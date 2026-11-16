@@ -1,564 +1,1590 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 
-const products = [
+// ========================================
+// DATA PRODUK AWAL
+// ========================================
+
+const initialProducts = [
   {
     id: 1,
     name: "Classic T-Shirt",
     category: "Fashion",
     price: 125000,
-    oldPrice: 175000,
-    badge: "BEST SELLER",
-    image:
-      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=700",
+    stock: 20,
+    image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=700",
+    description: "Kaos premium yang nyaman dipakai setiap hari.",
+    sizes: ["S", "M", "L", "XL"],
+    colors: ["White", "Black", "Cream"],
   },
   {
     id: 2,
     name: "Urban Sneakers",
     category: "Shoes",
     price: 350000,
-    oldPrice: 425000,
-    badge: "NEW",
-    image:
-      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=700",
+    stock: 15,
+    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=700",
+    description: "Sneakers modern dengan desain sporty dan stylish.",
+    sizes: ["39", "40", "41", "42", "43"],
+    colors: ["Red", "Black", "White"],
   },
   {
     id: 3,
     name: "Denim Jacket",
     category: "Fashion",
     price: 275000,
-    oldPrice: 325000,
-    badge: "POPULAR",
-    image:
-      "https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=700",
+    stock: 12,
+    image: "https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=700",
+    description: "Jaket denim berkualitas dengan gaya kasual modern.",
+    sizes: ["M", "L", "XL"],
+    colors: ["Blue", "Black"],
   },
   {
     id: 4,
     name: "Minimalist Sneakers",
     category: "Shoes",
     price: 395000,
-    oldPrice: 450000,
-    badge: "NEW",
-    image:
-      "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=700",
+    stock: 10,
+    image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=700",
+    description: "Sneakers minimalis untuk gaya kasual premium.",
+    sizes: ["39", "40", "41", "42"],
+    colors: ["Cream", "White"],
   },
   {
     id: 5,
     name: "Premium Hoodie",
     category: "Fashion",
     price: 245000,
-    oldPrice: 295000,
-    badge: "HOT",
-    image:
-      "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=700",
+    stock: 18,
+    image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=700",
+    description: "Hoodie hangat dengan bahan lembut dan nyaman.",
+    sizes: ["M", "L", "XL"],
+    colors: ["Black", "Grey", "Cream"],
   },
   {
     id: 6,
     name: "Leather Handbag",
     category: "Accessories",
     price: 425000,
-    oldPrice: 525000,
-    badge: "LIMITED",
-    image:
-      "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=700",
+    stock: 8,
+    image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=700",
+    description: "Tas elegan untuk berbagai kesempatan.",
+    sizes: ["All Size"],
+    colors: ["Brown", "Black"],
   },
 ];
 
-function formatRupiah(value) {
-  return new Intl.NumberFormat("id-ID", {
+const statuses = [
+  "Pesanan Baru",
+  "Diproses",
+  "Dikirim",
+  "Selesai",
+  "Dibatalkan",
+];
+
+const emptyForm = {
+  name: "",
+  category: "Fashion",
+  price: "",
+  stock: "",
+  image: "",
+  description: "",
+  sizes: "S,M,L,XL",
+  colors: "Black,White",
+};
+
+const money = (n) =>
+  new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
     maximumFractionDigits: 0,
-  }).format(value);
+  }).format(n);
+
+const shortMoney = (n) =>
+  n >= 1000000
+    ? `${(n / 1000000).toFixed(1)} jt`
+    : n >= 1000
+      ? `${(n / 1000).toFixed(0)} rb`
+      : String(n);
+
+function readStorage(key, fallback) {
+  try {
+    const saved = localStorage.getItem(key);
+    return saved ? JSON.parse(saved) : fallback;
+  } catch {
+    return fallback;
+  }
 }
 
-function App() {
-  const [cart, setCart] = useState([]);
-  const [cartOpen, setCartOpen] = useState(false);
-  const [favorites, setFavorites] = useState([]);
+function normalizeStatus(status) {
+  return status === "Simulasi" || !status
+    ? "Pesanan Baru"
+    : status;
+}
+
+// ========================================
+// KOMPONEN KARTU PRODUK
+// ========================================
+
+function ProductCard({
+  product,
+  favorite,
+  onFavorite,
+  onDetail,
+  onCart,
+}) {
+  return (
+    <article className="product-card">
+      <div className="product-picture">
+        <button
+          className="image-button"
+          onClick={() => onDetail(product)}
+          aria-label={`Lihat ${product.name}`}
+        >
+          <img src={product.image} alt={product.name} />
+        </button>
+
+        <button
+          className="heart"
+          onClick={() => onFavorite(product.id)}
+          aria-label={`Favorit ${product.name}`}
+          aria-pressed={favorite}
+        >
+          {favorite ? "♥" : "♡"}
+        </button>
+
+        <span className="stock-label">
+          {product.stock > 0 ? "NEW COLLECTION" : "SOLD OUT"}
+        </span>
+      </div>
+
+      <div className="product-body">
+        <small>{product.category}</small>
+        <h3>{product.name}</h3>
+        <p className="price">{money(product.price)}</p>
+        <p className="muted">Stok: {product.stock}</p>
+
+        <div className="product-actions">
+          <button className="btn-light" onClick={() => onDetail(product)}>
+            Detail
+          </button>
+          <button
+            className="btn-dark"
+            disabled={product.stock <= 0}
+            onClick={() => onCart(product)}
+          >
+            + Keranjang
+          </button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function ProductGrid({ items, wishlist, onFavorite, onDetail, onCart }) {
+  return (
+    <div className="product-grid">
+      {items.map((product) => (
+        <ProductCard
+          key={product.id}
+          product={product}
+          favorite={wishlist.includes(product.id)}
+          onFavorite={onFavorite}
+          onDetail={onDetail}
+          onCart={onCart}
+        />
+      ))}
+      {items.length === 0 && (
+        <p className="empty">Belum ada produk untuk ditampilkan.</p>
+      )}
+    </div>
+  );
+}
+
+// ========================================
+// KOMPONEN GRAFIK DASHBOARD
+// ========================================
+
+function MonthlyChart({ data }) {
+  const max = Math.max(1, ...data.map((d) => d.total));
+
+  return (
+    <div className="pro-month-chart">
+      {data.map((item, index) => (
+        <div className="pro-month-col" key={index}>
+          <span className="pro-bar-value">
+            {shortMoney(item.total)}
+          </span>
+          <div className="pro-bar-area">
+            <div
+              className="pro-month-bar"
+              style={{
+                height: `${(item.total / max) * 100}%`,
+                minHeight: item.total > 0 ? 5 : 0,
+              }}
+              title={money(item.total)}
+            />
+          </div>
+          <small>{item.label}</small>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function TopProducts({ items }) {
+  const max = Math.max(1, ...items.map((x) => x.quantity));
+
+  return (
+    <div className="pro-top-list">
+      {items.map((item, index) => (
+        <div className="pro-top-item" key={item.id}>
+          <div className="pro-top-meta">
+            <span>{index + 1}. {item.name}</span>
+            <strong>{item.quantity} unit</strong>
+          </div>
+          <div className="pro-progress">
+            <div
+              style={{
+                width: `${(item.quantity / max) * 100}%`,
+              }}
+            />
+          </div>
+        </div>
+      ))}
+      {items.length === 0 && (
+        <p className="muted">Belum ada data penjualan.</p>
+      )}
+    </div>
+  );
+}
+
+// ========================================
+// APLIKASI UTAMA
+// ========================================
+
+export default function App() {
+  const [products, setProducts] = useState(() =>
+    readStorage("lumina_products_v1", initialProducts)
+  );
+  const [cart, setCart] = useState(() =>
+    readStorage("lumina_cart_v1", [])
+  );
+  const [wishlist, setWishlist] = useState(() =>
+    readStorage("lumina_wishlist_v1", [])
+  );
+  const [orders, setOrders] = useState(() =>
+    readStorage("lumina_orders_v1", [])
+  );
+
+  const [page, setPage] = useState("home");
+  const [adminTab, setAdminTab] = useState("dashboard");
+  const [selectedId, setSelectedId] = useState(null);
+  const [size, setSize] = useState("");
+  const [color, setColor] = useState("");
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [sort, setSort] = useState("default");
-  const [notification, setNotification] = useState("");
+  const [message, setMessage] = useState("");
+  const [orderFilter, setOrderFilter] = useState("Semua");
 
-  const categories = ["All", "Fashion", "Shoes", "Accessories"];
+  const [checkout, setCheckout] = useState({
+    name: "",
+    phone: "",
+    address: "",
+    shipping: "regular",
+  });
 
-  const cartCount = cart.reduce(
-    (total, item) => total + item.quantity,
-    0
-  );
+  const [form, setForm] = useState(emptyForm);
+  const [editingId, setEditingId] = useState(null);
 
-  const cartTotal = cart.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0
-  );
+  useEffect(() => {
+    localStorage.setItem("lumina_products_v1", JSON.stringify(products));
+  }, [products]);
 
-  function addToCart(product) {
-    setCart((current) => {
-      const existing = current.find(
-        (item) => item.id === product.id
-      );
+  useEffect(() => {
+    localStorage.setItem("lumina_cart_v1", JSON.stringify(cart));
+  }, [cart]);
 
-      if (existing) {
-        return current.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
+  useEffect(() => {
+    localStorage.setItem("lumina_wishlist_v1", JSON.stringify(wishlist));
+  }, [wishlist]);
 
-      return [...current, { ...product, quantity: 1 }];
-    });
+  useEffect(() => {
+    localStorage.setItem("lumina_orders_v1", JSON.stringify(orders));
+  }, [orders]);
 
-    setNotification(`${product.name} ditambahkan ke keranjang`);
-  }
+  // ========================================
+  // PERHITUNGAN TOKO
+  // ========================================
 
-  function changeQuantity(id, amount) {
-    setCart((current) =>
-      current
-        .map((item) =>
-          item.id === id
-            ? { ...item, quantity: item.quantity + amount }
-            : item
-        )
-        .filter((item) => item.quantity > 0)
-    );
-  }
-
-  function removeFromCart(id) {
-    setCart((current) =>
-      current.filter((item) => item.id !== id)
-    );
-  }
-
-  function toggleFavorite(id) {
-    setFavorites((current) =>
-      current.includes(id)
-        ? current.filter((item) => item !== id)
-        : [...current, id]
-    );
-  }
-
-  function checkout() {
-    if (cart.length === 0) return;
-
-    alert(
-      `Pesanan simulasi berhasil!\nTotal: ${formatRupiah(
-        cartTotal
-      )}\n\nIni adalah proyek portofolio. Tidak ada pembayaran nyata.`
-    );
-
-    setCart([]);
-    setCartOpen(false);
-  }
+  const selected = products.find((p) => p.id === selectedId);
 
   const filteredProducts = products
-    .filter((product) => {
-      const matchCategory =
-        category === "All" || product.category === category;
-
-      const matchSearch = product.name
-        .toLowerCase()
-        .includes(search.toLowerCase());
-
-      return matchCategory && matchSearch;
-    })
+    .filter(
+      (p) =>
+        (category === "All" || p.category === category) &&
+        p.name.toLowerCase().includes(search.toLowerCase())
+    )
     .sort((a, b) => {
       if (sort === "low") return a.price - b.price;
       if (sort === "high") return b.price - a.price;
       return a.id - b.id;
     });
 
+  const cartCount = cart.reduce(
+    (sum, item) => sum + item.quantity,
+    0
+  );
+
+  const subtotal = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+
+  const shippingFee =
+    checkout.shipping === "express" ? 25000 : 12000;
+
+  // ========================================
+  // PERHITUNGAN DASHBOARD ADMIN
+  // ========================================
+
+  const activeOrders = orders.filter(
+    (o) => normalizeStatus(o.status) !== "Dibatalkan"
+  );
+
+  const completed = orders.filter(
+    (o) => normalizeStatus(o.status) === "Selesai"
+  );
+
+  const revenue = completed.reduce(
+    (sum, o) => sum + o.total,
+    0
+  );
+
+  const bookedValue = activeOrders.reduce(
+    (sum, o) => sum + o.total,
+    0
+  );
+
+  const newOrders = orders.filter(
+    (o) => normalizeStatus(o.status) === "Pesanan Baru"
+  ).length;
+
+  const lowStock = products.filter((p) => p.stock <= 5);
+  const totalStock = products.reduce((s, p) => s + p.stock, 0);
+
+  const statusCount = statuses.map((status) => ({
+    status,
+    count: orders.filter(
+      (o) => normalizeStatus(o.status) === status
+    ).length,
+  }));
+
+  // Grafik 6 bulan berdasarkan pesanan selesai.
+  const monthlySales = Array.from({ length: 6 }, (_, i) => {
+    const today = new Date();
+    const monthDate = new Date(
+      today.getFullYear(),
+      today.getMonth() - 5 + i,
+      1
+    );
+
+    const total = completed
+      .filter((o) => {
+        const date = new Date(o.date);
+        return (
+          date.getMonth() === monthDate.getMonth() &&
+          date.getFullYear() === monthDate.getFullYear()
+        );
+      })
+      .reduce((sum, o) => sum + o.total, 0);
+
+    return {
+      label: monthDate.toLocaleDateString("id-ID", {
+        month: "short",
+        year: "2-digit",
+      }),
+      total,
+    };
+  });
+
+  const productSalesMap = new Map();
+
+  completed.forEach((order) => {
+    order.items.forEach((item) => {
+      const old = productSalesMap.get(item.id) || {
+        id: item.id,
+        name: item.name,
+        quantity: 0,
+      };
+
+      productSalesMap.set(item.id, {
+        ...old,
+        quantity: old.quantity + item.quantity,
+      });
+    });
+  });
+
+  const topProducts = [...productSalesMap.values()]
+    .sort((a, b) => b.quantity - a.quantity)
+    .slice(0, 5);
+
+  const filteredOrders = orders.filter(
+    (o) =>
+      orderFilter === "Semua" ||
+      normalizeStatus(o.status) === orderFilter
+  );
+
+  function notify(text) {
+    setMessage(text);
+  }
+
+  function go(destination) {
+    setPage(destination);
+    window.scrollTo(0, 0);
+  }
+
+  function goAdmin(tab) {
+    setAdminTab(tab);
+    go("admin");
+  }
+
+  function openProduct(product) {
+    setSelectedId(product.id);
+    setSize(product.sizes?.[0] || "All Size");
+    setColor(product.colors?.[0] || "Default");
+    go("detail");
+  }
+
+  function toggleWishlist(id) {
+    setWishlist((current) =>
+      current.includes(id)
+        ? current.filter((x) => x !== id)
+        : [...current, id]
+    );
+  }
+
+  function addToCart(product, chosenSize, chosenColor) {
+    const productSize =
+      chosenSize || product.sizes?.[0] || "All Size";
+    const productColor =
+      chosenColor || product.colors?.[0] || "Default";
+
+    const key = `${product.id}-${productSize}-${productColor}`;
+
+    const used = cart
+      .filter((item) => item.id === product.id)
+      .reduce((sum, item) => sum + item.quantity, 0);
+
+    if (used >= product.stock) {
+      notify("Stok produk tidak mencukupi.");
+      return;
+    }
+
+    setCart((current) => {
+      const existing = current.find((item) => item.key === key);
+
+      if (existing) {
+        return current.map((item) =>
+          item.key === key
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+
+      return [
+        ...current,
+        {
+          ...product,
+          key,
+          size: productSize,
+          color: productColor,
+          quantity: 1,
+        },
+      ];
+    });
+
+    notify("Produk berhasil ditambahkan ke keranjang.");
+  }
+
+  function changeQty(key, amount) {
+    const item = cart.find((p) => p.key === key);
+    const product = products.find((p) => p.id === item?.id);
+
+    if (!item || !product) return;
+
+    const used = cart
+      .filter((p) => p.id === item.id)
+      .reduce((sum, p) => sum + p.quantity, 0);
+
+    if (amount > 0 && used >= product.stock) {
+      notify("Jumlah melebihi stok.");
+      return;
+    }
+
+    setCart((current) =>
+      current
+        .map((p) =>
+          p.key === key
+            ? { ...p, quantity: p.quantity + amount }
+            : p
+        )
+        .filter((p) => p.quantity > 0)
+    );
+  }
+
+  function placeOrder(event) {
+    event.preventDefault();
+    if (!cart.length) return;
+
+    if (!/^[0-9+()\s-]{8,20}$/.test(checkout.phone.trim())) {
+      notify("Nomor telepon belum valid.");
+      return;
+    }
+
+    const quantities = {};
+
+    cart.forEach((item) => {
+      quantities[item.id] =
+        (quantities[item.id] || 0) + item.quantity;
+    });
+
+    for (const [id, quantity] of Object.entries(quantities)) {
+      const product = products.find((p) => String(p.id) === id);
+
+      if (!product || quantity > product.stock) {
+        notify("Stok salah satu produk tidak mencukupi.");
+        return;
+      }
+    }
+
+    const order = {
+      id: `LM-${Date.now()}`,
+      date: new Date().toISOString(),
+      customer: checkout.name.trim(),
+      phone: checkout.phone.trim(),
+      address: checkout.address.trim(),
+      shipping: checkout.shipping,
+      items: cart.map((item) => ({ ...item })),
+      total: subtotal + shippingFee,
+      status: "Pesanan Baru",
+      stockRestored: false,
+    };
+
+    setOrders((current) => [order, ...current]);
+
+    setProducts((current) =>
+      current.map((p) => ({
+        ...p,
+        stock: p.stock - (quantities[p.id] || 0),
+      }))
+    );
+
+    setCart([]);
+    setCheckout({
+      name: "",
+      phone: "",
+      address: "",
+      shipping: "regular",
+    });
+    go("success");
+  }
+
+  function updateOrderStatus(id, nextStatus) {
+    const order = orders.find((o) => o.id === id);
+    if (!order) return;
+
+    const currentStatus = normalizeStatus(order.status);
+
+    if (currentStatus === "Dibatalkan") {
+      notify("Pesanan yang dibatalkan tidak bisa diaktifkan lagi.");
+      return;
+    }
+
+    if (nextStatus === "Dibatalkan" && currentStatus === "Selesai") {
+      notify("Pesanan selesai tidak bisa dibatalkan pada demo ini.");
+      return;
+    }
+
+    if (nextStatus === "Dibatalkan" && !order.stockRestored) {
+      setProducts((current) =>
+        current.map((product) => ({
+          ...product,
+          stock:
+            product.stock +
+            order.items
+              .filter((item) => item.id === product.id)
+              .reduce((sum, item) => sum + item.quantity, 0),
+        }))
+      );
+    }
+
+    setOrders((current) =>
+      current.map((o) =>
+        o.id === id
+          ? {
+              ...o,
+              status: nextStatus,
+              stockRestored:
+                o.stockRestored || nextStatus === "Dibatalkan",
+            }
+          : o
+      )
+    );
+
+    notify(`Status berhasil diubah menjadi ${nextStatus}.`);
+  }
+
+  function saveProduct(event) {
+    event.preventDefault();
+
+    const item = {
+      id: editingId ?? Date.now(),
+      name: form.name.trim(),
+      category: form.category,
+      price: Number(form.price),
+      stock: Number(form.stock),
+      image: form.image.trim(),
+      description: form.description.trim(),
+      sizes: form.sizes.split(",").map((x) => x.trim()).filter(Boolean),
+      colors: form.colors.split(",").map((x) => x.trim()).filter(Boolean),
+    };
+
+    if (
+      !item.name ||
+      !Number.isFinite(item.price) ||
+      item.price <= 0 ||
+      !Number.isInteger(item.stock) ||
+      item.stock < 0 ||
+      !item.sizes.length ||
+      !item.colors.length
+    ) {
+      notify("Periksa kembali data produk.");
+      return;
+    }
+
+    if (editingId !== null) {
+      setProducts((current) =>
+        current.map((p) => (p.id === editingId ? item : p))
+      );
+
+      setCart((current) =>
+        current.map((p) =>
+          p.id === editingId ? { ...p, ...item } : p
+        )
+      );
+    } else {
+      setProducts((current) => [...current, item]);
+    }
+
+    setForm(emptyForm);
+    setEditingId(null);
+    notify("Data produk berhasil disimpan.");
+  }
+
+  function editProduct(product) {
+    setEditingId(product.id);
+    setForm({
+      name: product.name,
+      category: product.category,
+      price: String(product.price),
+      stock: String(product.stock),
+      image: product.image,
+      description: product.description,
+      sizes: product.sizes.join(","),
+      colors: product.colors.join(","),
+    });
+    window.scrollTo(0, 0);
+  }
+
+  function deleteProduct(id) {
+    if (!window.confirm("Yakin ingin menghapus produk ini?")) return;
+
+    setProducts((current) => current.filter((p) => p.id !== id));
+    setWishlist((current) => current.filter((x) => x !== id));
+    setCart((current) => current.filter((p) => p.id !== id));
+
+    notify("Produk berhasil dihapus.");
+  }
+
+  const gridProps = {
+    wishlist,
+    onFavorite: toggleWishlist,
+    onDetail: openProduct,
+    onCart: addToCart,
+  };
+
+  // ========================================
+  // TAMPILAN APLIKASI
+  // ========================================
+
   return (
-    <div className="store">
-      {/* TOP BAR */}
-      <div className="topbar">
-        ✦ Discover your style with LUMINA — New Collection 2026
+    <div className="lumina">
+      <div className="announcement">
+        ✦ LUMINA STORE — Timeless Fashion & Everyday Elegance
       </div>
 
-      {/* NAVBAR */}
       <header className="navbar">
-        <a className="logo" href="#home">
+        <button className="logo" onClick={() => go("home")}>
           LUMINA<span>.</span>
-        </a>
+        </button>
 
-        <nav className="nav-links">
-          <a href="#home">Home</a>
-          <a href="#products">Shop</a>
-          <a href="#benefits">Why Us</a>
-          <a href="#about">About</a>
+        <nav className="nav-menu">
+          <button onClick={() => go("home")}>Home</button>
+          <button onClick={() => go("shop")}>Shop</button>
+          <button onClick={() => go("wishlist")}>
+            ♡ Wishlist ({wishlist.length})
+          </button>
+          <button onClick={() => goAdmin("dashboard")}>
+            Admin Demo
+          </button>
         </nav>
 
-        <div className="nav-actions">
-          <a href="#products" className="favorite-link">
-            ♥ {favorites.length}
-          </a>
-
-          <button
-            type="button"
-            className="cart-trigger"
-            onClick={() => setCartOpen(true)}
-          >
-            🛍 Cart ({cartCount})
-          </button>
-        </div>
+        <button className="cart-link" onClick={() => go("cart")}>
+          🛍 Cart ({cartCount})
+        </button>
       </header>
 
-      {/* HERO */}
-      <section id="home" className="hero">
-        <div className="hero-content">
-          <p className="eyebrow">THE NEW COLLECTION — 2026</p>
-
-          <h1>
-            Discover Your
-            <span>Unique Style.</span>
-          </h1>
-
-          <p className="hero-description">
-            Elevate your everyday look with timeless fashion,
-            premium essentials, and effortless style.
-          </p>
-
-          <div className="hero-buttons">
-            <a className="primary-button" href="#products">
-              Shop Collection →
-            </a>
-
-            <a className="secondary-button" href="#about">
-              Discover More
-            </a>
-          </div>
-
-          <div className="hero-note">
-            ✦ Timeless Essentials &nbsp; ✦ Everyday Elegance
-          </div>
-        </div>
-
-        <div className="hero-image">
-          <img
-            src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200"
-            alt="Lumina fashion collection"
-          />
-
-          <div className="hero-image-label">
-            <small>NEW ARRIVALS</small>
-            <strong>Effortless Elegance</strong>
-          </div>
-        </div>
-      </section>
-
-      {/* BENEFITS */}
-      <section id="benefits" className="benefits">
-        <div>
-          <span>✦</span>
-          <h3>Premium Collection</h3>
-          <p>Curated fashion essentials</p>
-        </div>
-
-        <div>
-          <span>♡</span>
-          <h3>Made for Everyday</h3>
-          <p>Style meets comfort</p>
-        </div>
-
-        <div>
-          <span>✧</span>
-          <h3>Timeless Style</h3>
-          <p>Designed for every moment</p>
-        </div>
-      </section>
-
-      {/* PRODUCTS */}
-      <section id="products" className="products-section">
-        <div className="section-heading">
-          <p className="eyebrow">CURATED FOR YOU</p>
-          <h2>Our Featured Collection</h2>
-          <p>
-            Explore contemporary essentials crafted for your
-            everyday wardrobe.
-          </p>
-        </div>
-
-        <div className="product-toolbar">
-          <div className="category-filters">
-            {categories.map((item) => (
-              <button
-                key={item}
-                type="button"
-                className={
-                  category === item ? "filter active" : "filter"
-                }
-                onClick={() => setCategory(item)}
-              >
-                {item}
+      {/* HOMEPAGE */}
+      {page === "home" && (
+        <>
+          <section className="hero">
+            <div className="hero-copy">
+              <p className="eyebrow">THE NEW COLLECTION — 2026</p>
+              <h1>
+                Discover Your <em>Unique Style.</em>
+              </h1>
+              <p>
+                Elevate your everyday look with timeless fashion,
+                premium essentials, and effortless style.
+              </p>
+              <button className="btn-dark" onClick={() => go("shop")}>
+                Shop Collection →
               </button>
-            ))}
-          </div>
+              <p className="hero-bottom">
+                ✦ PREMIUM ESSENTIALS ✦ EVERYDAY ELEGANCE
+              </p>
+            </div>
 
-          <div className="search-sort">
+            <div className="hero-photo">
+              <img
+                src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200"
+                alt="Lumina fashion collection"
+              />
+            </div>
+          </section>
+
+          <section className="perks">
+            <div>
+              ✧ <strong>Premium Quality</strong>
+              <span>Curated fashion essentials</span>
+            </div>
+            <div>
+              ♡ <strong>Modern Collection</strong>
+              <span>Timeless everyday style</span>
+            </div>
+            <div>
+              ✦ <strong>New Arrivals</strong>
+              <span>Fresh looks for you</span>
+            </div>
+          </section>
+
+          <main className="container section">
+            <p className="eyebrow center">CURATED FOR YOU</p>
+            <h2 className="section-title">Featured Collection</h2>
+            <p className="section-description">
+              Discover your next favorite fashion essentials.
+            </p>
+
+            <ProductGrid items={products.slice(0, 6)} {...gridProps} />
+
+            <div className="center action-space">
+              <button className="btn-dark" onClick={() => go("shop")}>
+                View All Products →
+              </button>
+            </div>
+          </main>
+
+          <section className="promo">
+            <p className="eyebrow">THE LUMINA EDIT</p>
+            <h2>Style that speaks for you.</h2>
+            <p>Modern fashion for every moment.</p>
+            <button className="btn-dark" onClick={() => go("shop")}>
+              Explore Collection
+            </button>
+          </section>
+        </>
+      )}
+
+      {/* SHOP */}
+      {page === "shop" && (
+        <main className="container section">
+          <p className="eyebrow center">LUMINA COLLECTION</p>
+          <h1 className="section-title">Shop Our Collection</h1>
+
+          <div className="toolbar">
             <input
-              type="search"
-              placeholder="Search products..."
-              aria-label="Search products"
+              placeholder="Cari produk..."
               value={search}
-              onChange={(event) =>
-                setSearch(event.target.value)
-              }
+              onChange={(e) => setSearch(e.target.value)}
             />
 
             <select
-              value={sort}
-              aria-label="Sort products"
-              onChange={(event) =>
-                setSort(event.target.value)
-              }
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
             >
-              <option value="default">Featured</option>
-              <option value="low">Price: Low to High</option>
-              <option value="high">Price: High to Low</option>
+              {["All", "Fashion", "Shoes", "Accessories"].map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </select>
+
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+            >
+              <option value="default">Default</option>
+              <option value="low">Harga Terendah</option>
+              <option value="high">Harga Tertinggi</option>
             </select>
           </div>
-        </div>
 
-        <div className="products-grid">
-          {filteredProducts.map((product) => (
-            <article className="product-card" key={product.id}>
-              <div className="product-image">
-                <img src={product.image} alt={product.name} />
+          <ProductGrid items={filteredProducts} {...gridProps} />
+        </main>
+      )}
 
-                <span className="product-badge">
-                  {product.badge}
-                </span>
+      {/* DETAIL PRODUK */}
+      {page === "detail" && selected && (
+        <main className="container section">
+          <button className="back" onClick={() => go("shop")}>
+            ← Kembali ke toko
+          </button>
 
-                <button
-                  type="button"
-                  aria-label={`Favorite ${product.name}`}
-                  aria-pressed={favorites.includes(product.id)}
-                  className={
-                    favorites.includes(product.id)
-                      ? "heart active"
-                      : "heart"
-                  }
-                  onClick={() =>
-                    toggleFavorite(product.id)
-                  }
-                >
-                  ♥
-                </button>
+          <div className="detail-layout">
+            <img
+              className="detail-image"
+              src={selected.image}
+              alt={selected.name}
+            />
+
+            <div className="detail-copy">
+              <p className="eyebrow">{selected.category}</p>
+              <h1>{selected.name}</h1>
+              <h2 className="price">{money(selected.price)}</h2>
+              <p>{selected.description}</p>
+              <p className="muted">Stok tersedia: {selected.stock}</p>
+
+              <label>Ukuran</label>
+              <div className="option-row">
+                {selected.sizes.map((s) => (
+                  <button
+                    key={s}
+                    className={size === s ? "chosen" : ""}
+                    onClick={() => setSize(s)}
+                  >
+                    {s}
+                  </button>
+                ))}
               </div>
 
-              <div className="product-info">
-                <p className="product-category">
-                  {product.category}
-                </p>
-
-                <h3>{product.name}</h3>
-
-                <div className="prices">
-                  <strong>
-                    {formatRupiah(product.price)}
-                  </strong>
-                  <del>
-                    {formatRupiah(product.oldPrice)}
-                  </del>
-                </div>
-
-                <button
-                  type="button"
-                  className="add-button"
-                  onClick={() => addToCart(product)}
-                >
-                  + Add to Cart
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
-
-        {filteredProducts.length === 0 && (
-          <div className="empty-products">
-            Produk yang kamu cari tidak ditemukan.
-          </div>
-        )}
-      </section>
-
-      {/* PROMO */}
-      <section className="promo">
-        <p className="eyebrow">THE LUMINA EDIT</p>
-        <h2>Style is a way to say who you are.</h2>
-        <p>
-          Discover everyday pieces that feel uniquely yours.
-        </p>
-        <a href="#products">Explore The Collection →</a>
-      </section>
-
-      {/* ABOUT */}
-      <section id="about" className="about">
-        <div>
-          <p className="eyebrow">ABOUT LUMINA</p>
-          <h2>Fashion that feels like you.</h2>
-        </div>
-
-        <p>
-          LUMINA STORE is a modern fashion e-commerce demo
-          built with React.js. Created as a web developer
-          portfolio project to explore responsive design,
-          product management, and interactive shopping.
-        </p>
-      </section>
-
-      {/* FOOTER */}
-      <footer className="footer">
-        <div>
-          <h2>LUMINA.</h2>
-          <p>Modern Fashion & Lifestyle.</p>
-        </div>
-
-        <div>
-          <h4>Explore</h4>
-          <a href="#home">Home</a>
-          <a href="#products">Products</a>
-          <a href="#about">About</a>
-        </div>
-
-        <div>
-          <h4>Project</h4>
-          <p>React.js E-Commerce Portfolio</p>
-          <p>Frontend Demo — No Real Payments</p>
-        </div>
-
-        <div className="footer-bottom">
-          © 2026 LUMINA STORE — Portfolio Project
-        </div>
-      </footer>
-
-      {/* CART SIDEBAR */}
-      {cartOpen && (
-        <div
-          className="cart-overlay"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) {
-              setCartOpen(false);
-            }
-          }}
-        >
-          <aside className="cart-panel">
-            <div className="cart-header">
-              <div>
-                <p className="eyebrow">YOUR SELECTION</p>
-                <h2>Shopping Cart ({cartCount})</h2>
+              <label>Warna</label>
+              <div className="option-row">
+                {selected.colors.map((c) => (
+                  <button
+                    key={c}
+                    className={color === c ? "chosen" : ""}
+                    onClick={() => setColor(c)}
+                  >
+                    {c}
+                  </button>
+                ))}
               </div>
 
               <button
-                type="button"
-                className="close-cart"
-                onClick={() => setCartOpen(false)}
-                aria-label="Close cart"
+                className="btn-dark wide"
+                disabled={selected.stock <= 0}
+                onClick={() => addToCart(selected, size, color)}
               >
-                ×
+                + Add to Cart
               </button>
             </div>
+          </div>
+        </main>
+      )}
 
-            <div className="cart-items">
-              {cart.length === 0 ? (
-                <div className="empty-cart">
-                  <span>🛍</span>
-                  <h3>Your cart is empty</h3>
-                  <p>Start exploring our latest collection.</p>
+      {/* WISHLIST */}
+      {page === "wishlist" && (
+        <main className="container section">
+          <h1 className="section-title">My Wishlist ♡</h1>
+          <ProductGrid
+            items={products.filter((p) => wishlist.includes(p.id))}
+            {...gridProps}
+          />
+        </main>
+      )}
 
-                  <button
-                    type="button"
-                    className="primary-button"
-                    onClick={() => setCartOpen(false)}
-                  >
-                    Continue Shopping
-                  </button>
-                </div>
-              ) : (
-                cart.map((item) => (
-                  <div className="cart-item" key={item.id}>
-                    <img src={item.image} alt={item.name} />
+      {/* CART */}
+      {page === "cart" && (
+        <main className="container section">
+          <h1 className="section-title">Shopping Cart</h1>
 
-                    <div>
-                      <h4>{item.name}</h4>
-                      <p>{formatRupiah(item.price)}</p>
+          <div className="two-column">
+            <div className="panel">
+              {cart.length === 0 && <p>Keranjang masih kosong.</p>}
 
-                      <div className="quantity-controls">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            changeQuantity(item.id, -1)
-                          }
-                        >
-                          −
-                        </button>
+              {cart.map((item) => (
+                <div className="cart-row" key={item.key}>
+                  <img src={item.image} alt={item.name} />
 
-                        <span>{item.quantity}</span>
+                  <div className="grow">
+                    <h3>{item.name}</h3>
+                    <p className="muted">{item.size} / {item.color}</p>
+                    <strong>{money(item.price)}</strong>
 
-                        <button
-                          type="button"
-                          onClick={() =>
-                            changeQuantity(item.id, 1)
-                          }
-                        >
-                          +
-                        </button>
-                      </div>
-
+                    <div className="quantity">
+                      <button onClick={() => changeQty(item.key, -1)}>
+                        −
+                      </button>
+                      <span>{item.quantity}</span>
+                      <button onClick={() => changeQty(item.key, 1)}>
+                        +
+                      </button>
                       <button
-                        type="button"
-                        className="remove-button"
                         onClick={() =>
-                          removeFromCart(item.id)
+                          setCart((current) =>
+                            current.filter((p) => p.key !== item.key)
+                          )
                         }
                       >
-                        Remove
+                        Hapus
                       </button>
                     </div>
                   </div>
-                ))
-              )}
+                </div>
+              ))}
             </div>
 
-            <div className="cart-footer">
-              <div className="cart-total">
-                <span>Subtotal</span>
-                <strong>{formatRupiah(cartTotal)}</strong>
+            <div className="panel summary">
+              <h2>Order Summary</h2>
+              <div className="between">
+                <span>Total Item</span><strong>{cartCount}</strong>
+              </div>
+              <div className="between">
+                <span>Subtotal</span><strong>{money(subtotal)}</strong>
               </div>
 
-              <p>
-                This is a portfolio demo. No real payments.
+              <button
+                className="btn-dark wide"
+                disabled={!cart.length}
+                onClick={() => go("checkout")}
+              >
+                Continue to Checkout →
+              </button>
+            </div>
+          </div>
+        </main>
+      )}
+
+      {/* CHECKOUT */}
+      {page === "checkout" && (
+        <main className="container section">
+          <h1 className="section-title">Checkout — Demo</h1>
+
+          <div className="two-column">
+            <form className="panel form-stack" onSubmit={placeOrder}>
+              <h2>Informasi Pembeli</h2>
+
+              <label>Nama Lengkap</label>
+              <input
+                required
+                value={checkout.name}
+                onChange={(e) =>
+                  setCheckout({ ...checkout, name: e.target.value })
+                }
+              />
+
+              <label>Nomor Telepon</label>
+              <input
+                required
+                type="tel"
+                value={checkout.phone}
+                onChange={(e) =>
+                  setCheckout({ ...checkout, phone: e.target.value })
+                }
+              />
+
+              <label>Alamat Pengiriman</label>
+              <textarea
+                required
+                rows="4"
+                value={checkout.address}
+                onChange={(e) =>
+                  setCheckout({ ...checkout, address: e.target.value })
+                }
+              />
+
+              <label>Metode Pengiriman</label>
+              <select
+                value={checkout.shipping}
+                onChange={(e) =>
+                  setCheckout({ ...checkout, shipping: e.target.value })
+                }
+              >
+                <option value="regular">Regular — Rp12.000</option>
+                <option value="express">Express — Rp25.000</option>
+              </select>
+
+              <p className="muted">
+                Gunakan data fiktif. Ini bukan pembayaran sungguhan.
               </p>
 
               <button
-                type="button"
-                disabled={cart.length === 0}
-                className="checkout-button"
-                onClick={checkout}
+                className="btn-dark wide"
+                type="submit"
+                disabled={!cart.length}
               >
-                Checkout Simulation →
+                Konfirmasi Pesanan Simulasi
               </button>
+            </form>
+
+            <div className="panel summary">
+              <h2>Ringkasan Pesanan</h2>
+
+              {cart.map((item) => (
+                <div className="between" key={item.key}>
+                  <span>{item.name} × {item.quantity}</span>
+                  <strong>{money(item.price * item.quantity)}</strong>
+                </div>
+              ))}
+
+              <div className="between">
+                <span>Subtotal</span><strong>{money(subtotal)}</strong>
+              </div>
+              <div className="between">
+                <span>Pengiriman</span><strong>{money(shippingFee)}</strong>
+              </div>
+              <div className="between grand-total">
+                <span>Total</span>
+                <strong>{money(subtotal + shippingFee)}</strong>
+              </div>
             </div>
-          </aside>
-        </div>
+          </div>
+        </main>
       )}
 
-      {/* NOTIFICATION */}
-      {notification && (
+      {/* SUCCESS */}
+      {page === "success" && (
+        <main className="container section center">
+          <div className="panel success-panel">
+            <div className="success-icon">✓</div>
+            <h1>Pesanan Simulasi Berhasil!</h1>
+            <p>Pesanan sudah dicatat dalam dashboard admin demo.</p>
+            <p>Tidak ada transaksi atau pembayaran nyata.</p>
+            <button className="btn-dark" onClick={() => go("home")}>
+              Kembali ke Home
+            </button>
+          </div>
+        </main>
+      )}
+
+      {/* ======================================
+          ADMIN DASHBOARD PRO
+      ====================================== */}
+      {page === "admin" && (
+        <main className="container section admin-area">
+          <div className="pro-admin-heading">
+            <div>
+              <p className="eyebrow">LUMINA MANAGEMENT SYSTEM</p>
+              <h1>Admin Dashboard</h1>
+              <p className="muted">
+                Pantau performa toko dan kelola pesanan simulasi.
+              </p>
+            </div>
+            <button className="btn-light" onClick={() => go("home")}>
+              ← Kembali ke Toko
+            </button>
+          </div>
+
+          <div className="pro-admin-tabs">
+            <button
+              className={adminTab === "dashboard" ? "active" : ""}
+              onClick={() => setAdminTab("dashboard")}
+            >
+              ◫ Overview
+            </button>
+            <button
+              className={adminTab === "products" ? "active" : ""}
+              onClick={() => setAdminTab("products")}
+            >
+              ◇ Kelola Produk
+            </button>
+            <button
+              className={adminTab === "orders" ? "active" : ""}
+              onClick={() => setAdminTab("orders")}
+            >
+              ▤ Pesanan
+            </button>
+          </div>
+
+          {/* OVERVIEW */}
+          {adminTab === "dashboard" && (
+            <>
+              <div className="pro-stats-grid">
+                {[
+                  {
+                    label: "Penjualan Selesai",
+                    value: money(revenue),
+                    note: "Pesanan selesai saja",
+                    icon: "◈",
+                  },
+                  {
+                    label: "Nilai Pesanan Aktif",
+                    value: money(bookedValue),
+                    note: "Tidak termasuk batal",
+                    icon: "◉",
+                  },
+                  {
+                    label: "Total Pesanan",
+                    value: orders.length,
+                    note: `${newOrders} pesanan baru`,
+                    icon: "▤",
+                  },
+                  {
+                    label: "Pesanan Selesai",
+                    value: completed.length,
+                    note: "Status selesai",
+                    icon: "✓",
+                  },
+                  {
+                    label: "Total Produk",
+                    value: products.length,
+                    note: `${totalStock} unit tersedia`,
+                    icon: "▣",
+                  },
+                  {
+                    label: "Stok Menipis",
+                    value: lowStock.length,
+                    note: "Stok 5 unit atau kurang",
+                    icon: "!",
+                  },
+                ].map((stat) => (
+                  <div className="pro-stat-card" key={stat.label}>
+                    <div className="pro-stat-top">
+                      <span>{stat.label}</span>
+                      <div className="pro-stat-icon">{stat.icon}</div>
+                    </div>
+                    <strong>{stat.value}</strong>
+                    <small>{stat.note}</small>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pro-chart-grid">
+                <div className="pro-card">
+                  <div className="pro-card-heading">
+                    <div>
+                      <h2>Grafik Pendapatan Bulanan</h2>
+                      <p>6 bulan terakhir · Pesanan selesai</p>
+                    </div>
+                    <span className="pro-tag">IDR</span>
+                  </div>
+                  <MonthlyChart data={monthlySales} />
+                </div>
+
+                <div className="pro-card">
+                  <div className="pro-card-heading">
+                    <div>
+                      <h2>Produk Terlaris</h2>
+                      <p>Unit dari pesanan selesai</p>
+                    </div>
+                  </div>
+                  <TopProducts items={topProducts} />
+                </div>
+              </div>
+
+              <div className="pro-chart-grid">
+                <div className="pro-card">
+                  <div className="pro-card-heading">
+                    <div>
+                      <h2>Status Pesanan</h2>
+                      <p>Distribusi seluruh pesanan</p>
+                    </div>
+                  </div>
+                  <div className="pro-status-list">
+                    {statusCount.map((item) => (
+                      <div className="pro-status-line" key={item.status}>
+                        <span>{item.status}</span>
+                        <div className="pro-progress">
+                          <div
+                            style={{
+                              width: `${
+                                (item.count / Math.max(1, orders.length)) *
+                                100
+                              }%`,
+                            }}
+                          />
+                        </div>
+                        <strong>{item.count}</strong>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pro-card">
+                  <div className="pro-card-heading">
+                    <div>
+                      <h2>Peringatan Stok</h2>
+                      <p>Produk dengan stok ≤ 5 unit</p>
+                    </div>
+                  </div>
+
+                  {lowStock.length === 0 ? (
+                    <p className="pro-empty">
+                      ✓ Tidak ada produk yang stoknya menipis.
+                    </p>
+                  ) : (
+                    lowStock.map((product) => (
+                      <div className="pro-stock-row" key={product.id}>
+                        <span>{product.name}</span>
+                        <strong>{product.stock} unit</strong>
+                      </div>
+                    ))
+                  )}
+
+                  <button
+                    className="pro-text-button"
+                    onClick={() => setAdminTab("products")}
+                  >
+                    Kelola Produk →
+                  </button>
+                </div>
+              </div>
+
+              <div className="pro-card pro-recent-orders">
+                <div className="pro-card-heading">
+                  <div>
+                    <h2>Pesanan Terbaru</h2>
+                    <p>Lima transaksi terakhir</p>
+                  </div>
+                  <button
+                    className="pro-text-button"
+                    onClick={() => setAdminTab("orders")}
+                  >
+                    Lihat Semua →
+                  </button>
+                </div>
+
+                <div className="table-scroll">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>ID Pesanan</th>
+                        <th>Pembeli</th>
+                        <th>Tanggal</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[...orders]
+                        .sort(
+                          (a, b) =>
+                            new Date(b.date) - new Date(a.date)
+                        )
+                        .slice(0, 5)
+                        .map((order) => (
+                          <tr key={order.id}>
+                            <td>{order.id}</td>
+                            <td>{order.customer}</td>
+                            <td>
+                              {new Date(order.date).toLocaleDateString(
+                                "id-ID"
+                              )}
+                            </td>
+                            <td>{money(order.total)}</td>
+                            <td>
+                              <span
+                                className={`pro-status-badge ${
+                                  normalizeStatus(order.status)
+                                    .toLowerCase()
+                                    .replaceAll(" ", "-")
+                                }`}
+                              >
+                                {normalizeStatus(order.status)}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+
+                      {orders.length === 0 && (
+                        <tr>
+                          <td colSpan={5}>
+                            Belum ada pesanan simulasi.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* MANAJEMEN PRODUK */}
+          {adminTab === "products" && (
+            <div className="admin-products">
+              <form className="panel form-stack" onSubmit={saveProduct}>
+                <h2>
+                  {editingId !== null
+                    ? "Edit Produk"
+                    : "Tambah Produk Baru"}
+                </h2>
+
+                <label>Nama Produk</label>
+                <input
+                  required
+                  value={form.name}
+                  onChange={(e) =>
+                    setForm({ ...form, name: e.target.value })
+                  }
+                />
+
+                <label>Kategori</label>
+                <select
+                  value={form.category}
+                  onChange={(e) =>
+                    setForm({ ...form, category: e.target.value })
+                  }
+                >
+                  <option>Fashion</option>
+                  <option>Shoes</option>
+                  <option>Accessories</option>
+                </select>
+
+                <label>Harga Produk (Rp)</label>
+                <input
+                  required
+                  type="number"
+                  min="1"
+                  value={form.price}
+                  onChange={(e) =>
+                    setForm({ ...form, price: e.target.value })
+                  }
+                />
+
+                <label>Stok</label>
+                <input
+                  required
+                  type="number"
+                  min="0"
+                  value={form.stock}
+                  onChange={(e) =>
+                    setForm({ ...form, stock: e.target.value })
+                  }
+                />
+
+                <label>URL Gambar</label>
+                <input
+                  type="url"
+                  placeholder="https://..."
+                  value={form.image}
+                  onChange={(e) =>
+                    setForm({ ...form, image: e.target.value })
+                  }
+                />
+
+                <label>Deskripsi</label>
+                <textarea
+                  rows="3"
+                  value={form.description}
+                  onChange={(e) =>
+                    setForm({ ...form, description: e.target.value })
+                  }
+                />
+
+                <label>Ukuran (pisahkan koma)</label>
+                <input
+                  value={form.sizes}
+                  onChange={(e) =>
+                    setForm({ ...form, sizes: e.target.value })
+                  }
+                />
+
+                <label>Warna (pisahkan koma)</label>
+                <input
+                  value={form.colors}
+                  onChange={(e) =>
+                    setForm({ ...form, colors: e.target.value })
+                  }
+                />
+
+                <button className="btn-dark wide" type="submit">
+                  {editingId !== null
+                    ? "Simpan Perubahan"
+                    : "+ Tambah Produk"}
+                </button>
+
+                {editingId !== null && (
+                  <button
+                    type="button"
+                    className="btn-light"
+                    onClick={() => {
+                      setEditingId(null);
+                      setForm(emptyForm);
+                    }}
+                  >
+                    Batal Edit
+                  </button>
+                )}
+              </form>
+
+              <div className="panel">
+                <h2>Daftar Produk</h2>
+
+                {products.map((product) => (
+                  <div
+                    className="admin-product-row"
+                    key={product.id}
+                  >
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                    />
+                    <div className="grow">
+                      <strong>{product.name}</strong>
+                      <p className="muted">
+                        {money(product.price)} · Stok {product.stock}
+                      </p>
+                    </div>
+                    <button
+                      className="btn-light"
+                      onClick={() => editProduct(product)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="delete-btn"
+                      onClick={() => deleteProduct(product.id)}
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* MANAJEMEN PESANAN */}
+          {adminTab === "orders" && (
+            <div className="pro-card">
+              <div className="pro-card-heading">
+                <div>
+                  <h2>Manajemen Pesanan</h2>
+                  <p>Ubah status transaksi simulasi</p>
+                </div>
+                <select
+                  className="pro-order-filter"
+                  value={orderFilter}
+                  onChange={(e) => setOrderFilter(e.target.value)}
+                >
+                  <option>Semua</option>
+                  {statuses.map((status) => (
+                    <option key={status}>{status}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Tanggal</th>
+                      <th>Pembeli</th>
+                      <th>Jumlah</th>
+                      <th>Total</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {filteredOrders.map((order) => (
+                      <tr key={order.id}>
+                        <td>{order.id}</td>
+                        <td>
+                          {new Date(order.date).toLocaleDateString(
+                            "id-ID"
+                          )}
+                        </td>
+                        <td>{order.customer}</td>
+                        <td>
+                          {order.items.reduce(
+                            (sum, item) => sum + item.quantity,
+                            0
+                          )}
+                        </td>
+                        <td>{money(order.total)}</td>
+                        <td>
+                          <select
+                            className="order-status-select"
+                            value={normalizeStatus(order.status)}
+                            disabled={
+                              normalizeStatus(order.status) ===
+                              "Dibatalkan"
+                            }
+                            onChange={(e) =>
+                              updateOrderStatus(
+                                order.id,
+                                e.target.value
+                              )
+                            }
+                          >
+                            {statuses
+                              .filter(
+                                (status) =>
+                                  normalizeStatus(order.status) !==
+                                    "Selesai" ||
+                                  status !== "Dibatalkan"
+                              )
+                              .map((status) => (
+                                <option key={status}>{status}</option>
+                              ))}
+                          </select>
+                        </td>
+                      </tr>
+                    ))}
+
+                    {filteredOrders.length === 0 && (
+                      <tr>
+                        <td colSpan={6}>
+                          Belum ada pesanan dengan status tersebut.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </main>
+      )}
+
+      <footer className="footer">
+        <div>
+          <h2>LUMINA.</h2>
+          <p>Modern Fashion & Lifestyle</p>
+        </div>
+        <p>React.js E-Commerce Portfolio Project</p>
+        <p>© 2026 LUMINA STORE · Demo Only</p>
+      </footer>
+
+      {message && (
         <div className="toast" role="status">
-          <span>✓ {notification}</span>
-          <button
-            type="button"
-            onClick={() => setNotification("")}
-            aria-label="Close notification"
-          >
-            ×
-          </button>
+          <span>{message}</span>
+          <button onClick={() => setMessage("")}>×</button>
         </div>
       )}
     </div>
   );
 }
-
-export default App;
