@@ -131,3 +131,117 @@
     animation-duration: 0.01ms !important;
   }
 }
+
+
+/* Tampilan khusus Admin Overview baru */
+.admin-area:has(.lum-admin-dashboard) {
+  max-width: 1700px;
+  padding: 24px 20px 65px;
+}
+
+.admin-area:has(.lum-admin-dashboard) > .pro-admin-heading,
+.admin-area:has(.lum-admin-dashboard) > .pro-admin-tabs {
+  display: none;
+}
+
+@media (max-width: 650px) {
+  .admin-area:has(.lum-admin-dashboard) {
+    padding: 15px 10px 45px;
+  }
+}
+
+
+/* ==========================================
+   LUMINA STORE - FULL SCREEN ADMIN DASHBOARD
+========================================== */
+
+.lumina.admin-mode {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+}
+
+.lumina.admin-mode .lum-dash {
+  width: 100%;
+  min-height: 100vh;
+  grid-template-columns: 245px minmax(0, 1fr) 270px;
+}
+
+.lumina.admin-mode .lum-dash-sidebar {
+  min-height: 100vh;
+  padding: 38px 25px;
+}
+
+.lumina.admin-mode .lum-dash-main {
+  min-width: 0;
+  padding: 38px 35px;
+}
+
+.lumina.admin-mode .lum-dash-right {
+  min-height: 100vh;
+  padding: 40px 23px;
+}
+
+/* Sidebar tetap terlihat ketika halaman digulir */
+@media (min-width: 1261px) {
+  .lumina.admin-mode .lum-dash-sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    align-self: start;
+  }
+
+  .lumina.admin-mode .lum-dash-right {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    align-self: start;
+  }
+}
+
+/* Laptop */
+@media (min-width: 781px) and (max-width: 1260px) {
+  .lumina.admin-mode .lum-dash {
+    grid-template-columns: 190px minmax(0, 1fr);
+  }
+
+  .lumina.admin-mode .lum-dash-right {
+    grid-column: 2;
+    min-height: auto;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    border-top: 1px solid #eee7e2;
+  }
+
+  .lumina.admin-mode .lum-dash-main {
+    padding: 28px 22px;
+  }
+}
+
+/* HP */
+@media (max-width: 780px) {
+  .lumina.admin-mode .lum-dash {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lumina.admin-mode .lum-dash-sidebar {
+    min-height: auto;
+    padding: 20px;
+  }
+
+  .lumina.admin-mode .lum-dash-main {
+    padding: 22px 15px;
+  }
+
+  .lumina.admin-mode .lum-dash-right {
+    grid-column: 1;
+    min-height: auto;
+    display: block;
+    padding: 25px 20px;
+  }
+}

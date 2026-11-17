@@ -1,0 +1,678 @@
+
+/* ====================================
+   LUMINA ADMIN DASHBOARD
+   Design inspired by supplied reference
+==================================== */
+
+.lum-admin-dashboard {
+  --lum-dark: #211d1b;
+  --lum-soft: #faf5f2;
+  --lum-accent: #b99483;
+  --lum-border: #eee7e2;
+
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr) 230px;
+  background: #fff;
+  color: var(--lum-dark);
+  border-radius: 18px;
+  overflow: hidden;
+  min-height: 850px;
+  box-shadow: 0 12px 40px rgba(56, 40, 29, .06);
+}
+
+.lum-admin-dashboard button,
+.lum-admin-dashboard input,
+.lum-admin-dashboard select {
+  font-family: inherit;
+}
+
+.lum-admin-dashboard h2,
+.lum-admin-dashboard h3,
+.lum-admin-dashboard p {
+  margin-top: 0;
+}
+
+/* SIDEBAR */
+
+.lum-admin-sidebar {
+  background: #faf1ed;
+  padding: 35px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.lum-admin-brand {
+  font-size: 27px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  padding: 0 10px;
+  margin-bottom: 24px;
+}
+
+.lum-admin-brand span {
+  color: #c4a18f;
+}
+
+.lum-admin-menu-heading {
+  display: inline-flex;
+  width: fit-content;
+  padding: 9px 20px;
+  border-radius: 5px;
+  background: var(--lum-dark);
+  color: #e1c3b5;
+  font-weight: 700;
+  margin-left: 10px;
+}
+
+.lum-admin-sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.lum-admin-menu-item {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: #332c28;
+  text-align: left;
+  padding: 13px 11px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s;
+}
+
+.lum-admin-menu-item:hover,
+.lum-admin-menu-item.active {
+  background: #edddd5;
+}
+
+.lum-admin-menu-icon {
+  width: 24px;
+  text-align: center;
+  font-size: 18px;
+}
+
+.lum-admin-sidebar-bottom {
+  margin-top: auto;
+  padding: 20px 10px;
+  border-top: 1px solid #eadbd3;
+}
+
+.lum-admin-sidebar-bottom strong {
+  font-size: 17px;
+}
+
+.lum-admin-sidebar-bottom p,
+.lum-admin-sidebar-bottom small {
+  display: block;
+  color: #887970;
+  font-size: 12px;
+  margin-top: 12px;
+}
+
+.lum-admin-demo-chip {
+  width: fit-content;
+  color: #866447;
+  background: #ead8cd;
+  border-radius: 18px;
+  font-size: 11px;
+  padding: 8px 12px;
+  margin-top: 20px;
+}
+
+/* MAIN CONTENT */
+
+.lum-admin-main {
+  padding: 34px 28px;
+  min-width: 0;
+}
+
+.lum-admin-topbar {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  justify-content: space-between;
+  margin-bottom: 35px;
+}
+
+.lum-admin-overline {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: #af8d7b;
+  margin-bottom: 7px;
+}
+
+.lum-admin-topbar h2 {
+  font-size: 23px;
+  font-weight: 750;
+  margin: 0;
+}
+
+.lum-admin-search-wrap {
+  min-width: 160px;
+  max-width: 310px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1.5px solid #29231d;
+  border-radius: 22px;
+  overflow: hidden;
+  gap: 8px;
+  padding: 0 13px;
+}
+
+.lum-admin-search-wrap span {
+  font-size: 23px;
+  color: #29231d;
+}
+
+.lum-admin-dashboard .lum-admin-search-wrap input {
+  border: 0;
+  background: none;
+  box-shadow: none;
+  width: 100%;
+  min-width: 0;
+  padding: 10px 0;
+  font-size: 12px;
+}
+
+.lum-admin-avatar {
+  background: #29231d;
+  color: white;
+  width: 37px;
+  height: 37px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+/* METRIC CARDS */
+
+.lum-admin-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 13px;
+  margin-bottom: 22px;
+}
+
+.lum-admin-metric {
+  background: #faf6f3;
+  min-width: 0;
+  padding: 19px 15px;
+  min-height: 135px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: 4px;
+}
+
+.lum-admin-metric-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+}
+
+.lum-admin-metric-icon {
+  font-size: 21px;
+  font-weight: bold;
+}
+
+.lum-admin-metric-note {
+  font-size: 9px;
+  color: #bea99e;
+  text-align: right;
+}
+
+.lum-admin-metric strong {
+  margin-top: 17px;
+  font-size: clamp(13px, 1.1vw, 17px);
+  overflow-wrap: anywhere;
+}
+
+.lum-admin-metric-label {
+  font-size: 11px;
+  color: #75675e;
+}
+
+/* CARDS */
+
+.lum-admin-chart-card,
+.lum-admin-orders-card,
+.lum-admin-report {
+  background: #fcf8f5;
+  border-radius: 5px;
+  padding: 25px;
+  margin-bottom: 22px;
+  min-width: 0;
+}
+
+.lum-admin-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.lum-admin-section-head h3,
+.lum-admin-report h3 {
+  margin-bottom: 7px;
+  font-size: 19px;
+}
+
+.lum-admin-section-head p {
+  font-size: 11px;
+  color: #917f73;
+  margin: 0;
+}
+
+.lum-admin-dashboard .lum-admin-section-head select {
+  border: none;
+  border-radius: 5px;
+  background: #29231d;
+  color: white;
+  font-size: 12px;
+  padding: 8px 12px;
+}
+
+.lum-admin-chart-total {
+  margin: 21px 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 19px;
+  font-weight: bold;
+}
+
+.lum-admin-chart-total small {
+  font-size: 11px;
+  font-weight: normal;
+  color: #928177;
+}
+
+/* REVENUE BAR CHART */
+
+.lum-admin-revenue-chart {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: end;
+  gap: 8px;
+  min-height: 250px;
+  margin-top: 15px;
+  border-bottom: 1px solid #e9dcd3;
+}
+
+.lum-admin-bar-column {
+  min-width: 0;
+  height: 235px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.lum-admin-chart-value {
+  color: #8d766b;
+  font-size: 9px;
+  height: 20px;
+  white-space: nowrap;
+}
+
+.lum-admin-bar-space {
+  height: 185px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.lum-admin-bar {
+  width: 58%;
+  max-width: 35px;
+  background: linear-gradient(
+    180deg,
+    #ead6cb 0%,
+    #b89887 70%,
+    #a88d7e 100%
+  );
+  border-radius: 30px;
+  min-height: 0;
+  transition: height .3s ease;
+}
+
+.lum-admin-bar.current {
+  background: linear-gradient(
+    180deg,
+    #d9bbaa,
+    #927665
+  );
+}
+
+.lum-admin-month-label {
+  font-size: 10px;
+  padding-top: 12px;
+  padding-bottom: 8px;
+  color: #57493e;
+}
+
+/* RECENT ORDERS */
+
+.lum-admin-view-button {
+  border: 0;
+  background: transparent;
+  color: #a17b66;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.lum-admin-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 15px;
+}
+
+.lum-admin-dashboard .lum-admin-orders-table {
+  min-width: 640px;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  text-align: left;
+}
+
+.lum-admin-orders-table th {
+  text-align: left;
+  font-weight: 600;
+  padding: 14px 9px;
+  background: transparent;
+  color: #55483e;
+}
+
+.lum-admin-orders-table td {
+  padding: 13px 9px;
+  border-bottom: 1px solid #eee3dc;
+}
+
+.lum-admin-order-product {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lum-admin-order-product img {
+  width: 45px;
+  height: 48px;
+  object-fit: cover;
+  background: white;
+  border-radius: 5px;
+}
+
+.lum-admin-order-id {
+  color: #927d6d;
+}
+
+.lum-admin-status {
+  display: inline-block;
+  padding: 7px 10px;
+  border-radius: 20px;
+  background: #e9e0d8;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.lum-admin-status.selesai {
+  color: #347a50;
+  background: #e0f1e5;
+}
+
+.lum-admin-status.dibatalkan {
+  color: #b14646;
+  background: #fae2e2;
+}
+
+.lum-admin-status.diproses,
+.lum-admin-status.dikirim {
+  color: #7d613c;
+  background: #f6e8d1;
+}
+
+.lum-admin-empty {
+  color: #97857b;
+  font-size: 12px;
+  padding: 18px 0;
+  text-align: center;
+}
+
+/* REPORT */
+
+.lum-admin-report-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.lum-admin-report-grid > div {
+  background: white;
+  padding: 15px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  border-radius: 7px;
+}
+
+.lum-admin-report-grid strong {
+  font-size: 23px;
+}
+
+.lum-admin-report-grid span {
+  color: #817065;
+  font-size: 10px;
+}
+
+/* RIGHT SIDEBAR */
+
+.lum-admin-rightbar {
+  background: white;
+  padding: 40px 17px;
+  border-left: 1px solid #f1eae6;
+  min-width: 0;
+}
+
+.lum-admin-right-section {
+  margin-bottom: 39px;
+}
+
+.lum-admin-right-section h3 {
+  font-size: 16px;
+  margin-bottom: 7px;
+}
+
+.lum-admin-right-section > p {
+  color: #9b8a80;
+  font-size: 11px;
+  line-height: 1.6;
+  margin-bottom: 18px;
+}
+
+.lum-admin-side-product {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 17px;
+  min-width: 0;
+}
+
+.lum-admin-side-product img {
+  width: 55px;
+  height: 58px;
+  object-fit: cover;
+  background: #f4ede7;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+
+.lum-admin-side-product div {
+  flex: 1;
+  min-width: 0;
+}
+
+.lum-admin-side-product strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.lum-admin-side-product span {
+  display: block;
+  font-size: 10px;
+  color: #918075;
+  margin-top: 5px;
+}
+
+.lum-admin-stock-alert {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 11px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1e9e4;
+}
+
+.lum-admin-stock-alert strong {
+  color: #ba6c47;
+}
+
+.lum-admin-stock-ok {
+  color: #47875b !important;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1250px) {
+  .lum-admin-dashboard {
+    grid-template-columns: 175px minmax(0, 1fr);
+  }
+
+  .lum-admin-rightbar {
+    grid-column: 2;
+    border-top: 1px solid #eee7e2;
+    border-left: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .lum-admin-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 780px) {
+  .lum-admin-dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .lum-admin-sidebar {
+    padding: 20px;
+    gap: 15px;
+  }
+
+  .lum-admin-brand {
+    margin-bottom: 0;
+  }
+
+  .lum-admin-sidebar-menu {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .lum-admin-menu-item {
+    width: auto;
+    white-space: nowrap;
+  }
+
+  .lum-admin-sidebar-bottom,
+  .lum-admin-menu-heading {
+    display: none;
+  }
+
+  .lum-admin-main {
+    padding: 24px 15px;
+  }
+
+  .lum-admin-rightbar {
+    grid-column: 1;
+    grid-template-columns: 1fr;
+    padding: 25px 20px;
+  }
+
+  .lum-admin-right-section {
+    margin-bottom: 8px;
+  }
+
+  .lum-admin-topbar {
+    flex-wrap: wrap;
+  }
+
+  .lum-admin-search-wrap {
+    order: 3;
+    max-width: none;
+    flex-basis: 100%;
+  }
+
+  .lum-admin-report-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .lum-admin-metrics {
+    gap: 9px;
+  }
+
+  .lum-admin-metric {
+    padding: 13px;
+    min-height: 125px;
+  }
+
+  .lum-admin-metric strong {
+    font-size: 14px;
+  }
+
+  .lum-admin-chart-card,
+  .lum-admin-orders-card,
+  .lum-admin-report {
+    padding: 15px;
+  }
+
+  .lum-admin-revenue-chart {
+    gap: 2px;
+  }
+
+  .lum-admin-month-label {
+    font-size: 8px;
+  }
+
+  .lum-admin-chart-value {
+    font-size: 8px;
+  }
+
+  .lum-admin-bar {
+    width: 75%;
+  }
+}

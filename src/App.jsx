@@ -2,9 +2,9 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
-// ========================================
-// DATA PRODUK AWAL
-// ========================================
+// ===========================================
+// LUMINA STORE - FULLSCREEN ADMIN VERSION
+// ===========================================
 
 const initialProducts = [
   {
@@ -94,21 +94,20 @@ const emptyForm = {
   colors: "Black,White",
 };
 
-const money = (n) =>
+const rupiah = (value) =>
   new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
     maximumFractionDigits: 0,
-  }).format(n);
+  }).format(Number(value) || 0);
 
-const shortMoney = (n) =>
-  n >= 1000000
-    ? `${(n / 1000000).toFixed(1)} jt`
-    : n >= 1000
-      ? `${(n / 1000).toFixed(0)} rb`
-      : String(n);
+const shortMoney = (value) => {
+  if (value >= 1000000) return `${(value / 1000000).toFixed(1)}jt`;
+  if (value >= 1000) return `${Math.round(value / 1000)}rb`;
+  return String(value);
+};
 
-function readStorage(key, fallback) {
+function loadData(key, fallback) {
   try {
     const saved = localStorage.getItem(key);
     return saved ? JSON.parse(saved) : fallback;
@@ -117,15 +116,15 @@ function readStorage(key, fallback) {
   }
 }
 
-function normalizeStatus(status) {
-  return status === "Simulasi" || !status
+function statusOf(status) {
+  return !status || status === "Simulasi"
     ? "Pesanan Baru"
     : status;
 }
 
-// ========================================
-// KOMPONEN KARTU PRODUK
-// ========================================
+// ===========================================
+// KARTU PRODUK
+// ===========================================
 
 function ProductCard({
   product,
@@ -138,18 +137,18 @@ function ProductCard({
     <article className="product-card">
       <div className="product-picture">
         <button
+          type="button"
           className="image-button"
           onClick={() => onDetail(product)}
-          aria-label={`Lihat ${product.name}`}
         >
           <img src={product.image} alt={product.name} />
         </button>
 
         <button
+          type="button"
           className="heart"
           onClick={() => onFavorite(product.id)}
           aria-label={`Favorit ${product.name}`}
-          aria-pressed={favorite}
         >
           {favorite ? "♥" : "♡"}
         </button>
@@ -162,11 +161,14 @@ function ProductCard({
       <div className="product-body">
         <small>{product.category}</small>
         <h3>{product.name}</h3>
-        <p className="price">{money(product.price)}</p>
+        <p className="price">{rupiah(product.price)}</p>
         <p className="muted">Stok: {product.stock}</p>
 
         <div className="product-actions">
-          <button className="btn-light" onClick={() => onDetail(product)}>
+          <button
+            className="btn-light"
+            onClick={() => onDetail(product)}
+          >
             Detail
           </button>
           <button
@@ -182,7 +184,15 @@ function ProductCard({
   );
 }
 
-function ProductGrid({ items, wishlist, onFavorite, onDetail, onCart }) {
+function ProductGrid(props) {
+  const {
+    items,
+    wishlist,
+    onFavorite,
+    onDetail,
+    onCart,
+  } = props;
+
   return (
     <div className="product-grid">
       {items.map((product) => (
@@ -196,90 +206,777 @@ function ProductGrid({ items, wishlist, onFavorite, onDetail, onCart }) {
         />
       ))}
       {items.length === 0 && (
-        <p className="empty">Belum ada produk untuk ditampilkan.</p>
+        <p className="empty">Produk tidak ditemukan.</p>
       )}
     </div>
   );
 }
 
-// ========================================
-// KOMPONEN GRAFIK DASHBOARD
-// ========================================
+// ===========================================
+// TABEL PESANAN ADMIN
+// ===========================================
 
-function MonthlyChart({ data }) {
-  const max = Math.max(1, ...data.map((d) => d.total));
-
+function OrderTable({ orders, onUpdateStatus, editable }) {
   return (
-    <div className="pro-month-chart">
-      {data.map((item, index) => (
-        <div className="pro-month-col" key={index}>
-          <span className="pro-bar-value">
-            {shortMoney(item.total)}
-          </span>
-          <div className="pro-bar-area">
-            <div
-              className="pro-month-bar"
-              style={{
-                height: `${(item.total / max) * 100}%`,
-                minHeight: item.total > 0 ? 5 : 0,
-              }}
-              title={money(item.total)}
-            />
-          </div>
-          <small>{item.label}</small>
-        </div>
-      ))}
+    <div className="lum-dash-table-wrap">
+      <table className="lum-dash-table">
+        <thead>
+          <tr>
+            <th>Produk</th>
+            <th>Customer</th>
+            <th>Order ID</th>
+            <th>Total</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {orders.map((order) => {
+            const first = order.items?.[0];
+            const currentStatus = statusOf(order.status);
+
+            return (
+              <tr key={order.id}>
+                <td>
+                  <div className="lum-dash-order-product">
+                    {first?.image && (
+                      <img src={first.image} alt={first.name} />
+                    )}
+                    <span>{first?.name || "Produk"}</span>
+                  </div>
+                </td>
+
+                <td>{order.customer}</td>
+                <td>{order.id}</td>
+                <td>{rupiah(order.total)}</td>
+
+                <td>
+                  {editable ? (
+                    <select
+                      value={currentStatus}
+                      disabled={
+                        currentStatus === "Dibatalkan" ||
+                        currentStatus === "Selesai"
+                      }
+                      onChange={(e) =>
+                        onUpdateStatus(order.id, e.target.value)
+                      }
+                    >
+                      {statuses.map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <span
+                      className={`lum-dash-status ${
+                        currentStatus.toLowerCase().replaceAll(" ", "-")
+                      }`}
+                    >
+                      {currentStatus}
+                    </span>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+
+          {orders.length === 0 && (
+            <tr>
+              <td colSpan={5} className="lum-dash-empty">
+                Belum ada pesanan.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </div>
   );
 }
 
-function TopProducts({ items }) {
-  const max = Math.max(1, ...items.map((x) => x.quantity));
+// ===========================================
+// DASHBOARD ADMIN FULLSCREEN
+// ===========================================
+
+function AdminDashboard({
+  products,
+  orders,
+  section,
+  setSection,
+  onBack,
+  onSaveProduct,
+  onEditProduct,
+  onDeleteProduct,
+  onUpdateStatus,
+  form,
+  setForm,
+  editingId,
+  cancelEdit,
+}) {
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState("Semua");
+  const [year, setYear] = useState(new Date().getFullYear());
+
+  const completed = orders.filter(
+    (o) => statusOf(o.status) === "Selesai"
+  );
+
+  const active = orders.filter(
+    (o) => statusOf(o.status) !== "Dibatalkan"
+  );
+
+  const revenue = completed.reduce(
+    (sum, o) => sum + Number(o.total || 0),
+    0
+  );
+
+  const activeValue = active.reduce(
+    (sum, o) => sum + Number(o.total || 0),
+    0
+  );
+
+  const totalStock = products.reduce(
+    (sum, p) => sum + Number(p.stock || 0),
+    0
+  );
+
+  const lowStock = products.filter(
+    (p) => Number(p.stock) <= 5
+  );
+
+  const years = [
+    ...new Set([
+      new Date().getFullYear(),
+      ...orders
+        .map((o) => new Date(o.date).getFullYear())
+        .filter(Number.isFinite),
+    ]),
+  ].sort((a, b) => b - a);
+
+  const months = Array.from({ length: 12 }, (_, index) => {
+    const total = completed
+      .filter((o) => {
+        const date = new Date(o.date);
+        return (
+          date.getFullYear() === year &&
+          date.getMonth() === index
+        );
+      })
+      .reduce((sum, o) => sum + Number(o.total || 0), 0);
+
+    return {
+      index,
+      label: new Date(2026, index, 1).toLocaleDateString(
+        "id-ID",
+        { month: "short" }
+      ),
+      total,
+    };
+  });
+
+  const maxRevenue = Math.max(
+    1,
+    ...months.map((m) => m.total)
+  );
+
+  const soldMap = new Map();
+
+  completed.forEach((order) => {
+    (order.items || []).forEach((item) => {
+      const current = soldMap.get(item.id) || {
+        id: item.id,
+        name: item.name,
+        image: item.image,
+        quantity: 0,
+      };
+
+      soldMap.set(item.id, {
+        ...current,
+        quantity: current.quantity + Number(item.quantity || 0),
+      });
+    });
+  });
+
+  const topSelling = [...soldMap.values()]
+    .sort((a, b) => b.quantity - a.quantity)
+    .slice(0, 5);
+
+  const popular = products
+    .map((p) => ({
+      ...p,
+      sold: soldMap.get(p.id)?.quantity || 0,
+    }))
+    .sort((a, b) => b.sold - a.sold)
+    .slice(0, 4);
+
+  const visibleOrders = [...orders]
+    .filter((o) => {
+      const matchesQuery = [
+        o.id,
+        o.customer,
+        ...(o.items || []).map((item) => item.name),
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(query.toLowerCase());
+
+      return (
+        matchesQuery &&
+        (filter === "Semua" || statusOf(o.status) === filter)
+      );
+    })
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  const visibleProducts = products.filter((p) =>
+    p.name.toLowerCase().includes(query.toLowerCase())
+  );
+
+  const statusTotals = statuses.map((status) => ({
+    status,
+    count: orders.filter(
+      (o) => statusOf(o.status) === status
+    ).length,
+  }));
+
+  const metrics = [
+    {
+      icon: "◉",
+      label: "Penjualan Selesai",
+      value: rupiah(revenue),
+      note: "Completed",
+    },
+    {
+      icon: "◈",
+      label: "Nilai Pesanan Aktif",
+      value: rupiah(activeValue),
+      note: "Non-cancelled",
+    },
+    {
+      icon: "▤",
+      label: "Total Pesanan",
+      value: orders.length,
+      note: `${completed.length} selesai`,
+    },
+    {
+      icon: "▣",
+      label: "Total Produk",
+      value: products.length,
+      note: `${totalStock} unit`,
+    },
+  ];
 
   return (
-    <div className="pro-top-list">
-      {items.map((item, index) => (
-        <div className="pro-top-item" key={item.id}>
-          <div className="pro-top-meta">
-            <span>{index + 1}. {item.name}</span>
-            <strong>{item.quantity} unit</strong>
+    <div className="lum-dash">
+      {/* SIDEBAR KIRI */}
+      <aside className="lum-dash-sidebar">
+        <div className="lum-dash-logo">
+          LUMINA<span>.</span>
+        </div>
+
+        <div className="lum-dash-menu-label">Menu</div>
+
+        <nav className="lum-dash-menu">
+          {[
+            ["overview", "▦", "Overview"],
+            ["report", "▤", "Report"],
+            ["orders", "🛒", "Order"],
+            ["products", "◈", "Product"],
+          ].map(([key, icon, label]) => (
+            <button
+              key={key}
+              type="button"
+              className={section === key ? "active" : ""}
+              onClick={() => setSection(key)}
+            >
+              <span>{icon}</span>
+              {label}
+            </button>
+          ))}
+        </nav>
+
+        <div className="lum-dash-sidebar-bottom">
+          <strong>Business</strong>
+          <p>Fashion & Lifestyle</p>
+          <small>● Admin Demo</small>
+          <button
+            className="lum-dash-back"
+            onClick={onBack}
+          >
+            ← Kembali ke Toko
+          </button>
+        </div>
+      </aside>
+
+      {/* KONTEN UTAMA */}
+      <main className="lum-dash-main">
+        <header className="lum-dash-topbar">
+          <div>
+            <span className="lum-dash-eyebrow">
+              LUMINA MANAGEMENT SYSTEM
+            </span>
+            <h1>
+              {{
+                overview: "Overview",
+                report: "Sales Report",
+                orders: "Manajemen Pesanan",
+                products: "Kelola Produk",
+              }[section]}
+            </h1>
           </div>
-          <div className="pro-progress">
-            <div
-              style={{
-                width: `${(item.quantity / max) * 100}%`,
-              }}
+
+          <div className="lum-dash-search">
+            <span>⌕</span>
+            <input
+              type="search"
+              placeholder="Search product or order..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
             />
           </div>
-        </div>
-      ))}
-      {items.length === 0 && (
-        <p className="muted">Belum ada data penjualan.</p>
-      )}
+
+          <span className="lum-dash-avatar">A</span>
+        </header>
+
+        {/* OVERVIEW */}
+        {section === "overview" && (
+          <>
+            <div className="lum-dash-stats">
+              {metrics.map((metric) => (
+                <div
+                  className="lum-dash-metric"
+                  key={metric.label}
+                >
+                  <div className="lum-dash-metric-head">
+                    <span className="lum-dash-metric-icon">
+                      {metric.icon}
+                    </span>
+                    <small>{metric.note}</small>
+                  </div>
+                  <strong>{metric.value}</strong>
+                  <span>{metric.label}</span>
+                </div>
+              ))}
+            </div>
+
+            <section className="lum-dash-card">
+              <div className="lum-dash-card-head">
+                <div>
+                  <h2>Earning Revenue</h2>
+                  <p>
+                    Pendapatan dari pesanan berstatus Selesai
+                  </p>
+                </div>
+
+                <select
+                  value={year}
+                  onChange={(e) => setYear(Number(e.target.value))}
+                >
+                  {years.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="lum-dash-chart-total">
+                {rupiah(
+                  months.reduce((sum, month) => sum + month.total, 0)
+                )}
+                <small>Total {year}</small>
+              </div>
+
+              <div className="lum-dash-chart">
+                {months.map((month) => (
+                  <div
+                    className="lum-dash-bar-col"
+                    key={month.index}
+                  >
+                    <span>
+                      {month.total > 0
+                        ? shortMoney(month.total)
+                        : ""}
+                    </span>
+                    <div className="lum-dash-bar-area">
+                      <div
+                        className="lum-dash-bar"
+                        style={{
+                          height: `${
+                            (month.total / maxRevenue) * 100
+                          }%`,
+                        }}
+                        title={rupiah(month.total)}
+                      />
+                    </div>
+                    <small>{month.label}</small>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="lum-dash-card">
+              <div className="lum-dash-card-head">
+                <div>
+                  <h2>Recent Orders</h2>
+                  <p>Lima pesanan terbaru</p>
+                </div>
+                <button
+                  className="lum-dash-link"
+                  onClick={() => setSection("orders")}
+                >
+                  Lihat Semua →
+                </button>
+              </div>
+
+              <OrderTable
+                orders={visibleOrders.slice(0, 5)}
+                onUpdateStatus={onUpdateStatus}
+                editable={false}
+              />
+            </section>
+          </>
+        )}
+
+        {/* REPORT */}
+        {section === "report" && (
+          <>
+            <div className="lum-dash-stats">
+              {metrics.map((metric) => (
+                <div
+                  className="lum-dash-metric"
+                  key={metric.label}
+                >
+                  <div className="lum-dash-metric-head">
+                    <span className="lum-dash-metric-icon">
+                      {metric.icon}
+                    </span>
+                    <small>{metric.note}</small>
+                  </div>
+                  <strong>{metric.value}</strong>
+                  <span>{metric.label}</span>
+                </div>
+              ))}
+            </div>
+
+            <section className="lum-dash-card">
+              <h2>Ringkasan Status Pesanan</h2>
+              <div className="lum-dash-status-grid">
+                {statusTotals.map((item) => (
+                  <div key={item.status}>
+                    <strong>{item.count}</strong>
+                    <span>{item.status}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="lum-dash-card">
+              <div className="lum-dash-card-head">
+                <h2>Laporan Transaksi</h2>
+                <select
+                  value={filter}
+                  onChange={(e) => setFilter(e.target.value)}
+                >
+                  <option>Semua</option>
+                  {statuses.map((status) => (
+                    <option key={status}>{status}</option>
+                  ))}
+                </select>
+              </div>
+
+              <OrderTable
+                orders={visibleOrders}
+                onUpdateStatus={onUpdateStatus}
+                editable={false}
+              />
+            </section>
+          </>
+        )}
+
+        {/* MANAJEMEN PESANAN */}
+        {section === "orders" && (
+          <section className="lum-dash-card">
+            <div className="lum-dash-card-head">
+              <div>
+                <h2>Manajemen Pesanan</h2>
+                <p>Perbarui status pesanan simulasi</p>
+              </div>
+
+              <select
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+              >
+                <option>Semua</option>
+                {statuses.map((status) => (
+                  <option key={status}>{status}</option>
+                ))}
+              </select>
+            </div>
+
+            <OrderTable
+              orders={visibleOrders}
+              onUpdateStatus={onUpdateStatus}
+              editable
+            />
+          </section>
+        )}
+
+        {/* MANAJEMEN PRODUK */}
+        {section === "products" && (
+          <div className="lum-dash-products">
+            <form
+              className="lum-dash-card lum-dash-product-form"
+              onSubmit={onSaveProduct}
+            >
+              <h2>
+                {editingId !== null
+                  ? "Edit Produk"
+                  : "Tambah Produk"}
+              </h2>
+
+              <label>Nama Produk</label>
+              <input
+                required
+                value={form.name}
+                onChange={(e) =>
+                  setForm({ ...form, name: e.target.value })
+                }
+              />
+
+              <label>Kategori</label>
+              <select
+                value={form.category}
+                onChange={(e) =>
+                  setForm({ ...form, category: e.target.value })
+                }
+              >
+                <option>Fashion</option>
+                <option>Shoes</option>
+                <option>Accessories</option>
+              </select>
+
+              <label>Harga (Rp)</label>
+              <input
+                required
+                type="number"
+                min="1"
+                value={form.price}
+                onChange={(e) =>
+                  setForm({ ...form, price: e.target.value })
+                }
+              />
+
+              <label>Stok</label>
+              <input
+                required
+                type="number"
+                min="0"
+                step="1"
+                value={form.stock}
+                onChange={(e) =>
+                  setForm({ ...form, stock: e.target.value })
+                }
+              />
+
+              <label>URL Gambar</label>
+              <input
+                type="url"
+                placeholder="https://..."
+                value={form.image}
+                onChange={(e) =>
+                  setForm({ ...form, image: e.target.value })
+                }
+              />
+
+              {form.image && (
+                <img
+                  className="lum-dash-preview"
+                  src={form.image}
+                  alt="Preview produk"
+                />
+              )}
+
+              <label>Deskripsi</label>
+              <textarea
+                rows={3}
+                value={form.description}
+                onChange={(e) =>
+                  setForm({ ...form, description: e.target.value })
+                }
+              />
+
+              <label>Ukuran (pisahkan dengan koma)</label>
+              <input
+                value={form.sizes}
+                onChange={(e) =>
+                  setForm({ ...form, sizes: e.target.value })
+                }
+              />
+
+              <label>Warna (pisahkan dengan koma)</label>
+              <input
+                value={form.colors}
+                onChange={(e) =>
+                  setForm({ ...form, colors: e.target.value })
+                }
+              />
+
+              <button className="btn-dark" type="submit">
+                {editingId !== null
+                  ? "Simpan Perubahan"
+                  : "+ Tambah Produk"}
+              </button>
+
+              {editingId !== null && (
+                <button
+                  type="button"
+                  className="btn-light"
+                  onClick={cancelEdit}
+                >
+                  Batal Edit
+                </button>
+              )}
+            </form>
+
+            <section className="lum-dash-card">
+              <h2>Daftar Produk</h2>
+
+              {visibleProducts.map((product) => (
+                <div
+                  className="lum-dash-product-row"
+                  key={product.id}
+                >
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                  />
+
+                  <div>
+                    <strong>{product.name}</strong>
+                    <p>
+                      {rupiah(product.price)} · Stok {product.stock}
+                    </p>
+                  </div>
+
+                  <button
+                    className="btn-light"
+                    onClick={() => onEditProduct(product)}
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    className="delete-btn"
+                    onClick={() => onDeleteProduct(product.id)}
+                  >
+                    Hapus
+                  </button>
+                </div>
+              ))}
+            </section>
+          </div>
+        )}
+      </main>
+
+      {/* SIDEBAR KANAN */}
+      <aside className="lum-dash-right">
+        <section>
+          <h3>Produk Populer</h3>
+          <p className="lum-dash-small">
+            Berdasarkan penjualan selesai
+          </p>
+
+          {popular.map((product) => (
+            <div
+              className="lum-dash-side-product"
+              key={product.id}
+            >
+              <img src={product.image} alt={product.name} />
+              <div>
+                <strong>{product.name}</strong>
+                <small>{product.sold} unit terjual</small>
+              </div>
+            </div>
+          ))}
+        </section>
+
+        <section>
+          <h3>Top Selling Product</h3>
+          <p className="lum-dash-small">Produk terlaris</p>
+
+          {topSelling.length === 0 && (
+            <p className="lum-dash-small">
+              Belum ada pesanan selesai.
+            </p>
+          )}
+
+          {topSelling.map((product) => (
+            <div
+              className="lum-dash-side-product"
+              key={product.id}
+            >
+              {product.image && (
+                <img src={product.image} alt={product.name} />
+              )}
+              <div>
+                <strong>{product.name}</strong>
+                <small>{product.quantity} unit</small>
+              </div>
+            </div>
+          ))}
+        </section>
+
+        <section>
+          <h3>Stock Alert</h3>
+          <p className="lum-dash-small">
+            Stok 5 unit atau kurang
+          </p>
+
+          {lowStock.length === 0 ? (
+            <p className="lum-dash-small">
+              ✓ Semua stok mencukupi.
+            </p>
+          ) : (
+            lowStock.map((product) => (
+              <div
+                className="lum-dash-stock"
+                key={product.id}
+              >
+                <span>{product.name}</span>
+                <strong>{product.stock}</strong>
+              </div>
+            ))
+          )}
+        </section>
+      </aside>
     </div>
   );
 }
 
-// ========================================
+// ===========================================
 // APLIKASI UTAMA
-// ========================================
+// ===========================================
 
 export default function App() {
   const [products, setProducts] = useState(() =>
-    readStorage("lumina_products_v1", initialProducts)
+    loadData("lumina_products_v1", initialProducts)
   );
+
   const [cart, setCart] = useState(() =>
-    readStorage("lumina_cart_v1", [])
+    loadData("lumina_cart_v1", [])
   );
+
   const [wishlist, setWishlist] = useState(() =>
-    readStorage("lumina_wishlist_v1", [])
+    loadData("lumina_wishlist_v1", [])
   );
+
   const [orders, setOrders] = useState(() =>
-    readStorage("lumina_orders_v1", [])
+    loadData("lumina_orders_v1", [])
   );
 
   const [page, setPage] = useState("home");
-  const [adminTab, setAdminTab] = useState("dashboard");
+  const [adminSection, setAdminSection] = useState("overview");
   const [selectedId, setSelectedId] = useState(null);
   const [size, setSize] = useState("");
   const [color, setColor] = useState("");
@@ -287,7 +984,6 @@ export default function App() {
   const [category, setCategory] = useState("All");
   const [sort, setSort] = useState("default");
   const [message, setMessage] = useState("");
-  const [orderFilter, setOrderFilter] = useState("Semua");
 
   const [checkout, setCheckout] = useState({
     name: "",
@@ -299,25 +995,34 @@ export default function App() {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
 
+  // SIMPAN DATA
   useEffect(() => {
-    localStorage.setItem("lumina_products_v1", JSON.stringify(products));
+    localStorage.setItem(
+      "lumina_products_v1",
+      JSON.stringify(products)
+    );
   }, [products]);
 
   useEffect(() => {
-    localStorage.setItem("lumina_cart_v1", JSON.stringify(cart));
+    localStorage.setItem(
+      "lumina_cart_v1",
+      JSON.stringify(cart)
+    );
   }, [cart]);
 
   useEffect(() => {
-    localStorage.setItem("lumina_wishlist_v1", JSON.stringify(wishlist));
+    localStorage.setItem(
+      "lumina_wishlist_v1",
+      JSON.stringify(wishlist)
+    );
   }, [wishlist]);
 
   useEffect(() => {
-    localStorage.setItem("lumina_orders_v1", JSON.stringify(orders));
+    localStorage.setItem(
+      "lumina_orders_v1",
+      JSON.stringify(orders)
+    );
   }, [orders]);
-
-  // ========================================
-  // PERHITUNGAN TOKO
-  // ========================================
 
   const selected = products.find((p) => p.id === selectedId);
 
@@ -346,97 +1051,6 @@ export default function App() {
   const shippingFee =
     checkout.shipping === "express" ? 25000 : 12000;
 
-  // ========================================
-  // PERHITUNGAN DASHBOARD ADMIN
-  // ========================================
-
-  const activeOrders = orders.filter(
-    (o) => normalizeStatus(o.status) !== "Dibatalkan"
-  );
-
-  const completed = orders.filter(
-    (o) => normalizeStatus(o.status) === "Selesai"
-  );
-
-  const revenue = completed.reduce(
-    (sum, o) => sum + o.total,
-    0
-  );
-
-  const bookedValue = activeOrders.reduce(
-    (sum, o) => sum + o.total,
-    0
-  );
-
-  const newOrders = orders.filter(
-    (o) => normalizeStatus(o.status) === "Pesanan Baru"
-  ).length;
-
-  const lowStock = products.filter((p) => p.stock <= 5);
-  const totalStock = products.reduce((s, p) => s + p.stock, 0);
-
-  const statusCount = statuses.map((status) => ({
-    status,
-    count: orders.filter(
-      (o) => normalizeStatus(o.status) === status
-    ).length,
-  }));
-
-  // Grafik 6 bulan berdasarkan pesanan selesai.
-  const monthlySales = Array.from({ length: 6 }, (_, i) => {
-    const today = new Date();
-    const monthDate = new Date(
-      today.getFullYear(),
-      today.getMonth() - 5 + i,
-      1
-    );
-
-    const total = completed
-      .filter((o) => {
-        const date = new Date(o.date);
-        return (
-          date.getMonth() === monthDate.getMonth() &&
-          date.getFullYear() === monthDate.getFullYear()
-        );
-      })
-      .reduce((sum, o) => sum + o.total, 0);
-
-    return {
-      label: monthDate.toLocaleDateString("id-ID", {
-        month: "short",
-        year: "2-digit",
-      }),
-      total,
-    };
-  });
-
-  const productSalesMap = new Map();
-
-  completed.forEach((order) => {
-    order.items.forEach((item) => {
-      const old = productSalesMap.get(item.id) || {
-        id: item.id,
-        name: item.name,
-        quantity: 0,
-      };
-
-      productSalesMap.set(item.id, {
-        ...old,
-        quantity: old.quantity + item.quantity,
-      });
-    });
-  });
-
-  const topProducts = [...productSalesMap.values()]
-    .sort((a, b) => b.quantity - a.quantity)
-    .slice(0, 5);
-
-  const filteredOrders = orders.filter(
-    (o) =>
-      orderFilter === "Semua" ||
-      normalizeStatus(o.status) === orderFilter
-  );
-
   function notify(text) {
     setMessage(text);
   }
@@ -446,8 +1060,8 @@ export default function App() {
     window.scrollTo(0, 0);
   }
 
-  function goAdmin(tab) {
-    setAdminTab(tab);
+  function goAdmin() {
+    setAdminSection("overview");
     go("admin");
   }
 
@@ -466,13 +1080,11 @@ export default function App() {
     );
   }
 
-  function addToCart(product, chosenSize, chosenColor) {
-    const productSize =
-      chosenSize || product.sizes?.[0] || "All Size";
-    const productColor =
-      chosenColor || product.colors?.[0] || "Default";
-
-    const key = `${product.id}-${productSize}-${productColor}`;
+  // TAMBAH KE KERANJANG
+  function addToCart(product, selectedSize, selectedColor) {
+    const s = selectedSize || product.sizes?.[0] || "All Size";
+    const c = selectedColor || product.colors?.[0] || "Default";
+    const key = `${product.id}-${s}-${c}`;
 
     const used = cart
       .filter((item) => item.id === product.id)
@@ -499,8 +1111,8 @@ export default function App() {
         {
           ...product,
           key,
-          size: productSize,
-          color: productColor,
+          size: s,
+          color: c,
           quantity: 1,
         },
       ];
@@ -509,10 +1121,10 @@ export default function App() {
     notify("Produk berhasil ditambahkan ke keranjang.");
   }
 
+  // UBAH JUMLAH KERANJANG
   function changeQty(key, amount) {
     const item = cart.find((p) => p.key === key);
     const product = products.find((p) => p.id === item?.id);
-
     if (!item || !product) return;
 
     const used = cart
@@ -535,12 +1147,17 @@ export default function App() {
     );
   }
 
+  // CHECKOUT SIMULASI
   function placeOrder(event) {
     event.preventDefault();
     if (!cart.length) return;
 
-    if (!/^[0-9+()\s-]{8,20}$/.test(checkout.phone.trim())) {
-      notify("Nomor telepon belum valid.");
+    if (
+      !checkout.name.trim() ||
+      !checkout.address.trim() ||
+      !/^[0-9+()\s-]{8,20}$/.test(checkout.phone.trim())
+    ) {
+      notify("Periksa kembali data pembeli.");
       return;
     }
 
@@ -560,7 +1177,7 @@ export default function App() {
       }
     }
 
-    const order = {
+    const newOrder = {
       id: `LM-${Date.now()}`,
       date: new Date().toISOString(),
       customer: checkout.name.trim(),
@@ -573,7 +1190,7 @@ export default function App() {
       stockRestored: false,
     };
 
-    setOrders((current) => [order, ...current]);
+    setOrders((current) => [newOrder, ...current]);
 
     setProducts((current) =>
       current.map((p) => ({
@@ -589,58 +1206,60 @@ export default function App() {
       address: "",
       shipping: "regular",
     });
+
     go("success");
   }
 
+  // PERBARUI STATUS PESANAN
   function updateOrderStatus(id, nextStatus) {
     const order = orders.find((o) => o.id === id);
     if (!order) return;
 
-    const currentStatus = normalizeStatus(order.status);
+    const current = statusOf(order.status);
 
-    if (currentStatus === "Dibatalkan") {
-      notify("Pesanan yang dibatalkan tidak bisa diaktifkan lagi.");
-      return;
-    }
-
-    if (nextStatus === "Dibatalkan" && currentStatus === "Selesai") {
-      notify("Pesanan selesai tidak bisa dibatalkan pada demo ini.");
+    if (current === "Dibatalkan" || current === "Selesai") {
+      notify("Pesanan final tidak dapat diubah pada demo ini.");
       return;
     }
 
     if (nextStatus === "Dibatalkan" && !order.stockRestored) {
-      setProducts((current) =>
-        current.map((product) => ({
+      setProducts((currentProducts) =>
+        currentProducts.map((product) => ({
           ...product,
           stock:
             product.stock +
-            order.items
+            (order.items || [])
               .filter((item) => item.id === product.id)
-              .reduce((sum, item) => sum + item.quantity, 0),
+              .reduce(
+                (sum, item) => sum + item.quantity,
+                0
+              ),
         }))
       );
     }
 
-    setOrders((current) =>
-      current.map((o) =>
-        o.id === id
+    setOrders((currentOrders) =>
+      currentOrders.map((item) =>
+        item.id === id
           ? {
-              ...o,
+              ...item,
               status: nextStatus,
               stockRestored:
-                o.stockRestored || nextStatus === "Dibatalkan",
+                item.stockRestored ||
+                nextStatus === "Dibatalkan",
             }
-          : o
+          : item
       )
     );
 
-    notify(`Status berhasil diubah menjadi ${nextStatus}.`);
+    notify(`Status pesanan menjadi ${nextStatus}.`);
   }
 
+  // SIMPAN PRODUK
   function saveProduct(event) {
     event.preventDefault();
 
-    const item = {
+    const product = {
       id: editingId ?? Date.now(),
       name: form.name.trim(),
       category: form.category,
@@ -653,13 +1272,13 @@ export default function App() {
     };
 
     if (
-      !item.name ||
-      !Number.isFinite(item.price) ||
-      item.price <= 0 ||
-      !Number.isInteger(item.stock) ||
-      item.stock < 0 ||
-      !item.sizes.length ||
-      !item.colors.length
+      !product.name ||
+      !Number.isFinite(product.price) ||
+      product.price <= 0 ||
+      !Number.isInteger(product.stock) ||
+      product.stock < 0 ||
+      !product.sizes.length ||
+      !product.colors.length
     ) {
       notify("Periksa kembali data produk.");
       return;
@@ -667,21 +1286,25 @@ export default function App() {
 
     if (editingId !== null) {
       setProducts((current) =>
-        current.map((p) => (p.id === editingId ? item : p))
+        current.map((p) =>
+          p.id === editingId ? product : p
+        )
       );
 
       setCart((current) =>
-        current.map((p) =>
-          p.id === editingId ? { ...p, ...item } : p
+        current.map((item) =>
+          item.id === editingId
+            ? { ...item, ...product }
+            : item
         )
       );
     } else {
-      setProducts((current) => [...current, item]);
+      setProducts((current) => [...current, product]);
     }
 
-    setForm(emptyForm);
     setEditingId(null);
-    notify("Data produk berhasil disimpan.");
+    setForm(emptyForm);
+    notify("Produk berhasil disimpan.");
   }
 
   function editProduct(product) {
@@ -700,12 +1323,11 @@ export default function App() {
   }
 
   function deleteProduct(id) {
-    if (!window.confirm("Yakin ingin menghapus produk ini?")) return;
+    if (!window.confirm("Yakin ingin menghapus produk?")) return;
 
     setProducts((current) => current.filter((p) => p.id !== id));
-    setWishlist((current) => current.filter((x) => x !== id));
     setCart((current) => current.filter((p) => p.id !== id));
-
+    setWishlist((current) => current.filter((p) => p !== id));
     notify("Produk berhasil dihapus.");
   }
 
@@ -716,36 +1338,43 @@ export default function App() {
     onCart: addToCart,
   };
 
-  // ========================================
-  // TAMPILAN APLIKASI
-  // ========================================
-
   return (
-    <div className="lumina">
-      <div className="announcement">
-        ✦ LUMINA STORE — Timeless Fashion & Everyday Elegance
-      </div>
+    <div className={`lumina ${page === "admin" ? "admin-mode" : ""}`}>
+      <style>{adminStyles}</style>
 
-      <header className="navbar">
-        <button className="logo" onClick={() => go("home")}>
-          LUMINA<span>.</span>
-        </button>
+      {/* NAVBAR HANYA UNTUK HALAMAN TOKO */}
+      {page !== "admin" && (
+        <>
+          <div className="announcement">
+            ✦ LUMINA STORE — Timeless Fashion & Everyday Elegance
+          </div>
 
-        <nav className="nav-menu">
-          <button onClick={() => go("home")}>Home</button>
-          <button onClick={() => go("shop")}>Shop</button>
-          <button onClick={() => go("wishlist")}>
-            ♡ Wishlist ({wishlist.length})
-          </button>
-          <button onClick={() => goAdmin("dashboard")}>
-            Admin Demo
-          </button>
-        </nav>
+          <header className="navbar">
+            <button
+              className="logo"
+              onClick={() => go("home")}
+            >
+              LUMINA<span>.</span>
+            </button>
 
-        <button className="cart-link" onClick={() => go("cart")}>
-          🛍 Cart ({cartCount})
-        </button>
-      </header>
+            <nav className="nav-menu">
+              <button onClick={() => go("home")}>Home</button>
+              <button onClick={() => go("shop")}>Shop</button>
+              <button onClick={() => go("wishlist")}>
+                ♡ Wishlist ({wishlist.length})
+              </button>
+              <button onClick={goAdmin}>Admin Demo</button>
+            </nav>
+
+            <button
+              className="cart-link"
+              onClick={() => go("cart")}
+            >
+              🛍 Cart ({cartCount})
+            </button>
+          </header>
+        </>
+      )}
 
       {/* HOMEPAGE */}
       {page === "home" && (
@@ -760,9 +1389,14 @@ export default function App() {
                 Elevate your everyday look with timeless fashion,
                 premium essentials, and effortless style.
               </p>
-              <button className="btn-dark" onClick={() => go("shop")}>
+
+              <button
+                className="btn-dark"
+                onClick={() => go("shop")}
+              >
                 Shop Collection →
               </button>
+
               <p className="hero-bottom">
                 ✦ PREMIUM ESSENTIALS ✦ EVERYDAY ELEGANCE
               </p>
@@ -793,15 +1427,23 @@ export default function App() {
 
           <main className="container section">
             <p className="eyebrow center">CURATED FOR YOU</p>
-            <h2 className="section-title">Featured Collection</h2>
+            <h2 className="section-title">
+              Featured Collection
+            </h2>
             <p className="section-description">
               Discover your next favorite fashion essentials.
             </p>
 
-            <ProductGrid items={products.slice(0, 6)} {...gridProps} />
+            <ProductGrid
+              items={products.slice(0, 6)}
+              {...gridProps}
+            />
 
             <div className="center action-space">
-              <button className="btn-dark" onClick={() => go("shop")}>
+              <button
+                className="btn-dark"
+                onClick={() => go("shop")}
+              >
                 View All Products →
               </button>
             </div>
@@ -811,7 +1453,10 @@ export default function App() {
             <p className="eyebrow">THE LUMINA EDIT</p>
             <h2>Style that speaks for you.</h2>
             <p>Modern fashion for every moment.</p>
-            <button className="btn-dark" onClick={() => go("shop")}>
+            <button
+              className="btn-dark"
+              onClick={() => go("shop")}
+            >
               Explore Collection
             </button>
           </section>
@@ -836,7 +1481,7 @@ export default function App() {
               onChange={(e) => setCategory(e.target.value)}
             >
               {["All", "Fashion", "Shoes", "Accessories"].map((c) => (
-                <option key={c}>{c}</option>
+                <option key={c} value={c}>{c}</option>
               ))}
             </select>
 
@@ -857,7 +1502,10 @@ export default function App() {
       {/* DETAIL PRODUK */}
       {page === "detail" && selected && (
         <main className="container section">
-          <button className="back" onClick={() => go("shop")}>
+          <button
+            className="back"
+            onClick={() => go("shop")}
+          >
             ← Kembali ke toko
           </button>
 
@@ -871,9 +1519,11 @@ export default function App() {
             <div className="detail-copy">
               <p className="eyebrow">{selected.category}</p>
               <h1>{selected.name}</h1>
-              <h2 className="price">{money(selected.price)}</h2>
+              <h2 className="price">{rupiah(selected.price)}</h2>
               <p>{selected.description}</p>
-              <p className="muted">Stok tersedia: {selected.stock}</p>
+              <p className="muted">
+                Stok tersedia: {selected.stock}
+              </p>
 
               <label>Ukuran</label>
               <div className="option-row">
@@ -924,14 +1574,16 @@ export default function App() {
         </main>
       )}
 
-      {/* CART */}
+      {/* KERANJANG */}
       {page === "cart" && (
         <main className="container section">
           <h1 className="section-title">Shopping Cart</h1>
 
           <div className="two-column">
             <div className="panel">
-              {cart.length === 0 && <p>Keranjang masih kosong.</p>}
+              {cart.length === 0 && (
+                <p>Keranjang masih kosong.</p>
+              )}
 
               {cart.map((item) => (
                 <div className="cart-row" key={item.key}>
@@ -939,21 +1591,29 @@ export default function App() {
 
                   <div className="grow">
                     <h3>{item.name}</h3>
-                    <p className="muted">{item.size} / {item.color}</p>
-                    <strong>{money(item.price)}</strong>
+                    <p className="muted">
+                      {item.size} / {item.color}
+                    </p>
+                    <strong>{rupiah(item.price)}</strong>
 
                     <div className="quantity">
-                      <button onClick={() => changeQty(item.key, -1)}>
+                      <button
+                        onClick={() => changeQty(item.key, -1)}
+                      >
                         −
                       </button>
                       <span>{item.quantity}</span>
-                      <button onClick={() => changeQty(item.key, 1)}>
+                      <button
+                        onClick={() => changeQty(item.key, 1)}
+                      >
                         +
                       </button>
                       <button
                         onClick={() =>
                           setCart((current) =>
-                            current.filter((p) => p.key !== item.key)
+                            current.filter(
+                              (p) => p.key !== item.key
+                            )
                           )
                         }
                       >
@@ -968,12 +1628,13 @@ export default function App() {
             <div className="panel summary">
               <h2>Order Summary</h2>
               <div className="between">
-                <span>Total Item</span><strong>{cartCount}</strong>
+                <span>Total Item</span>
+                <strong>{cartCount}</strong>
               </div>
               <div className="between">
-                <span>Subtotal</span><strong>{money(subtotal)}</strong>
+                <span>Subtotal</span>
+                <strong>{rupiah(subtotal)}</strong>
               </div>
-
               <button
                 className="btn-dark wide"
                 disabled={!cart.length}
@@ -992,7 +1653,10 @@ export default function App() {
           <h1 className="section-title">Checkout — Demo</h1>
 
           <div className="two-column">
-            <form className="panel form-stack" onSubmit={placeOrder}>
+            <form
+              className="panel form-stack"
+              onSubmit={placeOrder}
+            >
               <h2>Informasi Pembeli</h2>
 
               <label>Nama Lengkap</label>
@@ -1000,7 +1664,10 @@ export default function App() {
                 required
                 value={checkout.name}
                 onChange={(e) =>
-                  setCheckout({ ...checkout, name: e.target.value })
+                  setCheckout({
+                    ...checkout,
+                    name: e.target.value,
+                  })
                 }
               />
 
@@ -1010,17 +1677,23 @@ export default function App() {
                 type="tel"
                 value={checkout.phone}
                 onChange={(e) =>
-                  setCheckout({ ...checkout, phone: e.target.value })
+                  setCheckout({
+                    ...checkout,
+                    phone: e.target.value,
+                  })
                 }
               />
 
               <label>Alamat Pengiriman</label>
               <textarea
                 required
-                rows="4"
+                rows={4}
                 value={checkout.address}
                 onChange={(e) =>
-                  setCheckout({ ...checkout, address: e.target.value })
+                  setCheckout({
+                    ...checkout,
+                    address: e.target.value,
+                  })
                 }
               />
 
@@ -1028,15 +1701,22 @@ export default function App() {
               <select
                 value={checkout.shipping}
                 onChange={(e) =>
-                  setCheckout({ ...checkout, shipping: e.target.value })
+                  setCheckout({
+                    ...checkout,
+                    shipping: e.target.value,
+                  })
                 }
               >
-                <option value="regular">Regular — Rp12.000</option>
-                <option value="express">Express — Rp25.000</option>
+                <option value="regular">
+                  Regular — Rp12.000
+                </option>
+                <option value="express">
+                  Express — Rp25.000
+                </option>
               </select>
 
               <p className="muted">
-                Gunakan data fiktif. Ini bukan pembayaran sungguhan.
+                Ini simulasi. Gunakan data fiktif.
               </p>
 
               <button
@@ -1053,538 +1733,771 @@ export default function App() {
 
               {cart.map((item) => (
                 <div className="between" key={item.key}>
-                  <span>{item.name} × {item.quantity}</span>
-                  <strong>{money(item.price * item.quantity)}</strong>
+                  <span>
+                    {item.name} × {item.quantity}
+                  </span>
+                  <strong>
+                    {rupiah(item.price * item.quantity)}
+                  </strong>
                 </div>
               ))}
 
               <div className="between">
-                <span>Subtotal</span><strong>{money(subtotal)}</strong>
+                <span>Subtotal</span>
+                <strong>{rupiah(subtotal)}</strong>
               </div>
               <div className="between">
-                <span>Pengiriman</span><strong>{money(shippingFee)}</strong>
+                <span>Pengiriman</span>
+                <strong>{rupiah(shippingFee)}</strong>
               </div>
               <div className="between grand-total">
                 <span>Total</span>
-                <strong>{money(subtotal + shippingFee)}</strong>
+                <strong>
+                  {rupiah(subtotal + shippingFee)}
+                </strong>
               </div>
             </div>
           </div>
         </main>
       )}
 
-      {/* SUCCESS */}
+      {/* SUKSES */}
       {page === "success" && (
         <main className="container section center">
           <div className="panel success-panel">
             <div className="success-icon">✓</div>
             <h1>Pesanan Simulasi Berhasil!</h1>
-            <p>Pesanan sudah dicatat dalam dashboard admin demo.</p>
-            <p>Tidak ada transaksi atau pembayaran nyata.</p>
-            <button className="btn-dark" onClick={() => go("home")}>
+            <p>Pesanan sudah dicatat di dashboard admin.</p>
+            <p>Tidak ada pembayaran nyata.</p>
+            <button
+              className="btn-dark"
+              onClick={() => go("home")}
+            >
               Kembali ke Home
             </button>
           </div>
         </main>
       )}
 
-      {/* ======================================
-          ADMIN DASHBOARD PRO
-      ====================================== */}
+      {/* ADMIN FULL SCREEN */}
       {page === "admin" && (
-        <main className="container section admin-area">
-          <div className="pro-admin-heading">
-            <div>
-              <p className="eyebrow">LUMINA MANAGEMENT SYSTEM</p>
-              <h1>Admin Dashboard</h1>
-              <p className="muted">
-                Pantau performa toko dan kelola pesanan simulasi.
-              </p>
-            </div>
-            <button className="btn-light" onClick={() => go("home")}>
-              ← Kembali ke Toko
-            </button>
-          </div>
-
-          <div className="pro-admin-tabs">
-            <button
-              className={adminTab === "dashboard" ? "active" : ""}
-              onClick={() => setAdminTab("dashboard")}
-            >
-              ◫ Overview
-            </button>
-            <button
-              className={adminTab === "products" ? "active" : ""}
-              onClick={() => setAdminTab("products")}
-            >
-              ◇ Kelola Produk
-            </button>
-            <button
-              className={adminTab === "orders" ? "active" : ""}
-              onClick={() => setAdminTab("orders")}
-            >
-              ▤ Pesanan
-            </button>
-          </div>
-
-          {/* OVERVIEW */}
-          {adminTab === "dashboard" && (
-            <>
-              <div className="pro-stats-grid">
-                {[
-                  {
-                    label: "Penjualan Selesai",
-                    value: money(revenue),
-                    note: "Pesanan selesai saja",
-                    icon: "◈",
-                  },
-                  {
-                    label: "Nilai Pesanan Aktif",
-                    value: money(bookedValue),
-                    note: "Tidak termasuk batal",
-                    icon: "◉",
-                  },
-                  {
-                    label: "Total Pesanan",
-                    value: orders.length,
-                    note: `${newOrders} pesanan baru`,
-                    icon: "▤",
-                  },
-                  {
-                    label: "Pesanan Selesai",
-                    value: completed.length,
-                    note: "Status selesai",
-                    icon: "✓",
-                  },
-                  {
-                    label: "Total Produk",
-                    value: products.length,
-                    note: `${totalStock} unit tersedia`,
-                    icon: "▣",
-                  },
-                  {
-                    label: "Stok Menipis",
-                    value: lowStock.length,
-                    note: "Stok 5 unit atau kurang",
-                    icon: "!",
-                  },
-                ].map((stat) => (
-                  <div className="pro-stat-card" key={stat.label}>
-                    <div className="pro-stat-top">
-                      <span>{stat.label}</span>
-                      <div className="pro-stat-icon">{stat.icon}</div>
-                    </div>
-                    <strong>{stat.value}</strong>
-                    <small>{stat.note}</small>
-                  </div>
-                ))}
-              </div>
-
-              <div className="pro-chart-grid">
-                <div className="pro-card">
-                  <div className="pro-card-heading">
-                    <div>
-                      <h2>Grafik Pendapatan Bulanan</h2>
-                      <p>6 bulan terakhir · Pesanan selesai</p>
-                    </div>
-                    <span className="pro-tag">IDR</span>
-                  </div>
-                  <MonthlyChart data={monthlySales} />
-                </div>
-
-                <div className="pro-card">
-                  <div className="pro-card-heading">
-                    <div>
-                      <h2>Produk Terlaris</h2>
-                      <p>Unit dari pesanan selesai</p>
-                    </div>
-                  </div>
-                  <TopProducts items={topProducts} />
-                </div>
-              </div>
-
-              <div className="pro-chart-grid">
-                <div className="pro-card">
-                  <div className="pro-card-heading">
-                    <div>
-                      <h2>Status Pesanan</h2>
-                      <p>Distribusi seluruh pesanan</p>
-                    </div>
-                  </div>
-                  <div className="pro-status-list">
-                    {statusCount.map((item) => (
-                      <div className="pro-status-line" key={item.status}>
-                        <span>{item.status}</span>
-                        <div className="pro-progress">
-                          <div
-                            style={{
-                              width: `${
-                                (item.count / Math.max(1, orders.length)) *
-                                100
-                              }%`,
-                            }}
-                          />
-                        </div>
-                        <strong>{item.count}</strong>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="pro-card">
-                  <div className="pro-card-heading">
-                    <div>
-                      <h2>Peringatan Stok</h2>
-                      <p>Produk dengan stok ≤ 5 unit</p>
-                    </div>
-                  </div>
-
-                  {lowStock.length === 0 ? (
-                    <p className="pro-empty">
-                      ✓ Tidak ada produk yang stoknya menipis.
-                    </p>
-                  ) : (
-                    lowStock.map((product) => (
-                      <div className="pro-stock-row" key={product.id}>
-                        <span>{product.name}</span>
-                        <strong>{product.stock} unit</strong>
-                      </div>
-                    ))
-                  )}
-
-                  <button
-                    className="pro-text-button"
-                    onClick={() => setAdminTab("products")}
-                  >
-                    Kelola Produk →
-                  </button>
-                </div>
-              </div>
-
-              <div className="pro-card pro-recent-orders">
-                <div className="pro-card-heading">
-                  <div>
-                    <h2>Pesanan Terbaru</h2>
-                    <p>Lima transaksi terakhir</p>
-                  </div>
-                  <button
-                    className="pro-text-button"
-                    onClick={() => setAdminTab("orders")}
-                  >
-                    Lihat Semua →
-                  </button>
-                </div>
-
-                <div className="table-scroll">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>ID Pesanan</th>
-                        <th>Pembeli</th>
-                        <th>Tanggal</th>
-                        <th>Total</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {[...orders]
-                        .sort(
-                          (a, b) =>
-                            new Date(b.date) - new Date(a.date)
-                        )
-                        .slice(0, 5)
-                        .map((order) => (
-                          <tr key={order.id}>
-                            <td>{order.id}</td>
-                            <td>{order.customer}</td>
-                            <td>
-                              {new Date(order.date).toLocaleDateString(
-                                "id-ID"
-                              )}
-                            </td>
-                            <td>{money(order.total)}</td>
-                            <td>
-                              <span
-                                className={`pro-status-badge ${
-                                  normalizeStatus(order.status)
-                                    .toLowerCase()
-                                    .replaceAll(" ", "-")
-                                }`}
-                              >
-                                {normalizeStatus(order.status)}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-
-                      {orders.length === 0 && (
-                        <tr>
-                          <td colSpan={5}>
-                            Belum ada pesanan simulasi.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* MANAJEMEN PRODUK */}
-          {adminTab === "products" && (
-            <div className="admin-products">
-              <form className="panel form-stack" onSubmit={saveProduct}>
-                <h2>
-                  {editingId !== null
-                    ? "Edit Produk"
-                    : "Tambah Produk Baru"}
-                </h2>
-
-                <label>Nama Produk</label>
-                <input
-                  required
-                  value={form.name}
-                  onChange={(e) =>
-                    setForm({ ...form, name: e.target.value })
-                  }
-                />
-
-                <label>Kategori</label>
-                <select
-                  value={form.category}
-                  onChange={(e) =>
-                    setForm({ ...form, category: e.target.value })
-                  }
-                >
-                  <option>Fashion</option>
-                  <option>Shoes</option>
-                  <option>Accessories</option>
-                </select>
-
-                <label>Harga Produk (Rp)</label>
-                <input
-                  required
-                  type="number"
-                  min="1"
-                  value={form.price}
-                  onChange={(e) =>
-                    setForm({ ...form, price: e.target.value })
-                  }
-                />
-
-                <label>Stok</label>
-                <input
-                  required
-                  type="number"
-                  min="0"
-                  value={form.stock}
-                  onChange={(e) =>
-                    setForm({ ...form, stock: e.target.value })
-                  }
-                />
-
-                <label>URL Gambar</label>
-                <input
-                  type="url"
-                  placeholder="https://..."
-                  value={form.image}
-                  onChange={(e) =>
-                    setForm({ ...form, image: e.target.value })
-                  }
-                />
-
-                <label>Deskripsi</label>
-                <textarea
-                  rows="3"
-                  value={form.description}
-                  onChange={(e) =>
-                    setForm({ ...form, description: e.target.value })
-                  }
-                />
-
-                <label>Ukuran (pisahkan koma)</label>
-                <input
-                  value={form.sizes}
-                  onChange={(e) =>
-                    setForm({ ...form, sizes: e.target.value })
-                  }
-                />
-
-                <label>Warna (pisahkan koma)</label>
-                <input
-                  value={form.colors}
-                  onChange={(e) =>
-                    setForm({ ...form, colors: e.target.value })
-                  }
-                />
-
-                <button className="btn-dark wide" type="submit">
-                  {editingId !== null
-                    ? "Simpan Perubahan"
-                    : "+ Tambah Produk"}
-                </button>
-
-                {editingId !== null && (
-                  <button
-                    type="button"
-                    className="btn-light"
-                    onClick={() => {
-                      setEditingId(null);
-                      setForm(emptyForm);
-                    }}
-                  >
-                    Batal Edit
-                  </button>
-                )}
-              </form>
-
-              <div className="panel">
-                <h2>Daftar Produk</h2>
-
-                {products.map((product) => (
-                  <div
-                    className="admin-product-row"
-                    key={product.id}
-                  >
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                    />
-                    <div className="grow">
-                      <strong>{product.name}</strong>
-                      <p className="muted">
-                        {money(product.price)} · Stok {product.stock}
-                      </p>
-                    </div>
-                    <button
-                      className="btn-light"
-                      onClick={() => editProduct(product)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="delete-btn"
-                      onClick={() => deleteProduct(product.id)}
-                    >
-                      Hapus
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* MANAJEMEN PESANAN */}
-          {adminTab === "orders" && (
-            <div className="pro-card">
-              <div className="pro-card-heading">
-                <div>
-                  <h2>Manajemen Pesanan</h2>
-                  <p>Ubah status transaksi simulasi</p>
-                </div>
-                <select
-                  className="pro-order-filter"
-                  value={orderFilter}
-                  onChange={(e) => setOrderFilter(e.target.value)}
-                >
-                  <option>Semua</option>
-                  {statuses.map((status) => (
-                    <option key={status}>{status}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="table-scroll">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Tanggal</th>
-                      <th>Pembeli</th>
-                      <th>Jumlah</th>
-                      <th>Total</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {filteredOrders.map((order) => (
-                      <tr key={order.id}>
-                        <td>{order.id}</td>
-                        <td>
-                          {new Date(order.date).toLocaleDateString(
-                            "id-ID"
-                          )}
-                        </td>
-                        <td>{order.customer}</td>
-                        <td>
-                          {order.items.reduce(
-                            (sum, item) => sum + item.quantity,
-                            0
-                          )}
-                        </td>
-                        <td>{money(order.total)}</td>
-                        <td>
-                          <select
-                            className="order-status-select"
-                            value={normalizeStatus(order.status)}
-                            disabled={
-                              normalizeStatus(order.status) ===
-                              "Dibatalkan"
-                            }
-                            onChange={(e) =>
-                              updateOrderStatus(
-                                order.id,
-                                e.target.value
-                              )
-                            }
-                          >
-                            {statuses
-                              .filter(
-                                (status) =>
-                                  normalizeStatus(order.status) !==
-                                    "Selesai" ||
-                                  status !== "Dibatalkan"
-                              )
-                              .map((status) => (
-                                <option key={status}>{status}</option>
-                              ))}
-                          </select>
-                        </td>
-                      </tr>
-                    ))}
-
-                    {filteredOrders.length === 0 && (
-                      <tr>
-                        <td colSpan={6}>
-                          Belum ada pesanan dengan status tersebut.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-        </main>
+        <AdminDashboard
+          products={products}
+          orders={orders}
+          section={adminSection}
+          setSection={setAdminSection}
+          onBack={() => go("home")}
+          onSaveProduct={saveProduct}
+          onEditProduct={editProduct}
+          onDeleteProduct={deleteProduct}
+          onUpdateStatus={updateOrderStatus}
+          form={form}
+          setForm={setForm}
+          editingId={editingId}
+          cancelEdit={() => {
+            setEditingId(null);
+            setForm(emptyForm);
+          }}
+        />
       )}
 
-      <footer className="footer">
-        <div>
-          <h2>LUMINA.</h2>
-          <p>Modern Fashion & Lifestyle</p>
-        </div>
-        <p>React.js E-Commerce Portfolio Project</p>
-        <p>© 2026 LUMINA STORE · Demo Only</p>
-      </footer>
+      {/* FOOTER HANYA UNTUK HALAMAN TOKO */}
+      {page !== "admin" && (
+        <footer className="footer">
+          <div>
+            <h2>LUMINA.</h2>
+            <p>Modern Fashion & Lifestyle</p>
+          </div>
+          <p>React.js E-Commerce Portfolio Project</p>
+          <p>© 2026 LUMINA STORE · Demo Only</p>
+        </footer>
+      )}
 
       {message && (
         <div className="toast" role="status">
           <span>{message}</span>
-          <button onClick={() => setMessage("")}>×</button>
+          <button onClick={() => setMessage("")}>
+            ×
+          </button>
         </div>
       )}
     </div>
   );
 }
+
+// ===========================================
+// CSS ADMIN FULLSCREEN
+// CSS TOKO TETAP DARI App.css
+// ===========================================
+
+const adminStyles = `
+.lumina.admin-mode {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background: #fff;
+}
+
+.lum-dash {
+  display: grid;
+  grid-template-columns: 245px minmax(0, 1fr) 270px;
+  width: 100%;
+  min-height: 100vh;
+  background: #fff;
+  color: #28221f;
+  font-family: Arial, sans-serif;
+}
+
+.lum-dash * {
+  box-sizing: border-box;
+}
+
+.lum-dash-sidebar {
+  background: #faf1ed;
+  padding: 38px 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  min-width: 0;
+}
+
+.lum-dash-logo {
+  font-size: 27px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  margin: 0 10px 20px;
+}
+
+.lum-dash-logo span {
+  color: #bb9683;
+}
+
+.lum-dash-menu-label {
+  background: #25201e;
+  color: #e8c7b6;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-weight: bold;
+  width: max-content;
+}
+
+.lum-dash-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lum-dash-menu button {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  background: transparent;
+  border: 0;
+  padding: 14px 12px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #322c29;
+  text-align: left;
+}
+
+.lum-dash-menu button.active,
+.lum-dash-menu button:hover {
+  background: #eadbd3;
+}
+
+.lum-dash-menu button span {
+  width: 24px;
+  font-size: 19px;
+  text-align: center;
+}
+
+.lum-dash-sidebar-bottom {
+  margin-top: auto;
+  border-top: 1px solid #eadbd3;
+  padding: 20px 10px 0;
+}
+
+.lum-dash-sidebar-bottom p {
+  color: #89776e;
+  font-size: 12px;
+}
+
+.lum-dash-sidebar-bottom small {
+  display: block;
+  color: #926d4d;
+  margin: 16px 0;
+}
+
+.lum-dash-back {
+  background: #29231d;
+  color: white;
+  border: 0;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.lum-dash-main {
+  min-width: 0;
+  padding: 38px 35px;
+}
+
+.lum-dash-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 35px;
+}
+
+.lum-dash-eyebrow {
+  display: block;
+  color: #aa8a79;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  margin-bottom: 9px;
+}
+
+.lum-dash-topbar h1 {
+  font-size: 25px;
+  margin: 0;
+}
+
+.lum-dash-search {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 350px;
+  padding: 0 12px;
+  gap: 8px;
+  border: 1.5px solid #2c2521;
+  border-radius: 30px;
+}
+
+.lum-dash-search span {
+  font-size: 22px;
+}
+
+.lumina .lum-dash-search input {
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  width: 100%;
+  min-width: 0;
+  padding: 10px 0;
+  font-size: 12px;
+}
+
+.lum-dash-avatar {
+  display: grid;
+  place-items: center;
+  width: 37px;
+  height: 37px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #29231d;
+  color: #fff;
+  font-weight: bold;
+}
+
+.lum-dash-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 25px;
+}
+
+.lum-dash-metric {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 143px;
+  padding: 18px 14px;
+  background: #faf6f3;
+  min-width: 0;
+}
+
+.lum-dash-metric-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+}
+
+.lum-dash-metric-icon {
+  font-size: 23px;
+}
+
+.lum-dash-metric-head small {
+  color: #b9a79c;
+  font-size: 9px;
+  text-align: right;
+}
+
+.lum-dash-metric strong {
+  font-size: clamp(13px, 1.2vw, 18px);
+  overflow-wrap: anywhere;
+}
+
+.lum-dash-metric > span:last-child {
+  color: #72665e;
+  font-size: 11px;
+}
+
+.lum-dash-card {
+  padding: 26px;
+  background: #fcf8f5;
+  border-radius: 5px;
+  margin-bottom: 23px;
+  min-width: 0;
+}
+
+.lum-dash-card h2 {
+  margin: 0 0 8px;
+  font-size: 19px;
+}
+
+.lum-dash-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.lum-dash-card-head p {
+  color: #948278;
+  font-size: 11px;
+  margin: 0;
+}
+
+.lumina .lum-dash-card-head select {
+  color: white;
+  background: #29231d;
+  border: 0;
+  border-radius: 5px;
+  padding: 9px 13px;
+  font-size: 12px;
+}
+
+.lum-dash-chart-total {
+  margin: 24px 0 10px;
+  font-size: 21px;
+  font-weight: bold;
+}
+
+.lum-dash-chart-total small {
+  margin-left: 12px;
+  color: #98867c;
+  font-size: 11px;
+  font-weight: normal;
+}
+
+.lum-dash-chart {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: end;
+  gap: 8px;
+  height: 245px;
+  margin-top: 15px;
+  border-bottom: 1px solid #eadfd9;
+}
+
+.lum-dash-bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  min-width: 0;
+}
+
+.lum-dash-bar-col > span {
+  height: 20px;
+  color: #8f7668;
+  font-size: 9px;
+}
+
+.lum-dash-bar-area {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 185px;
+  width: 100%;
+}
+
+.lum-dash-bar {
+  width: 62%;
+  max-width: 38px;
+  background: linear-gradient(180deg, #e6cfc2, #aa8d7e);
+  border-radius: 20px;
+  transition: height .3s;
+}
+
+.lum-dash-bar-col small {
+  padding: 10px 0;
+  font-size: 10px;
+}
+
+.lum-dash-link {
+  border: 0;
+  background: transparent;
+  color: #a07965;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.lum-dash-table-wrap {
+  overflow-x: auto;
+  margin-top: 20px;
+}
+
+.lumina .lum-dash-table {
+  width: 100%;
+  min-width: 650px;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 12px;
+}
+
+.lumina .lum-dash-table th {
+  background: transparent;
+  padding: 15px 9px;
+  color: #6e5b51;
+}
+
+.lumina .lum-dash-table td {
+  padding: 14px 9px;
+  border-bottom: 1px solid #eee1d9;
+}
+
+.lum-dash-order-product {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lum-dash-order-product img {
+  width: 43px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.lum-dash-status {
+  display: inline-block;
+  border-radius: 20px;
+  padding: 7px 10px;
+  background: #eee5da;
+  white-space: nowrap;
+}
+
+.lum-dash-status.selesai {
+  color: #2e7e50;
+  background: #e0f3e7;
+}
+
+.lum-dash-status.dibatalkan {
+  color: #ad4545;
+  background: #fae2e2;
+}
+
+.lum-dash-status.diproses,
+.lum-dash-status.dikirim {
+  color: #846039;
+  background: #f8ebd9;
+}
+
+.lum-dash-empty {
+  padding: 35px !important;
+  text-align: center;
+  color: #908177;
+}
+
+.lumina .lum-dash-table select {
+  min-width: 125px;
+  padding: 8px;
+  font-size: 11px;
+}
+
+.lum-dash-right {
+  padding: 40px 23px;
+  background: #fff;
+  border-left: 1px solid #f1e9e4;
+  min-width: 0;
+}
+
+.lum-dash-right section {
+  margin-bottom: 38px;
+}
+
+.lum-dash-right h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.lum-dash-small {
+  color: #9c8b80;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.lum-dash-side-product {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 17px 0;
+  min-width: 0;
+}
+
+.lum-dash-side-product img {
+  width: 52px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 5px;
+  background: #f3ebe5;
+}
+
+.lum-dash-side-product div {
+  flex: 1;
+  min-width: 0;
+}
+
+.lum-dash-side-product strong {
+  display: block;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.lum-dash-side-product small {
+  display: block;
+  margin-top: 6px;
+  color: #948177;
+  font-size: 10px;
+}
+
+.lum-dash-stock {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1e9e4;
+  font-size: 11px;
+}
+
+.lum-dash-stock strong {
+  color: #b86647;
+}
+
+.lum-dash-status-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.lum-dash-status-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 10px;
+  background: #fff;
+}
+
+.lum-dash-status-grid strong {
+  font-size: 25px;
+}
+
+.lum-dash-status-grid span {
+  color: #85766a;
+  font-size: 10px;
+}
+
+.lum-dash-products {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.lum-dash-product-form {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.lum-dash-product-form label {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.lum-dash-product-form button {
+  margin-top: 8px;
+}
+
+.lum-dash-preview {
+  width: 100%;
+  max-height: 150px;
+  object-fit: contain;
+}
+
+.lum-dash-product-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 0;
+  border-bottom: 1px solid #eee2d9;
+  flex-wrap: wrap;
+}
+
+.lum-dash-product-row img {
+  width: 55px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 7px;
+}
+
+.lum-dash-product-row > div {
+  flex: 1;
+  min-width: 120px;
+}
+
+.lum-dash-product-row strong {
+  font-size: 12px;
+}
+
+.lum-dash-product-row p {
+  color: #8c7c70;
+  font-size: 11px;
+}
+
+.lum-dash-product-row button {
+  padding: 9px;
+  font-size: 11px;
+}
+
+/* SIDEBAR STICKY DI DESKTOP */
+@media (min-width: 1261px) {
+  .lum-dash-sidebar,
+  .lum-dash-right {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    align-self: start;
+  }
+}
+
+/* LAPTOP */
+@media (min-width: 781px) and (max-width: 1260px) {
+  .lum-dash {
+    grid-template-columns: 190px minmax(0, 1fr);
+  }
+
+  .lum-dash-main {
+    padding: 28px 22px;
+  }
+
+  .lum-dash-right {
+    grid-column: 2;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    border-top: 1px solid #eee7e2;
+  }
+
+  .lum-dash-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* HP DAN TABLET */
+@media (max-width: 780px) {
+  .lum-dash {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lum-dash-sidebar {
+    padding: 20px;
+    gap: 15px;
+  }
+
+  .lum-dash-logo {
+    margin: 0;
+  }
+
+  .lum-dash-menu-label {
+    display: none;
+  }
+
+  .lum-dash-menu {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .lum-dash-menu button {
+    white-space: nowrap;
+  }
+
+  .lum-dash-sidebar-bottom {
+    margin-top: 0;
+  }
+
+  .lum-dash-main {
+    padding: 22px 15px;
+  }
+
+  .lum-dash-right {
+    grid-column: 1;
+    display: block;
+    padding: 25px 20px;
+  }
+
+  .lum-dash-topbar {
+    flex-wrap: wrap;
+  }
+
+  .lum-dash-search {
+    order: 3;
+    flex-basis: 100%;
+    max-width: none;
+  }
+
+  .lum-dash-products {
+    grid-template-columns: 1fr;
+  }
+
+  .lum-dash-status-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .lum-dash-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .lum-dash-metric {
+    padding: 12px;
+  }
+
+  .lum-dash-metric strong {
+    font-size: 14px;
+  }
+
+  .lum-dash-card {
+    padding: 16px;
+  }
+
+  .lum-dash-chart {
+    gap: 2px;
+  }
+
+  .lum-dash-bar-col small,
+  .lum-dash-bar-col > span {
+    font-size: 8px;
+  }
+}
+`;
