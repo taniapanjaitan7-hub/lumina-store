@@ -85,6 +85,27 @@ const childSizes = [
   "8-10 Tahun", "11-12 Tahun",
 ];
 
+const productPhotos = {
+  101: "https://unsplash.com/photos/ua_mdNhbDbM/download?force=true&w=700",
+  102: "https://unsplash.com/photos/VwUbsPzDYC0/download?force=true&w=700",
+  103: "https://images.unsplash.com/photo-1503919005314-30d93d07d823?w=700",
+  104: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=700",
+  105: "https://unsplash.com/photos/KhNDSBCLhJg/download?force=true&w=700",
+  106: "https://unsplash.com/photos/KhNDSBCLhJg/download?force=true&w=700",
+  107: "https://unsplash.com/photos/VwUbsPzDYC0/download?force=true&w=700",
+  108: "https://unsplash.com/photos/1AEkP5vYBcE/download?force=true&w=700",
+  109: "https://unsplash.com/photos/ltz0S4iN1PA/download?force=true&w=700",
+  110: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=700",
+  111: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=700",
+  112: "https://images.unsplash.com/photo-1515347619252-60a4bf4fff4f?w=700",
+  113: "https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=700",
+  114: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=700",
+  115: "https://images.unsplash.com/photo-1520639888713-7851133b1ed0?w=700",
+  116: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=700",
+  117: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=700",
+  118: "https://unsplash.com/photos/VwUbsPzDYC0/download?force=true&w=700",
+};
+
 function createProduct(
   id, name, category, price, stock,
   sizes, colors, description, keywords
@@ -99,9 +120,7 @@ function createProduct(
     colors,
     description,
     keywords,
-    image:
-      "https://placehold.co/600x750/eadbd2/584237.png?text=" +
-      encodeURIComponent(name),
+    image: productPhotos[id],
   };
 }
 
@@ -1257,9 +1276,25 @@ export default function App() {
       basicProducts
     );
 
-    const existing = Array.isArray(saved)
+    const existing = (Array.isArray(saved)
       ? saved
-      : basicProducts;
+      : basicProducts
+    ).map((product) => {
+      const newImage = productPhotos[product.id];
+
+      if (
+        newImage &&
+        (!product.image ||
+          product.image.includes("placehold.co"))
+      ) {
+        return {
+          ...product,
+          image: newImage,
+        };
+      }
+
+      return product;
+    });
 
     const ids = new Set(
       existing.map((product) => String(product.id))
