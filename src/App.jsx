@@ -2,113 +2,61 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
-// ============================================
-// LUMINA STORE
-// FASHION KELUARGA + ADMIN DASHBOARD FULLSCREEN
-// ============================================
+/* ============================================
+   LUMINA STORE - FAMILY FASHION COLLECTION
+   REACT + VITE
+   HOME, SHOP, WISHLIST, CART, ADMIN DASHBOARD
+============================================ */
 
-const basicProducts = [
-  {
-    id: 1,
-    name: "Classic T-Shirt",
-    category: "Fashion",
-    price: 125000,
-    stock: 20,
-    image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=700",
-    description: "Kaos premium yang nyaman dipakai setiap hari.",
-    sizes: ["S", "M", "L", "XL"],
-    colors: ["White", "Black", "Cream"],
-  },
-  {
-    id: 2,
-    name: "Urban Sneakers",
-    category: "Shoes",
-    price: 350000,
-    stock: 15,
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=700",
-    description: "Sneakers modern dengan desain sporty.",
-    sizes: ["39", "40", "41", "42", "43"],
-    colors: ["Red", "Black", "White"],
-  },
-  {
-    id: 3,
-    name: "Denim Jacket",
-    category: "Fashion",
-    price: 275000,
-    stock: 12,
-    image: "https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=700",
-    description: "Jaket denim berkualitas untuk gaya kasual.",
-    sizes: ["M", "L", "XL"],
-    colors: ["Blue", "Black"],
-  },
-  {
-    id: 4,
-    name: "Minimalist Sneakers",
-    category: "Shoes",
-    price: 395000,
-    stock: 10,
-    image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=700",
-    description: "Sneakers minimalis bergaya premium.",
-    sizes: ["39", "40", "41", "42"],
-    colors: ["Cream", "White"],
-  },
-  {
-    id: 5,
-    name: "Premium Hoodie",
-    category: "Fashion",
-    price: 245000,
-    stock: 18,
-    image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=700",
-    description: "Hoodie berbahan lembut dan nyaman.",
-    sizes: ["M", "L", "XL"],
-    colors: ["Black", "Grey", "Cream"],
-  },
-  {
-    id: 6,
-    name: "Leather Handbag",
-    category: "Accessories",
-    price: 425000,
-    stock: 8,
-    image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=700",
-    description: "Tas elegan untuk berbagai kesempatan.",
-    sizes: ["All Size"],
-    colors: ["Brown", "Black"],
-  },
-];
+// Foto referensi dari Unsplash.
+// Untuk toko sungguhan, gunakan foto produk milik toko.
+const photo = (id) =>
+  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=800&q=85`;
 
-// Koleksi baru, dengan gambar placeholder demo.
-// Gambar dapat diganti melalui Admin > Product.
+const photos = {
+  tshirt: photo("photo-1521572163474-6864f9cf17ab"),
+  sneakers: photo("photo-1542291026-7eec264c27ff"),
+  denim: photo("photo-1544022613-e87ca75a784a"),
+  shoes: photo("photo-1549298916-b41d501d3772"),
+  hoodie: photo("photo-1556821840-3a63f95609a7"),
+  handbag: photo("photo-1584917865442-de89df76afd3"),
+  fashion1: photo("photo-1515886657613-9f3515b0c78f"),
+  fashion2: photo("photo-1529139574466-a303027c1d8b"),
+  fashion3: photo("photo-1496747611176-843222e1e57c"),
+  fashion4: photo("photo-1515372039744-b8f02a3ae446"),
+  fashion5: photo("photo-1483985988355-763728e1935b"),
+  fashion6: photo("photo-1503919005314-30d93d07d823"),
+  fashion7: photo("photo-1518831959646-742c3a14ebf7"),
+  heels: photo("photo-1543163521-1bf539c55dd2"),
+  flats: photo("photo-1515347619252-60a4bf4fff4f"),
+  loafers: photo("photo-1614252235316-8c857d38b5f4"),
+  formal: photo("photo-1520639888713-7851133b1ed0"),
+  sneakers2: photo("photo-1600185365483-26d7a4cc7519"),
+  sneakers3: photo("photo-1525966222134-fcfa99b8ae77"),
+  shirt: photo("photo-1603252109303-2751441dd157"),
+  lifestyle: photo("photo-1539109136881-3be0616acf4b"),
+};
 
 const adultSizes = ["S", "M", "L", "XL", "XXL"];
 const childSizes = [
-  "2-3 Tahun", "4-5 Tahun", "6-7 Tahun",
-  "8-10 Tahun", "11-12 Tahun",
+  "2-3 Tahun",
+  "4-5 Tahun",
+  "6-7 Tahun",
+  "8-10 Tahun",
+  "11-12 Tahun",
 ];
 
-const productPhotos = {
-  101: "https://unsplash.com/photos/ua_mdNhbDbM/download?force=true&w=700",
-  102: "https://unsplash.com/photos/VwUbsPzDYC0/download?force=true&w=700",
-  103: "https://images.unsplash.com/photo-1503919005314-30d93d07d823?w=700",
-  104: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=700",
-  105: "https://unsplash.com/photos/KhNDSBCLhJg/download?force=true&w=700",
-  106: "https://unsplash.com/photos/KhNDSBCLhJg/download?force=true&w=700",
-  107: "https://unsplash.com/photos/VwUbsPzDYC0/download?force=true&w=700",
-  108: "https://unsplash.com/photos/1AEkP5vYBcE/download?force=true&w=700",
-  109: "https://unsplash.com/photos/ltz0S4iN1PA/download?force=true&w=700",
-  110: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=700",
-  111: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=700",
-  112: "https://images.unsplash.com/photo-1515347619252-60a4bf4fff4f?w=700",
-  113: "https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=700",
-  114: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=700",
-  115: "https://images.unsplash.com/photo-1520639888713-7851133b1ed0?w=700",
-  116: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=700",
-  117: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=700",
-  118: "https://unsplash.com/photos/VwUbsPzDYC0/download?force=true&w=700",
-};
-
-function createProduct(
-  id, name, category, price, stock,
-  sizes, colors, description, keywords
+function product(
+  id,
+  name,
+  category,
+  price,
+  stock,
+  image,
+  sizes,
+  colors,
+  description,
+  keywords = ""
 ) {
   return {
     id,
@@ -116,153 +64,301 @@ function createProduct(
     category,
     price,
     stock,
+    image,
     sizes,
     colors,
     description,
     keywords,
-    image: productPhotos[id],
   };
 }
 
-const newProducts = [
-  createProduct(
+// ============================================
+// KATALOG PRODUK
+// ============================================
+
+const catalog = [
+  product(
+    1, "Classic T-Shirt", "Fashion", 125000, 20,
+    photos.tshirt,
+    ["S", "M", "L", "XL"],
+    ["White", "Black", "Cream"],
+    "Kaos premium untuk aktivitas sehari-hari.",
+    "kaos pria wanita cowok cewek dewasa casual"
+  ),
+  product(
+    2, "Urban Sneakers", "Shoes", 350000, 15,
+    photos.sneakers,
+    ["39", "40", "41", "42", "43"],
+    ["Red", "Black", "White"],
+    "Sneakers sporty untuk gaya modern.",
+    "sepatu pria cowok dewasa olahraga"
+  ),
+  product(
+    3, "Denim Jacket", "Fashion", 275000, 12,
+    photos.denim,
+    ["M", "L", "XL"],
+    ["Blue", "Black"],
+    "Jaket denim berkualitas dengan gaya kasual.",
+    "jaket cowok cewek pria wanita dewasa"
+  ),
+  product(
+    4, "Minimalist Sneakers", "Shoes", 395000, 10,
+    photos.shoes,
+    ["39", "40", "41", "42"],
+    ["Cream", "White"],
+    "Sepatu minimalis untuk gaya sehari-hari.",
+    "sepatu pria wanita dewasa sneakers"
+  ),
+  product(
+    5, "Premium Hoodie", "Fashion", 245000, 18,
+    photos.hoodie,
+    ["M", "L", "XL"],
+    ["Black", "Grey", "Cream"],
+    "Hoodie premium dengan bahan nyaman.",
+    "hoodie jaket pria wanita dewasa"
+  ),
+  product(
+    6, "Leather Handbag", "Accessories", 425000, 8,
+    photos.handbag,
+    ["All Size"],
+    ["Brown", "Black"],
+    "Tas elegan untuk berbagai kesempatan.",
+    "tas wanita perempuan dewasa"
+  ),
+  product(
     101, "Batik Pria Modern", "Fashion", 189000, 25,
-    adultSizes, ["Brown", "Navy", "Black"],
-    "Batik pria untuk kerja, gereja, pesta, dan acara keluarga.",
-    "batik pria cowok cowo laki laki ayah bapak suami dewasa formal"
+    photos.shirt,
+    adultSizes,
+    ["Brown", "Navy", "Black"],
+    "Kemeja batik pria untuk kerja, gereja dan acara keluarga.",
+    "batik pria cowok cowo laki laki bapak ayah suami dewasa"
   ),
-  createProduct(
+  product(
     102, "Batik Wanita Elegan", "Fashion", 215000, 20,
-    adultSizes, ["Maroon", "Cream", "Brown"],
-    "Batik elegan untuk wanita dewasa dan acara resmi.",
-    "batik wanita cewek cewe perempuan ibu istri dewasa pesta"
+    photos.fashion2,
+    adultSizes,
+    ["Maroon", "Cream", "Brown"],
+    "Batik wanita untuk pesta dan acara resmi.",
+    "batik wanita cewek cewe perempuan ibu istri dewasa"
   ),
-  createProduct(
+  product(
     103, "Batik Anak Laki-Laki", "Fashion", 99000, 30,
-    childSizes, ["Blue", "Brown"],
-    "Batik anak laki-laki untuk sekolah dan acara keluarga.",
-    "batik anak kecil cowok cowo pria laki laki sekolah"
+    photos.fashion6,
+    childSizes,
+    ["Blue", "Brown"],
+    "Batik anak laki-laki untuk sekolah dan keluarga.",
+    "batik anak kecil cowok cowo laki laki sekolah"
   ),
-  createProduct(
+  product(
     104, "Dress Batik Anak Perempuan", "Fashion", 115000, 24,
-    childSizes, ["Pink", "Cream", "Maroon"],
-    "Dress batik anak perempuan untuk pesta dan keluarga.",
-    "batik anak kecil cewek cewe wanita perempuan dress"
+    photos.fashion7,
+    childSizes,
+    ["Pink", "Cream", "Maroon"],
+    "Dress batik anak perempuan untuk pesta.",
+    "batik dress anak kecil cewek cewe perempuan"
   ),
-  createProduct(
+  product(
     105, "Batik Couple Suami Istri", "Fashion", 375000, 15,
-    adultSizes, ["Brown", "Navy"],
-    "Batik pasangan dengan warna senada.",
-    "batik couple pasangan keluarga suami istri menikah berumah tangga pria wanita dewasa"
+    photos.fashion5,
+    ["Paket S", "Paket M", "Paket L", "Paket XL"],
+    ["Brown", "Navy"],
+    "Set pakaian batik senada untuk pasangan.",
+    "batik couple pria wanita pasangan keluarga suami istri dewasa"
   ),
-  createProduct(
+  product(
     106, "Batik Sarimbit Keluarga", "Fashion", 575000, 12,
+    photos.fashion3,
     ["Paket S", "Paket M", "Paket L", "Paket XL"],
     ["Brown", "Green"],
-    "Paket batik keluarga untuk ayah, ibu, dan anak.",
-    "batik sarimbit keluarga ayah ibu anak kecil dewasa pasangan"
+    "Set batik keluarga untuk ayah, ibu dan anak.",
+    "batik sarimbit keluarga pasangan ayah ibu anak dewasa"
   ),
-  createProduct(
+  product(
     107, "Kebaya Wanita Modern", "Fashion", 285000, 18,
-    adultSizes, ["Pink", "Cream", "Maroon"],
-    "Kebaya modern untuk wisuda, pesta, dan acara adat.",
-    "kebaya wanita cewek cewe perempuan dewasa wisuda pesta"
+    photos.fashion1,
+    adultSizes,
+    ["Pink", "Cream", "Maroon"],
+    "Kebaya modern untuk wisuda dan acara adat.",
+    "kebaya wanita cewek perempuan dewasa wisuda pesta"
   ),
-  createProduct(
+  product(
     108, "Kebaya Ibu Brokat Premium", "Fashion", 345000, 14,
-    ["M", "L", "XL", "XXL"], ["Gold", "Brown", "Navy"],
+    photos.fashion3,
+    ["M", "L", "XL", "XXL"],
+    ["Gold", "Brown", "Navy"],
     "Kebaya brokat untuk ibu dan wanita dewasa.",
-    "kebaya ibu wanita perempuan dewasa orang tua brokat pesta"
+    "kebaya ibu perempuan dewasa brokat formal"
   ),
-  createProduct(
+  product(
     109, "Kebaya Anak Perempuan", "Fashion", 145000, 22,
-    childSizes, ["Pink", "White", "Purple"],
-    "Kebaya anak untuk acara sekolah dan keluarga.",
-    "kebaya anak kecil cewek cewe wanita perempuan pesta"
+    photos.fashion7,
+    childSizes,
+    ["Pink", "White", "Purple"],
+    "Kebaya anak untuk kegiatan adat dan keluarga.",
+    "kebaya anak kecil cewek perempuan pesta"
   ),
-  createProduct(
+  product(
     110, "Sepatu Sekolah Anak Laki-Laki", "Shoes", 159000, 40,
+    photos.formal,
     ["28", "29", "30", "31", "32", "33", "34", "35", "36"],
     ["Black"],
-    "Sepatu sekolah hitam untuk anak laki-laki.",
-    "sepatu sekolah anak kecil cowok cowo pria laki laki pelajar"
+    "Sepatu sekolah untuk anak laki-laki.",
+    "sepatu sekolah anak cowok laki laki hitam pelajar"
   ),
-  createProduct(
+  product(
     111, "Sepatu Sekolah Anak Perempuan", "Shoes", 155000, 35,
+    photos.sneakers3,
     ["28", "29", "30", "31", "32", "33", "34", "35", "36"],
     ["Black"],
     "Sepatu sekolah untuk anak perempuan.",
-    "sepatu sekolah anak kecil cewek cewe wanita perempuan pelajar"
+    "sepatu sekolah anak cewek perempuan hitam pelajar"
   ),
-  createProduct(
+  product(
     112, "Sepatu Gereja Wanita", "Shoes", 245000, 20,
+    photos.heels,
     ["36", "37", "38", "39", "40", "41"],
     ["Black", "Cream", "Brown"],
-    "Sepatu elegan wanita untuk gereja dan acara formal.",
-    "sepatu gereja wanita cewek cewe perempuan ibu dewasa formal"
+    "Sepatu wanita elegan untuk ibadah dan acara formal.",
+    "sepatu gereja wanita cewek perempuan ibu dewasa formal heels"
   ),
-  createProduct(
+  product(
     113, "Sepatu Gereja Pria Formal", "Shoes", 295000, 25,
+    photos.loafers,
     ["39", "40", "41", "42", "43", "44"],
     ["Black", "Brown"],
-    "Sepatu pantofel pria untuk gereja dan acara resmi.",
-    "sepatu gereja pria cowok cowo laki laki bapak dewasa pantofel"
+    "Sepatu pantofel pria untuk gereja dan kegiatan resmi.",
+    "sepatu gereja cowok pria laki laki dewasa bapak pantofel"
   ),
-  createProduct(
+  product(
     114, "Sepatu Gereja Anak Perempuan", "Shoes", 175000, 24,
+    photos.flats,
     ["27", "28", "29", "30", "31", "32", "33", "34"],
     ["Black", "White", "Pink"],
-    "Sepatu pesta dan gereja untuk anak perempuan.",
-    "sepatu gereja anak kecil cewek cewe wanita perempuan"
+    "Sepatu formal anak perempuan untuk acara istimewa.",
+    "sepatu gereja anak cewek perempuan pesta"
   ),
-  createProduct(
+  product(
     115, "Sepatu Gereja Anak Laki-Laki", "Shoes", 185000, 24,
+    photos.formal,
     ["28", "29", "30", "31", "32", "33", "34", "35"],
     ["Black", "Brown"],
-    "Sepatu formal anak laki-laki untuk gereja.",
-    "sepatu gereja anak kecil cowok cowo pria laki laki"
+    "Sepatu formal anak laki-laki untuk ibadah.",
+    "sepatu gereja anak cowok pria laki laki pantofel"
   ),
-  createProduct(
+  product(
     116, "Sneakers Pria Casual", "Shoes", 325000, 28,
+    photos.sneakers,
     ["39", "40", "41", "42", "43", "44"],
     ["White", "Black", "Grey"],
-    "Sneakers pria nyaman untuk aktivitas sehari-hari.",
-    "sepatu sneakers pria cowok cowo laki laki dewasa casual"
+    "Sneakers pria untuk aktivitas sehari-hari.",
+    "sepatu cowok pria dewasa casual sneakers"
   ),
-  createProduct(
+  product(
     117, "Sepatu Anak Casual", "Shoes", 145000, 32,
+    photos.sneakers2,
     ["26", "27", "28", "29", "30", "31", "32", "33"],
     ["White", "Blue", "Pink"],
-    "Sepatu sneakers anak untuk bermain dan sekolah.",
-    "sepatu anak kecil cowok cewek pria wanita sneakers casual"
+    "Sneakers anak untuk bermain dan sekolah.",
+    "sepatu anak kecil cowok cewek sneakers"
   ),
-  createProduct(
+  product(
     118, "Kebaya Couple Ibu dan Anak", "Fashion", 395000, 12,
+    photos.fashion4,
     ["Paket S", "Paket M", "Paket L", "Paket XL"],
     ["Pink", "Cream", "Maroon"],
-    "Set kebaya senada untuk ibu dan anak perempuan.",
-    "kebaya couple keluarga pasangan ibu anak kecil wanita perempuan dewasa"
+    "Set kebaya senada untuk ibu dan anak.",
+    "kebaya keluarga couple ibu anak perempuan dewasa"
+  ),
+  product(
+    119, "Blouse Wanita Floral", "Fashion", 175000, 18,
+    photos.fashion3,
+    adultSizes,
+    ["White", "Pink", "Beige"],
+    "Blouse wanita dengan tampilan elegan.",
+    "blouse wanita cewek perempuan dewasa floral"
+  ),
+  product(
+    120, "Kemeja Formal Pria", "Fashion", 199000, 21,
+    photos.shirt,
+    adultSizes,
+    ["White", "Blue", "Grey"],
+    "Kemeja formal pria untuk kerja dan acara resmi.",
+    "kemeja pria cowok dewasa bapak kerja"
+  ),
+  product(
+    121, "Flat Shoes Wanita", "Shoes", 189000, 17,
+    photos.flats,
+    ["36", "37", "38", "39", "40"],
+    ["Black", "Nude", "Brown"],
+    "Sepatu flat wanita untuk aktivitas harian.",
+    "sepatu flat shoes wanita cewek gereja dewasa"
+  ),
+  product(
+    122, "Loafers Pria Casual", "Shoes", 279000, 16,
+    photos.loafers,
+    ["39", "40", "41", "42", "43"],
+    ["Brown", "Black"],
+    "Sepatu loafers pria yang simpel dan rapi.",
+    "sepatu loafers pria cowok dewasa casual"
+  ),
+  product(
+    123, "Dress Wanita Casual", "Fashion", 225000, 20,
+    photos.fashion4,
+    adultSizes,
+    ["Cream", "Black", "Pink"],
+    "Dress wanita untuk acara santai.",
+    "dress gaun wanita cewek dewasa"
+  ),
+  product(
+    124, "Sepatu Sneakers Putih", "Shoes", 249000, 30,
+    photos.sneakers3,
+    ["37", "38", "39", "40", "41", "42", "43"],
+    ["White"],
+    "Sneakers putih dengan desain minimalis.",
+    "sepatu putih sneakers wanita pria dewasa"
+  ),
+  product(
+    125, "Fashion Anak Perempuan", "Fashion", 135000, 25,
+    photos.fashion7,
+    childSizes,
+    ["Pink", "Cream"],
+    "Koleksi busana casual anak perempuan.",
+    "baju pakaian anak kecil perempuan cewek"
+  ),
+  product(
+    126, "Koleksi Fashion Wanita Premium", "Fashion", 329000, 14,
+    photos.lifestyle,
+    adultSizes,
+    ["Brown", "Cream", "Black"],
+    "Fashion wanita premium untuk acara istimewa.",
+    "baju wanita cewek perempuan dewasa"
   ),
 ];
 
-const statuses = [
+// ============================================
+// KATEGORI DAN DATA BANTUAN
+// ============================================
+
+const categoryOptions = [
+  ["All", "Semua Produk"],
+  ["Fashion", "Fashion"],
+  ["Batik", "Batik"],
+  ["Kebaya", "Kebaya"],
+  ["Shoes", "Sepatu"],
+  ["Sekolah", "Sepatu Sekolah"],
+  ["Gereja", "Sepatu Gereja"],
+  ["Anak", "Anak-Anak"],
+  ["Dewasa", "Dewasa"],
+  ["Keluarga", "Keluarga"],
+  ["Accessories", "Accessories"],
+];
+
+const orderStatuses = [
   "Pesanan Baru",
   "Diproses",
   "Dikirim",
   "Selesai",
   "Dibatalkan",
-];
-
-const categories = [
-  ["All", "Semua Produk"],
-  ["Fashion", "Fashion"],
-  ["Batik", "Batik"],
-  ["Kebaya", "Kebaya"],
-  ["Shoes", "Semua Sepatu"],
-  ["Anak", "Anak-Anak"],
-  ["Dewasa", "Dewasa"],
-  ["Keluarga", "Fashion Keluarga"],
-  ["Accessories", "Accessories"],
 ];
 
 const emptyForm = {
@@ -277,48 +373,38 @@ const emptyForm = {
   colors: "Black,White",
 };
 
-const rupiah = (value) =>
+const money = (value) =>
   new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
     maximumFractionDigits: 0,
   }).format(Number(value) || 0);
 
-function shortMoney(value) {
-  if (value >= 1000000) {
-    return `${(value / 1000000).toFixed(1)}jt`;
-  }
-  if (value >= 1000) {
-    return `${Math.round(value / 1000)}rb`;
-  }
+const compactMoney = (value) => {
+  if (value >= 1000000) return `${(value / 1000000).toFixed(1)}jt`;
+  if (value >= 1000) return `${Math.round(value / 1000)}rb`;
   return String(value);
-}
+};
 
-function loadData(key, fallback) {
+function readStorage(key, fallback) {
   try {
-    const saved = localStorage.getItem(key);
-    return saved ? JSON.parse(saved) : fallback;
+    const data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : fallback;
   } catch {
     return fallback;
   }
 }
 
-function statusOf(status) {
-  return !status || status === "Simulasi"
-    ? "Pesanan Baru"
-    : status;
-}
-
-function normalizeSearch(text) {
+function normalize(text) {
   const aliases = {
-    cowo: "pria",
     cowok: "pria",
+    cowo: "pria",
     laki: "pria",
     bapak: "pria",
     ayah: "pria",
     suami: "pria",
-    cewe: "wanita",
     cewek: "wanita",
+    cewe: "wanita",
     perempuan: "wanita",
     ibu: "wanita",
     istri: "wanita",
@@ -326,7 +412,6 @@ function normalizeSearch(text) {
     balita: "anak",
     kids: "anak",
     menikah: "keluarga",
-    berumah: "keluarga",
     sarimbit: "keluarga",
   };
 
@@ -339,94 +424,99 @@ function normalizeSearch(text) {
     .join(" ");
 }
 
-function matchesProduct(product, search, category) {
-  const searchable = normalizeSearch([
-    product.name,
-    product.category,
-    product.description,
-    product.keywords || "",
-    ...(product.sizes || []),
-    ...(product.colors || []),
+function productMatches(item, search, category, size, maxPrice) {
+  const text = normalize([
+    item.name,
+    item.description,
+    item.keywords,
+    item.category,
+    ...(item.sizes || []),
+    ...(item.colors || []),
   ].join(" "));
 
-  const words = normalizeSearch(search)
-    .split(" ")
-    .filter(Boolean);
+  const words = normalize(search).split(" ").filter(Boolean);
+  const matchesWords = words.every((word) => text.includes(word));
 
-  const matchesSearch = words.every((word) =>
-    searchable.includes(word)
-  );
-
-  const categoryRules = {
+  const specialCategories = {
     All: true,
-    Fashion: product.category === "Fashion",
-    Shoes: product.category === "Shoes",
-    Accessories: product.category === "Accessories",
-    Batik: searchable.includes("batik"),
-    Kebaya: searchable.includes("kebaya"),
-    Anak: searchable.includes("anak"),
-    Dewasa: searchable.includes("dewasa"),
-    Keluarga: searchable.includes("keluarga"),
+    Fashion: item.category === "Fashion",
+    Shoes: item.category === "Shoes",
+    Accessories: item.category === "Accessories",
+    Batik: text.includes("batik"),
+    Kebaya: text.includes("kebaya"),
+    Sekolah: text.includes("sepatu") && text.includes("sekolah"),
+    Gereja: text.includes("sepatu") && text.includes("gereja"),
+    Anak: text.includes("anak"),
+    Dewasa: text.includes("dewasa"),
+    Keluarga: text.includes("keluarga"),
   };
 
-  return matchesSearch && (categoryRules[category] ?? true);
+  const matchesCategory = specialCategories[category] ?? true;
+  const matchesSize =
+    !size || (item.sizes || []).includes(size);
+  const matchesPrice =
+    !maxPrice || Number(item.price) <= Number(maxPrice);
+
+  return (
+    matchesWords &&
+    matchesCategory &&
+    matchesSize &&
+    matchesPrice
+  );
 }
 
-// ============================================
-// KARTU PRODUK
-// ============================================
+function orderStatus(status) {
+  return status && status !== "Simulasi"
+    ? status
+    : "Pesanan Baru";
+}
 
-function ProductCard({
-  product,
-  favorite,
-  onFavorite,
-  onDetail,
-  onCart,
-}) {
+function ProductCard({ item, favorite, onFavorite, onDetail, onAdd }) {
   return (
     <article className="product-card">
       <div className="product-picture">
         <button
           className="image-button"
           type="button"
-          onClick={() => onDetail(product)}
+          onClick={() => onDetail(item)}
         >
-          <img src={product.image} alt={product.name} />
+          <img
+            src={item.image}
+            alt={item.name}
+            loading="lazy"
+            onError={(event) => {
+              event.currentTarget.style.background = "#eee4dc";
+            }}
+          />
         </button>
 
         <button
           className="heart"
           type="button"
-          aria-label={`Wishlist ${product.name}`}
-          aria-pressed={favorite}
-          onClick={() => onFavorite(product.id)}
+          aria-label={`Wishlist ${item.name}`}
+          onClick={() => onFavorite(item.id)}
         >
           {favorite ? "♥" : "♡"}
         </button>
 
         <span className="stock-label">
-          {product.stock > 0 ? "NEW COLLECTION" : "SOLD OUT"}
+          {item.stock > 0 ? "NEW COLLECTION" : "SOLD OUT"}
         </span>
       </div>
 
       <div className="product-body">
-        <small>{product.category}</small>
-        <h3>{product.name}</h3>
-        <p className="price">{rupiah(product.price)}</p>
-        <p className="muted">Stok: {product.stock}</p>
-
+        <small>{item.category}</small>
+        <h3>{item.name}</h3>
+        <p className="price">{money(item.price)}</p>
+        <p className="muted">Stok: {item.stock}</p>
         <div className="product-actions">
-          <button
-            className="btn-light"
-            onClick={() => onDetail(product)}
-          >
+          <button className="btn-light" onClick={() => onDetail(item)}>
             Detail
           </button>
-
           <button
             className="btn-dark"
-            disabled={product.stock <= 0}
-            onClick={() => onCart(product)}
+            disabled={item.stock <= 0}
+            onClick={() => onAdd(item)}
           >
             + Keranjang
           </button>
@@ -436,29 +526,23 @@ function ProductCard({
   );
 }
 
-function ProductGrid({
-  items,
-  wishlist,
-  onFavorite,
-  onDetail,
-  onCart,
-}) {
+function ProductGrid({ items, wishlist, onFavorite, onDetail, onAdd }) {
   return (
     <div className="product-grid">
-      {items.map((product) => (
+      {items.map((item) => (
         <ProductCard
-          key={product.id}
-          product={product}
-          favorite={wishlist.includes(product.id)}
+          key={item.id}
+          item={item}
+          favorite={wishlist.includes(item.id)}
           onFavorite={onFavorite}
           onDetail={onDetail}
-          onCart={onCart}
+          onAdd={onAdd}
         />
       ))}
 
       {items.length === 0 && (
         <p className="empty">
-          Produk tidak ditemukan. Coba kata pencarian lain.
+          Produk tidak ditemukan. Coba kata kunci atau filter lain.
         </p>
       )}
     </div>
@@ -466,10 +550,10 @@ function ProductGrid({
 }
 
 // ============================================
-// TABEL PESANAN ADMIN
+// TABEL ORDER ADMIN
 // ============================================
 
-function OrderTable({ orders, onUpdateStatus, editable }) {
+function OrderTable({ orders, onStatus, editable }) {
   return (
     <div className="lum-dash-table-wrap">
       <table className="lum-dash-table">
@@ -482,65 +566,52 @@ function OrderTable({ orders, onUpdateStatus, editable }) {
             <th>Status</th>
           </tr>
         </thead>
-
         <tbody>
           {orders.map((order) => {
-            const product = order.items?.[0];
-            const currentStatus = statusOf(order.status);
+            const first = order.items?.[0];
+            const status = orderStatus(order.status);
 
             return (
               <tr key={order.id}>
                 <td>
                   <div className="lum-dash-order-product">
-                    {product?.image && (
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                      />
+                    {first?.image && (
+                      <img src={first.image} alt={first.name} />
                     )}
-                    <span>{product?.name || "Produk"}</span>
+                    <span>{first?.name || "Produk"}</span>
                   </div>
                 </td>
-
                 <td>{order.customer}</td>
                 <td>{order.id}</td>
-                <td>{rupiah(order.total)}</td>
-
+                <td>{money(order.total)}</td>
                 <td>
                   {editable ? (
                     <select
-                      value={currentStatus}
+                      value={status}
                       disabled={
-                        currentStatus === "Selesai" ||
-                        currentStatus === "Dibatalkan"
+                        status === "Selesai" ||
+                        status === "Dibatalkan"
                       }
-                      onChange={(e) =>
-                        onUpdateStatus(order.id, e.target.value)
-                      }
+                      onChange={(e) => onStatus(order.id, e.target.value)}
                     >
-                      {statuses.map((status) => (
-                        <option key={status} value={status}>
-                          {status}
-                        </option>
+                      {orderStatuses.map((option) => (
+                        <option key={option}>{option}</option>
                       ))}
                     </select>
                   ) : (
                     <span
                       className={
                         "lum-dash-status " +
-                        currentStatus
-                          .toLowerCase()
-                          .replaceAll(" ", "-")
+                        status.toLowerCase().replaceAll(" ", "-")
                       }
                     >
-                      {currentStatus}
+                      {status}
                     </span>
                   )}
                 </td>
               </tr>
             );
           })}
-
           {orders.length === 0 && (
             <tr>
               <td colSpan={5} className="lum-dash-empty">
@@ -555,187 +626,126 @@ function OrderTable({ orders, onUpdateStatus, editable }) {
 }
 
 // ============================================
-// DASHBOARD ADMIN FULL SCREEN
+// ADMIN DASHBOARD FULL SCREEN
 // ============================================
 
 function AdminDashboard({
   products,
   orders,
-  section,
-  setSection,
   onBack,
-  onSaveProduct,
-  onEditProduct,
-  onDeleteProduct,
-  onUpdateStatus,
+  onSave,
+  onEdit,
+  onDelete,
+  onStatus,
   form,
   setForm,
   editingId,
-  cancelEdit,
+  onCancel,
 }) {
+  const [section, setSection] = useState("overview");
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("Semua");
   const [year, setYear] = useState(new Date().getFullYear());
 
   const completed = orders.filter(
-    (order) => statusOf(order.status) === "Selesai"
+    (item) => orderStatus(item.status) === "Selesai"
   );
 
   const active = orders.filter(
-    (order) => statusOf(order.status) !== "Dibatalkan"
+    (item) => orderStatus(item.status) !== "Dibatalkan"
   );
 
   const revenue = completed.reduce(
-    (sum, order) => sum + Number(order.total || 0),
-    0
+    (sum, item) => sum + Number(item.total || 0), 0
   );
 
   const activeValue = active.reduce(
-    (sum, order) => sum + Number(order.total || 0),
-    0
+    (sum, item) => sum + Number(item.total || 0), 0
   );
 
-  const totalStock = products.reduce(
-    (sum, product) => sum + Number(product.stock || 0),
-    0
-  );
-
-  const lowStock = products.filter(
-    (product) => product.stock <= 5
-  );
-
-  const years = [
-    ...new Set([
-      new Date().getFullYear(),
-      ...orders
-        .map((order) => new Date(order.date).getFullYear())
-        .filter(Number.isFinite),
-    ]),
-  ].sort((a, b) => b - a);
-
-  const months = Array.from({ length: 12 }, (_, index) => {
-    const total = completed
-      .filter((order) => {
-        const date = new Date(order.date);
-        return (
-          date.getFullYear() === year &&
-          date.getMonth() === index
-        );
-      })
-      .reduce(
-        (sum, order) => sum + Number(order.total || 0),
-        0
-      );
-
-    return {
-      index,
-      label: new Date(2026, index, 1).toLocaleDateString(
-        "id-ID",
-        { month: "short" }
-      ),
-      total,
-    };
-  });
-
-  const maxRevenue = Math.max(
-    1,
-    ...months.map((month) => month.total)
-  );
-
-  const soldMap = new Map();
-
-  completed.forEach((order) => {
-    (order.items || []).forEach((item) => {
-      const old = soldMap.get(item.id) || {
-        id: item.id,
-        name: item.name,
-        image: item.image,
-        quantity: 0,
-      };
-
-      soldMap.set(item.id, {
-        ...old,
-        quantity:
-          old.quantity + Number(item.quantity || 0),
-      });
-    });
-  });
-
-  const topSelling = [...soldMap.values()]
-    .sort((a, b) => b.quantity - a.quantity)
-    .slice(0, 5);
-
-  const popular = products
-    .map((product) => ({
-      ...product,
-      sold: soldMap.get(product.id)?.quantity || 0,
-    }))
-    .sort((a, b) => b.sold - a.sold)
-    .slice(0, 4);
-
-  const visibleOrders = [...orders]
-    .filter((order) => {
-      const text = [
-        order.id,
-        order.customer,
-        ...(order.items || []).map((item) => item.name),
-      ]
-        .join(" ")
-        .toLowerCase();
-
-      const matchSearch = text.includes(
-        query.toLowerCase()
-      );
-
-      return (
-        matchSearch &&
-        (filter === "Semua" ||
-          statusOf(order.status) === filter)
-      );
-    })
-    .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-  const visibleProducts = products.filter((product) =>
-    matchesProduct(product, query, "All")
+  const stock = products.reduce(
+    (sum, item) => sum + Number(item.stock || 0), 0
   );
 
   const metrics = [
-    {
-      icon: "◉",
-      label: "Penjualan Selesai",
-      value: rupiah(revenue),
-      note: "Completed",
-    },
-    {
-      icon: "◈",
-      label: "Nilai Pesanan Aktif",
-      value: rupiah(activeValue),
-      note: "Non-cancelled",
-    },
-    {
-      icon: "▤",
-      label: "Total Pesanan",
-      value: orders.length,
-      note: `${completed.length} selesai`,
-    },
-    {
-      icon: "▣",
-      label: "Total Produk",
-      value: products.length,
-      note: `${totalStock} unit`,
-    },
+    ["◉", "Penjualan Selesai", money(revenue), "Completed"],
+    ["◈", "Nilai Pesanan Aktif", money(activeValue), "Non-cancelled"],
+    ["▤", "Total Pesanan", orders.length, `${completed.length} selesai`],
+    ["▣", "Total Produk", products.length, `${stock} unit`],
   ];
+
+  const sold = new Map();
+
+  completed.forEach((order) => {
+    (order.items || []).forEach((item) => {
+      const previous = sold.get(item.id) || 0;
+      sold.set(item.id, previous + Number(item.quantity || 0));
+    });
+  });
+
+  const popular = [...products]
+    .sort((a, b) => (sold.get(b.id) || 0) - (sold.get(a.id) || 0))
+    .slice(0, 4);
+
+  const bestSelling = products
+    .filter((item) => (sold.get(item.id) || 0) > 0)
+    .sort((a, b) => sold.get(b.id) - sold.get(a.id))
+    .slice(0, 5);
+
+  const lowStock = products.filter((item) => item.stock <= 5);
+
+  const availableYears = [...new Set([
+    new Date().getFullYear(),
+    ...orders
+      .map((item) => new Date(item.date).getFullYear())
+      .filter(Number.isFinite),
+  ])].sort((a, b) => b - a);
+
+  const months = Array.from({ length: 12 }, (_, index) => ({
+    label: new Date(2026, index, 1).toLocaleString("id-ID", {
+      month: "short",
+    }),
+    total: completed
+      .filter((item) => {
+        const d = new Date(item.date);
+        return d.getFullYear() === year && d.getMonth() === index;
+      })
+      .reduce((sum, item) => sum + Number(item.total || 0), 0),
+  }));
+
+  const maxMonth = Math.max(1, ...months.map((item) => item.total));
+
+  const visibleOrders = [...orders]
+    .filter((item) => {
+      const data = [
+        item.id,
+        item.customer,
+        ...(item.items || []).map((p) => p.name),
+      ].join(" ").toLowerCase();
+
+      return data.includes(query.toLowerCase()) &&
+        (filter === "Semua" || orderStatus(item.status) === filter);
+    })
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  const visibleProducts = products.filter((item) =>
+    productMatches(item, query, "All", "", "")
+  );
+
+  const titleMap = {
+    overview: "Overview",
+    report: "Sales Report",
+    orders: "Manajemen Pesanan",
+    products: "Kelola Produk",
+  };
 
   return (
     <div className="lum-dash">
-      {/* SIDEBAR ADMIN */}
       <aside className="lum-dash-sidebar">
         <div className="lum-dash-logo">
           LUMINA<span>.</span>
         </div>
-
         <div className="lum-dash-menu-label">Menu</div>
-
         <nav className="lum-dash-menu">
           {[
             ["overview", "▦", "Overview"],
@@ -745,46 +755,35 @@ function AdminDashboard({
           ].map(([key, icon, label]) => (
             <button
               key={key}
+              type="button"
               className={section === key ? "active" : ""}
-              onClick={() => setSection(key)}
+              onClick={() => {
+                setSection(key);
+                setQuery("");
+              }}
             >
-              <span>{icon}</span>
-              {label}
+              <span>{icon}</span> {label}
             </button>
           ))}
         </nav>
-
         <div className="lum-dash-sidebar-bottom">
           <strong>Business</strong>
-          <p>Fashion & Lifestyle</p>
+          <p>Family Fashion & Lifestyle</p>
           <small>● Admin Demo</small>
-
-          <button
-            className="lum-dash-back"
-            onClick={onBack}
-          >
+          <button className="lum-dash-back" onClick={onBack}>
             ← Kembali ke Toko
           </button>
         </div>
       </aside>
 
-      {/* KONTEN ADMIN */}
       <main className="lum-dash-main">
         <header className="lum-dash-topbar">
           <div>
             <span className="lum-dash-eyebrow">
               LUMINA MANAGEMENT SYSTEM
             </span>
-            <h1>
-              {{
-                overview: "Overview",
-                report: "Sales Report",
-                orders: "Manajemen Pesanan",
-                products: "Kelola Produk",
-              }[section]}
-            </h1>
+            <h1>{titleMap[section]}</h1>
           </div>
-
           <div className="lum-dash-search">
             <span>⌕</span>
             <input
@@ -794,92 +793,60 @@ function AdminDashboard({
               onChange={(e) => setQuery(e.target.value)}
             />
           </div>
-
           <span className="lum-dash-avatar">A</span>
         </header>
 
-        {/* METRIK OVERVIEW / REPORT */}
-        {(section === "overview" ||
-          section === "report") && (
+        {(section === "overview" || section === "report") && (
           <div className="lum-dash-stats">
-            {metrics.map((metric) => (
-              <div
-                className="lum-dash-metric"
-                key={metric.label}
-              >
+            {metrics.map(([icon, label, value, note]) => (
+              <div className="lum-dash-metric" key={label}>
                 <div className="lum-dash-metric-head">
-                  <span className="lum-dash-metric-icon">
-                    {metric.icon}
-                  </span>
-                  <small>{metric.note}</small>
+                  <span className="lum-dash-metric-icon">{icon}</span>
+                  <small>{note}</small>
                 </div>
-                <strong>{metric.value}</strong>
-                <span>{metric.label}</span>
+                <strong>{value}</strong>
+                <span>{label}</span>
               </div>
             ))}
           </div>
         )}
 
-        {/* OVERVIEW */}
         {section === "overview" && (
           <>
             <section className="lum-dash-card">
               <div className="lum-dash-card-head">
                 <div>
                   <h2>Earning Revenue</h2>
-                  <p>
-                    Pendapatan dari pesanan selesai
-                  </p>
+                  <p>Pendapatan dari pesanan selesai</p>
                 </div>
-
                 <select
                   value={year}
-                  onChange={(e) =>
-                    setYear(Number(e.target.value))
-                  }
+                  onChange={(e) => setYear(Number(e.target.value))}
                 >
-                  {years.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
+                  {availableYears.map((value) => (
+                    <option key={value} value={value}>{value}</option>
                   ))}
                 </select>
               </div>
-
               <div className="lum-dash-chart-total">
-                {rupiah(
-                  months.reduce(
-                    (sum, month) => sum + month.total,
-                    0
-                  )
-                )}
+                {money(months.reduce((sum, month) => sum + month.total, 0))}
                 <small>Total {year}</small>
               </div>
-
               <div className="lum-dash-chart">
-                {months.map((month) => (
-                  <div
-                    className="lum-dash-bar-col"
-                    key={month.index}
-                  >
+                {months.map((month, index) => (
+                  <div className="lum-dash-bar-col" key={index}>
                     <span>
-                      {month.total > 0
-                        ? shortMoney(month.total)
-                        : ""}
+                      {month.total ? compactMoney(month.total) : ""}
                     </span>
-
                     <div className="lum-dash-bar-area">
                       <div
                         className="lum-dash-bar"
                         style={{
-                          height: `${
-                            (month.total / maxRevenue) * 100
-                          }%`,
+                          height: `${(month.total / maxMonth) * 100}%`,
                         }}
-                        title={rupiah(month.total)}
+                        title={money(month.total)}
                       />
                     </div>
-
                     <small>{month.label}</small>
                   </div>
                 ))}
@@ -899,29 +866,25 @@ function AdminDashboard({
                   Lihat Semua →
                 </button>
               </div>
-
               <OrderTable
                 orders={visibleOrders.slice(0, 5)}
-                onUpdateStatus={onUpdateStatus}
+                onStatus={onStatus}
                 editable={false}
               />
             </section>
           </>
         )}
 
-        {/* REPORT */}
         {section === "report" && (
           <>
             <section className="lum-dash-card">
               <h2>Ringkasan Status Pesanan</h2>
-
               <div className="lum-dash-status-grid">
-                {statuses.map((status) => (
+                {orderStatuses.map((status) => (
                   <div key={status}>
                     <strong>
                       {orders.filter(
-                        (order) =>
-                          statusOf(order.status) === status
+                        (o) => orderStatus(o.status) === status
                       ).length}
                     </strong>
                     <span>{status}</span>
@@ -929,81 +892,53 @@ function AdminDashboard({
                 ))}
               </div>
             </section>
-
             <section className="lum-dash-card">
-              <div className="lum-dash-card-head">
-                <h2>Laporan Transaksi</h2>
-
-                <select
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
-                >
-                  <option>Semua</option>
-                  {statuses.map((status) => (
-                    <option key={status}>{status}</option>
-                  ))}
-                </select>
-              </div>
-
+              <h2>Laporan Transaksi</h2>
               <OrderTable
                 orders={visibleOrders}
-                onUpdateStatus={onUpdateStatus}
+                onStatus={onStatus}
                 editable={false}
               />
             </section>
           </>
         )}
 
-        {/* PESANAN */}
         {section === "orders" && (
           <section className="lum-dash-card">
             <div className="lum-dash-card-head">
               <div>
                 <h2>Manajemen Pesanan</h2>
-                <p>Ubah status pesanan simulasi</p>
+                <p>Perbarui status pesanan simulasi</p>
               </div>
-
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
               >
                 <option>Semua</option>
-                {statuses.map((status) => (
+                {orderStatuses.map((status) => (
                   <option key={status}>{status}</option>
                 ))}
               </select>
             </div>
-
             <OrderTable
               orders={visibleOrders}
-              onUpdateStatus={onUpdateStatus}
+              onStatus={onStatus}
               editable
             />
           </section>
         )}
 
-        {/* PRODUK */}
         {section === "products" && (
           <div className="lum-dash-products">
-            <form
-              className="lum-dash-card lum-dash-product-form"
-              onSubmit={onSaveProduct}
-            >
-              <h2>
-                {editingId !== null
-                  ? "Edit Produk"
-                  : "Tambah Produk"}
-              </h2>
+            <form className="lum-dash-card lum-dash-product-form" onSubmit={onSave}>
+              <h2>{editingId !== null ? "Edit Produk" : "Tambah Produk"}</h2>
 
               <label>Nama Produk</label>
               <input
                 required
                 value={form.name}
                 onChange={(e) =>
-                  setForm({
-                    ...form,
-                    name: e.target.value,
-                  })
+                  setForm({ ...form, name: e.target.value })
                 }
               />
 
@@ -1011,10 +946,7 @@ function AdminDashboard({
               <select
                 value={form.category}
                 onChange={(e) =>
-                  setForm({
-                    ...form,
-                    category: e.target.value,
-                  })
+                  setForm({ ...form, category: e.target.value })
                 }
               >
                 <option>Fashion</option>
@@ -1024,52 +956,38 @@ function AdminDashboard({
 
               <label>Harga (Rp)</label>
               <input
-                required
                 type="number"
                 min="1"
+                required
                 value={form.price}
                 onChange={(e) =>
-                  setForm({
-                    ...form,
-                    price: e.target.value,
-                  })
+                  setForm({ ...form, price: e.target.value })
                 }
               />
 
               <label>Stok</label>
               <input
-                required
                 type="number"
                 min="0"
-                step="1"
+                required
                 value={form.stock}
                 onChange={(e) =>
-                  setForm({
-                    ...form,
-                    stock: e.target.value,
-                  })
+                  setForm({ ...form, stock: e.target.value })
                 }
               />
 
-              <label>URL Gambar</label>
+              <label>URL Foto Produk</label>
               <input
                 type="url"
                 placeholder="https://..."
                 value={form.image}
                 onChange={(e) =>
-                  setForm({
-                    ...form,
-                    image: e.target.value,
-                  })
+                  setForm({ ...form, image: e.target.value })
                 }
               />
 
               {form.image && (
-                <img
-                  className="lum-dash-preview"
-                  src={form.image}
-                  alt="Preview produk"
-                />
+                <img className="lum-dash-preview" src={form.image} alt="Preview" />
               )}
 
               <label>Deskripsi</label>
@@ -1077,10 +995,7 @@ function AdminDashboard({
                 rows={3}
                 value={form.description}
                 onChange={(e) =>
-                  setForm({
-                    ...form,
-                    description: e.target.value,
-                  })
+                  setForm({ ...form, description: e.target.value })
                 }
               />
 
@@ -1088,48 +1003,37 @@ function AdminDashboard({
               <textarea
                 rows={2}
                 placeholder="Contoh: batik pria cowok dewasa"
-                value={form.keywords || ""}
+                value={form.keywords}
                 onChange={(e) =>
-                  setForm({
-                    ...form,
-                    keywords: e.target.value,
-                  })
+                  setForm({ ...form, keywords: e.target.value })
                 }
               />
 
-              <label>Ukuran (pisahkan koma)</label>
+              <label>Ukuran (pisahkan dengan koma)</label>
               <input
                 value={form.sizes}
                 onChange={(e) =>
-                  setForm({
-                    ...form,
-                    sizes: e.target.value,
-                  })
+                  setForm({ ...form, sizes: e.target.value })
                 }
               />
 
-              <label>Warna (pisahkan koma)</label>
+              <label>Warna (pisahkan dengan koma)</label>
               <input
                 value={form.colors}
                 onChange={(e) =>
-                  setForm({
-                    ...form,
-                    colors: e.target.value,
-                  })
+                  setForm({ ...form, colors: e.target.value })
                 }
               />
 
               <button className="btn-dark" type="submit">
-                {editingId !== null
-                  ? "Simpan Perubahan"
-                  : "+ Tambah Produk"}
+                {editingId !== null ? "Simpan Perubahan" : "+ Tambah Produk"}
               </button>
 
               {editingId !== null && (
                 <button
                   type="button"
                   className="btn-light"
-                  onClick={cancelEdit}
+                  onClick={onCancel}
                 >
                   Batal Edit
                 </button>
@@ -1139,71 +1043,42 @@ function AdminDashboard({
             <section className="lum-dash-card">
               <h2>Daftar Produk ({products.length})</h2>
               <p className="lum-dash-small">
-                Cari produk melalui kolom Search di atas.
+                Cari produk menggunakan kolom di atas.
               </p>
 
-              {visibleProducts.map((product) => (
-                <div
-                  className="lum-dash-product-row"
-                  key={product.id}
-                >
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                  />
-
+              {visibleProducts.map((item) => (
+                <div className="lum-dash-product-row" key={item.id}>
+                  <img src={item.image} alt={item.name} />
                   <div>
-                    <strong>{product.name}</strong>
-                    <p>
-                      {rupiah(product.price)} · Stok{" "}
-                      {product.stock}
-                    </p>
+                    <strong>{item.name}</strong>
+                    <p>{money(item.price)} · Stok {item.stock}</p>
                   </div>
-
-                  <button
-                    className="btn-light"
-                    onClick={() => onEditProduct(product)}
-                  >
+                  <button className="btn-light" onClick={() => onEdit(item)}>
                     Edit
                   </button>
-
-                  <button
-                    className="delete-btn"
-                    onClick={() => onDeleteProduct(product.id)}
-                  >
+                  <button className="delete-btn" onClick={() => onDelete(item.id)}>
                     Hapus
                   </button>
                 </div>
               ))}
-
               {visibleProducts.length === 0 && (
-                <p>Produk tidak ditemukan.</p>
+                <p className="lum-dash-small">Produk tidak ditemukan.</p>
               )}
             </section>
           </div>
         )}
       </main>
 
-      {/* PANEL KANAN */}
       <aside className="lum-dash-right">
         <section>
           <h3>Produk Populer</h3>
-          <p className="lum-dash-small">
-            Berdasarkan jumlah penjualan selesai
-          </p>
-
-          {popular.map((product) => (
-            <div
-              className="lum-dash-side-product"
-              key={product.id}
-            >
-              <img
-                src={product.image}
-                alt={product.name}
-              />
+          <p className="lum-dash-small">Berdasarkan penjualan selesai</p>
+          {popular.map((item) => (
+            <div className="lum-dash-side-product" key={item.id}>
+              <img src={item.image} alt={item.name} />
               <div>
-                <strong>{product.name}</strong>
-                <small>{product.sold} unit terjual</small>
+                <strong>{item.name}</strong>
+                <small>{sold.get(item.id) || 0} unit terjual</small>
               </div>
             </div>
           ))}
@@ -1211,28 +1086,15 @@ function AdminDashboard({
 
         <section>
           <h3>Top Selling Product</h3>
-          <p className="lum-dash-small">Produk terlaris</p>
-
-          {topSelling.length === 0 && (
-            <p className="lum-dash-small">
-              Belum ada pesanan selesai.
-            </p>
+          {bestSelling.length === 0 && (
+            <p className="lum-dash-small">Belum ada penjualan selesai.</p>
           )}
-
-          {topSelling.map((product) => (
-            <div
-              className="lum-dash-side-product"
-              key={product.id}
-            >
-              {product.image && (
-                <img
-                  src={product.image}
-                  alt={product.name}
-                />
-              )}
+          {bestSelling.map((item) => (
+            <div className="lum-dash-side-product" key={item.id}>
+              <img src={item.image} alt={item.name} />
               <div>
-                <strong>{product.name}</strong>
-                <small>{product.quantity} unit</small>
+                <strong>{item.name}</strong>
+                <small>{sold.get(item.id)} unit</small>
               </div>
             </div>
           ))}
@@ -1240,22 +1102,14 @@ function AdminDashboard({
 
         <section>
           <h3>Stock Alert</h3>
-          <p className="lum-dash-small">
-            Produk dengan stok 5 unit atau kurang
-          </p>
-
+          <p className="lum-dash-small">Stok lima unit atau kurang</p>
           {lowStock.length === 0 ? (
-            <p className="lum-dash-small">
-              ✓ Semua stok mencukupi.
-            </p>
+            <p className="lum-dash-small">✓ Stok mencukupi.</p>
           ) : (
-            lowStock.map((product) => (
-              <div
-                className="lum-dash-stock"
-                key={product.id}
-              >
-                <span>{product.name}</span>
-                <strong>{product.stock}</strong>
+            lowStock.map((item) => (
+              <div className="lum-dash-stock" key={item.id}>
+                <span>{item.name}</span>
+                <strong>{item.stock}</strong>
               </div>
             ))
           )}
@@ -1266,71 +1120,61 @@ function AdminDashboard({
 }
 
 // ============================================
-// APLIKASI UTAMA
+// MAIN APP
 // ============================================
 
 export default function App() {
   const [products, setProducts] = useState(() => {
-    const saved = loadData(
-      "lumina_products_v1",
-      basicProducts
-    );
+    const saved = readStorage("lumina_products_v1", catalog);
+    const old = Array.isArray(saved) ? saved : catalog;
 
-    const existing = (Array.isArray(saved)
-      ? saved
-      : basicProducts
-    ).map((product) => {
-      const newImage = productPhotos[product.id];
+    const merged = old.map((item) => {
+      const current = catalog.find((p) => String(p.id) === String(item.id));
+      if (!current) return item;
 
-      if (
-        newImage &&
-        (!product.image ||
-          product.image.includes("placehold.co"))
-      ) {
-        return {
-          ...product,
-          image: newImage,
-        };
-      }
+      // Perbarui foto referensi lama, tanpa mengubah harga/stok
+      // atau foto yang sudah diganti sendiri melalui Admin.
+      const oldPhoto = !item.image ||
+        item.image.includes("placehold.co") ||
+        item.image.includes("unsplash.com/photos/");
 
-      return product;
+      return {
+        ...current,
+        ...item,
+        image: oldPhoto ? current.image : item.image,
+        keywords: item.keywords || current.keywords,
+      };
     });
 
-    const ids = new Set(
-      existing.map((product) => String(product.id))
-    );
-
-    const additions = newProducts.filter(
-      (product) => !ids.has(String(product.id))
-    );
-
-    return [...existing, ...additions];
+    const ids = new Set(merged.map((item) => String(item.id)));
+    return [
+      ...merged,
+      ...catalog.filter((item) => !ids.has(String(item.id))),
+    ];
   });
 
   const [cart, setCart] = useState(() =>
-    loadData("lumina_cart_v1", [])
+    readStorage("lumina_cart_v1", [])
   );
-
   const [wishlist, setWishlist] = useState(() =>
-    loadData("lumina_wishlist_v1", [])
+    readStorage("lumina_wishlist_v1", [])
   );
-
   const [orders, setOrders] = useState(() =>
-    loadData("lumina_orders_v1", [])
+    readStorage("lumina_orders_v1", [])
   );
 
   const [page, setPage] = useState("home");
-  const [adminSection, setAdminSection] =
-    useState("overview");
-
   const [selectedId, setSelectedId] = useState(null);
-  const [size, setSize] = useState("");
-  const [color, setColor] = useState("");
-
+  const [selectedSize, setSelectedSize] = useState("");
+  const [selectedColor, setSelectedColor] = useState("");
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
+  const [sizeFilter, setSizeFilter] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
   const [sort, setSort] = useState("default");
   const [message, setMessage] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [form, setForm] = useState(emptyForm);
 
   const [checkout, setCheckout] = useState({
     name: "",
@@ -1339,46 +1183,27 @@ export default function App() {
     shipping: "regular",
   });
 
-  const [form, setForm] = useState(emptyForm);
-  const [editingId, setEditingId] = useState(null);
-
-  // Simpan data browser.
   useEffect(() => {
-    localStorage.setItem(
-      "lumina_products_v1",
-      JSON.stringify(products)
-    );
+    localStorage.setItem("lumina_products_v1", JSON.stringify(products));
   }, [products]);
 
   useEffect(() => {
-    localStorage.setItem(
-      "lumina_cart_v1",
-      JSON.stringify(cart)
-    );
+    localStorage.setItem("lumina_cart_v1", JSON.stringify(cart));
   }, [cart]);
 
   useEffect(() => {
-    localStorage.setItem(
-      "lumina_wishlist_v1",
-      JSON.stringify(wishlist)
-    );
+    localStorage.setItem("lumina_wishlist_v1", JSON.stringify(wishlist));
   }, [wishlist]);
 
   useEffect(() => {
-    localStorage.setItem(
-      "lumina_orders_v1",
-      JSON.stringify(orders)
-    );
+    localStorage.setItem("lumina_orders_v1", JSON.stringify(orders));
   }, [orders]);
 
-  const selected = products.find(
-    (product) => product.id === selectedId
-  );
+  const selected = products.find((item) => item.id === selectedId);
 
-  // Pencarian batik, kebaya, sepatu, dan keluarga.
-  const filteredProducts = products
-    .filter((product) =>
-      matchesProduct(product, search, category)
+  const filtered = products
+    .filter((item) =>
+      productMatches(item, search, category, sizeFilter, maxPrice)
     )
     .sort((a, b) => {
       if (sort === "low") return a.price - b.price;
@@ -1386,88 +1211,66 @@ export default function App() {
       return a.id - b.id;
     });
 
-  const cartCount = cart.reduce(
-    (sum, item) => sum + item.quantity,
-    0
-  );
+  const sizesAvailable = [...new Set(
+    products.flatMap((item) => item.sizes || [])
+  )];
 
+  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
+    (sum, item) => sum + item.quantity * item.price, 0
   );
-
-  const shippingFee =
-    checkout.shipping === "express" ? 25000 : 12000;
+  const shippingFee = checkout.shipping === "express" ? 25000 : 12000;
 
   function notify(text) {
     setMessage(text);
   }
 
-  function go(destination) {
+  function navigate(destination) {
     setPage(destination);
     window.scrollTo(0, 0);
   }
 
-  function goAdmin() {
-    setAdminSection("overview");
-    go("admin");
-  }
-
-  function openProduct(product) {
-    setSelectedId(product.id);
-    setSize(product.sizes?.[0] || "All Size");
-    setColor(product.colors?.[0] || "Default");
-    go("detail");
+  function openProduct(item) {
+    setSelectedId(item.id);
+    setSelectedSize(item.sizes?.[0] || "All Size");
+    setSelectedColor(item.colors?.[0] || "Default");
+    navigate("detail");
   }
 
   function toggleWishlist(id) {
-    setWishlist((current) =>
-      current.includes(id)
-        ? current.filter((item) => item !== id)
-        : [...current, id]
+    setWishlist((old) =>
+      old.includes(id) ? old.filter((item) => item !== id) : [...old, id]
     );
   }
 
-  function addToCart(product, chosenSize, chosenColor) {
-    const chosenS =
-      chosenSize || product.sizes?.[0] || "All Size";
-    const chosenC =
-      chosenColor || product.colors?.[0] || "Default";
-
-    const key = `${product.id}-${chosenS}-${chosenC}`;
+  function addToCart(item, size, color) {
+    const currentSize = size || item.sizes?.[0] || "All Size";
+    const currentColor = color || item.colors?.[0] || "Default";
+    const key = `${item.id}-${currentSize}-${currentColor}`;
 
     const used = cart
-      .filter((item) => item.id === product.id)
-      .reduce(
-        (sum, item) => sum + item.quantity,
-        0
-      );
+      .filter((p) => p.id === item.id)
+      .reduce((sum, p) => sum + p.quantity, 0);
 
-    if (used >= product.stock) {
-      notify("Stok produk tidak mencukupi.");
+    if (used >= item.stock) {
+      notify("Stok tidak mencukupi.");
       return;
     }
 
-    setCart((current) => {
-      const existing = current.find(
-        (item) => item.key === key
-      );
-
+    setCart((old) => {
+      const existing = old.find((p) => p.key === key);
       if (existing) {
-        return current.map((item) =>
-          item.key === key
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
+        return old.map((p) =>
+          p.key === key ? { ...p, quantity: p.quantity + 1 } : p
         );
       }
-
       return [
-        ...current,
+        ...old,
         {
-          ...product,
+          ...item,
           key,
-          size: chosenS,
-          color: chosenC,
+          size: currentSize,
+          color: currentColor,
           quantity: 1,
         },
       ];
@@ -1476,176 +1279,125 @@ export default function App() {
     notify("Produk berhasil ditambahkan ke keranjang.");
   }
 
-  function changeQty(key, amount) {
-    const item = cart.find(
-      (product) => product.key === key
-    );
-
-    const product = products.find(
-      (p) => p.id === item?.id
-    );
-
-    if (!item || !product) return;
+  function changeQuantity(key, amount) {
+    const item = cart.find((p) => p.key === key);
+    const current = products.find((p) => p.id === item?.id);
+    if (!item || !current) return;
 
     const used = cart
       .filter((p) => p.id === item.id)
-      .reduce(
-        (sum, p) => sum + p.quantity,
-        0
-      );
+      .reduce((sum, p) => sum + p.quantity, 0);
 
-    if (amount > 0 && used >= product.stock) {
-      notify("Jumlah melebihi stok.");
+    if (amount > 0 && used >= current.stock) {
+      notify("Jumlah melebihi stok tersedia.");
       return;
     }
 
-    setCart((current) =>
-      current
-        .map((p) =>
-          p.key === key
-            ? {
-                ...p,
-                quantity: p.quantity + amount,
-              }
-            : p
-        )
-        .filter((p) => p.quantity > 0)
+    setCart((old) =>
+      old.map((p) =>
+        p.key === key ? { ...p, quantity: p.quantity + amount } : p
+      ).filter((p) => p.quantity > 0)
     );
   }
 
   function placeOrder(event) {
     event.preventDefault();
-
-    if (!cart.length) return;
+    if (cart.length === 0) return;
 
     if (
       !checkout.name.trim() ||
       !checkout.address.trim() ||
-      !/^[0-9+()\s-]{8,20}$/.test(
-        checkout.phone.trim()
-      )
+      !/^[0-9+()\s-]{8,20}$/.test(checkout.phone.trim())
     ) {
       notify("Periksa kembali data pembeli.");
       return;
     }
 
     const quantities = {};
-
     cart.forEach((item) => {
-      quantities[item.id] =
-        (quantities[item.id] || 0) + item.quantity;
+      quantities[item.id] = (quantities[item.id] || 0) + item.quantity;
     });
 
-    for (const [id, quantity] of Object.entries(
-      quantities
-    )) {
-      const product = products.find(
-        (p) => String(p.id) === id
-      );
-
-      if (!product || quantity > product.stock) {
-        notify("Stok produk tidak mencukupi.");
+    for (const [id, quantity] of Object.entries(quantities)) {
+      const item = products.find((p) => String(p.id) === id);
+      if (!item || item.stock < quantity) {
+        notify("Stok salah satu produk tidak mencukupi.");
         return;
       }
     }
 
-    const newOrder = {
+    const order = {
       id: `LM-${Date.now()}`,
       date: new Date().toISOString(),
       customer: checkout.name.trim(),
       phone: checkout.phone.trim(),
       address: checkout.address.trim(),
       shipping: checkout.shipping,
-      items: cart.map((item) => ({ ...item })),
+      items: cart.map((p) => ({ ...p })),
       total: subtotal + shippingFee,
       status: "Pesanan Baru",
       stockRestored: false,
     };
 
-    setOrders((current) => [
-      newOrder,
-      ...current,
-    ]);
-
-    setProducts((current) =>
-      current.map((product) => ({
-        ...product,
-        stock:
-          product.stock -
-          (quantities[product.id] || 0),
+    setOrders((old) => [order, ...old]);
+    setProducts((old) =>
+      old.map((p) => ({
+        ...p,
+        stock: p.stock - (quantities[p.id] || 0),
       }))
     );
-
     setCart([]);
-
     setCheckout({
       name: "",
       phone: "",
       address: "",
       shipping: "regular",
     });
-
-    go("success");
+    navigate("success");
   }
 
-  function updateOrderStatus(id, nextStatus) {
-    const order = orders.find((o) => o.id === id);
+  function updateStatus(id, nextStatus) {
+    const order = orders.find((item) => item.id === id);
     if (!order) return;
 
-    const currentStatus = statusOf(order.status);
-
     if (
-      currentStatus === "Dibatalkan" ||
-      currentStatus === "Selesai"
+      orderStatus(order.status) === "Selesai" ||
+      orderStatus(order.status) === "Dibatalkan"
     ) {
-      notify("Status pesanan final tidak bisa diubah.");
+      notify("Status final tidak bisa diubah.");
       return;
     }
 
-    if (
-      nextStatus === "Dibatalkan" &&
-      !order.stockRestored
-    ) {
-      setProducts((current) =>
-        current.map((product) => ({
-          ...product,
-          stock:
-            product.stock +
-            (order.items || [])
-              .filter(
-                (item) => item.id === product.id
-              )
-              .reduce(
-                (sum, item) =>
-                  sum + item.quantity,
-                0
-              ),
+    if (nextStatus === "Dibatalkan" && !order.stockRestored) {
+      setProducts((old) =>
+        old.map((p) => ({
+          ...p,
+          stock: p.stock + (order.items || [])
+            .filter((item) => item.id === p.id)
+            .reduce((sum, item) => sum + item.quantity, 0),
         }))
       );
     }
 
-    setOrders((current) =>
-      current.map((item) =>
+    setOrders((old) =>
+      old.map((item) =>
         item.id === id
           ? {
               ...item,
               status: nextStatus,
               stockRestored:
-                item.stockRestored ||
-                nextStatus === "Dibatalkan",
+                item.stockRestored || nextStatus === "Dibatalkan",
             }
           : item
       )
     );
-
     notify(`Status menjadi ${nextStatus}.`);
   }
 
-  // CRUD produk.
   function saveProduct(event) {
     event.preventDefault();
 
-    const product = {
+    const item = {
       id: editingId ?? Date.now(),
       name: form.name.trim(),
       category: form.category,
@@ -1653,49 +1405,34 @@ export default function App() {
       stock: Number(form.stock),
       image: form.image.trim(),
       description: form.description.trim(),
-      keywords: (form.keywords || "").trim(),
-      sizes: form.sizes
-        .split(",")
-        .map((text) => text.trim())
-        .filter(Boolean),
-      colors: form.colors
-        .split(",")
-        .map((text) => text.trim())
-        .filter(Boolean),
+      keywords: form.keywords.trim(),
+      sizes: form.sizes.split(",").map((s) => s.trim()).filter(Boolean),
+      colors: form.colors.split(",").map((s) => s.trim()).filter(Boolean),
     };
 
     if (
-      !product.name ||
-      !Number.isFinite(product.price) ||
-      product.price <= 0 ||
-      !Number.isInteger(product.stock) ||
-      product.stock < 0 ||
-      product.sizes.length === 0 ||
-      product.colors.length === 0
+      !item.name ||
+      !item.image ||
+      !Number.isFinite(item.price) ||
+      item.price <= 0 ||
+      !Number.isInteger(item.stock) ||
+      item.stock < 0 ||
+      !item.sizes.length ||
+      !item.colors.length
     ) {
-      notify("Periksa kembali data produk.");
+      notify("Periksa kembali data produk dan URL foto.");
       return;
     }
 
     if (editingId !== null) {
-      setProducts((current) =>
-        current.map((item) =>
-          item.id === editingId ? product : item
-        )
+      setProducts((old) =>
+        old.map((p) => p.id === editingId ? item : p)
       );
-
-      setCart((current) =>
-        current.map((item) =>
-          item.id === editingId
-            ? { ...item, ...product }
-            : item
-        )
+      setCart((old) =>
+        old.map((p) => p.id === editingId ? { ...p, ...item } : p)
       );
     } else {
-      setProducts((current) => [
-        ...current,
-        product,
-      ]);
+      setProducts((old) => [...old, item]);
     }
 
     setEditingId(null);
@@ -1703,45 +1440,27 @@ export default function App() {
     notify("Produk berhasil disimpan.");
   }
 
-  function editProduct(product) {
-    setEditingId(product.id);
-
+  function editProduct(item) {
+    setEditingId(item.id);
     setForm({
-      name: product.name,
-      category: product.category,
-      price: String(product.price),
-      stock: String(product.stock),
-      image: product.image,
-      description: product.description || "",
-      keywords: product.keywords || "",
-      sizes: (product.sizes || []).join(","),
-      colors: (product.colors || []).join(","),
+      name: item.name,
+      category: item.category,
+      price: String(item.price),
+      stock: String(item.stock),
+      image: item.image || "",
+      description: item.description || "",
+      keywords: item.keywords || "",
+      sizes: (item.sizes || []).join(","),
+      colors: (item.colors || []).join(","),
     });
-
     window.scrollTo(0, 0);
   }
 
   function deleteProduct(id) {
-    if (
-      !window.confirm(
-        "Yakin ingin menghapus produk?"
-      )
-    ) {
-      return;
-    }
-
-    setProducts((current) =>
-      current.filter((p) => p.id !== id)
-    );
-
-    setCart((current) =>
-      current.filter((p) => p.id !== id)
-    );
-
-    setWishlist((current) =>
-      current.filter((item) => item !== id)
-    );
-
+    if (!window.confirm("Yakin ingin menghapus produk?")) return;
+    setProducts((old) => old.filter((item) => item.id !== id));
+    setCart((old) => old.filter((item) => item.id !== id));
+    setWishlist((old) => old.filter((item) => item !== id));
     notify("Produk berhasil dihapus.");
   }
 
@@ -1749,55 +1468,31 @@ export default function App() {
     wishlist,
     onFavorite: toggleWishlist,
     onDetail: openProduct,
-    onCart: addToCart,
+    onAdd: addToCart,
   };
 
   return (
-    <div
-      className={
-        "lumina " +
-        (page === "admin" ? "admin-mode" : "")
-      }
-    >
-      <style>{adminStyles}</style>
-
-      {/* NAVBAR HANYA DI TOKO */}
+    <div className={`lumina ${page === "admin" ? "admin-mode" : ""}`}>
       {page !== "admin" && (
         <>
           <div className="announcement">
-            ✦ LUMINA STORE — Fashion for Every Generation
+            ✦ LUMINA STORE — FASHION FOR EVERY GENERATION
           </div>
-
           <header className="navbar">
-            <button
-              className="logo"
-              onClick={() => go("home")}
-            >
+            <button className="logo" onClick={() => navigate("home")}>
               LUMINA<span>.</span>
             </button>
-
             <nav className="nav-menu">
-              <button onClick={() => go("home")}>
-                Home
-              </button>
-
-              <button onClick={() => go("shop")}>
-                Shop
-              </button>
-
-              <button onClick={() => go("wishlist")}>
+              <button onClick={() => navigate("home")}>Home</button>
+              <button onClick={() => navigate("shop")}>Shop</button>
+              <button onClick={() => navigate("wishlist")}>
                 ♡ Wishlist ({wishlist.length})
               </button>
-
-              <button onClick={goAdmin}>
+              <button onClick={() => navigate("admin")}>
                 Admin Demo
               </button>
             </nav>
-
-            <button
-              className="cart-link"
-              onClick={() => go("cart")}
-            >
+            <button className="cart-link" onClick={() => navigate("cart")}>
               🛍 Cart ({cartCount})
             </button>
           </header>
@@ -1809,98 +1504,63 @@ export default function App() {
         <>
           <section className="hero">
             <div className="hero-copy">
-              <p className="eyebrow">
-                FAMILY COLLECTION — 2026
-              </p>
-
+              <p className="eyebrow">FAMILY COLLECTION — 2026</p>
               <h1>
                 Discover Your <em>Unique Style.</em>
               </h1>
-
               <p>
-                Discover batik, kebaya, school shoes,
-                church shoes, and timeless fashion
-                for children and adults.
+                Koleksi batik, kebaya, sepatu, dan fashion
+                pilihan untuk anak-anak hingga dewasa.
               </p>
-
-              <button
-                className="btn-dark"
-                onClick={() => go("shop")}
-              >
+              <button className="btn-dark" onClick={() => navigate("shop")}>
                 Shop Collection →
               </button>
-
               <p className="hero-bottom">
                 ✦ BATIK ✦ KEBAYA ✦ FAMILY FASHION
               </p>
             </div>
-
             <div className="hero-photo">
-              <img
-                src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200"
-                alt="Lumina fashion collection"
-              />
+              <img src={photos.fashion5} alt="Lumina fashion collection" />
             </div>
           </section>
 
           <section className="perks">
             <div>
-              ✧ <strong>Premium Quality</strong>
-              <span>Fashion pilihan keluarga</span>
+              ✧ <strong>Premium Collection</strong>
+              <span>Koleksi pilihan keluarga</span>
             </div>
-
             <div>
               ♡ <strong>All Generations</strong>
-              <span>Anak hingga dewasa</span>
+              <span>Anak-anak hingga dewasa</span>
             </div>
-
             <div>
               ✦ <strong>New Arrivals</strong>
-              <span>Batik, kebaya dan sepatu</span>
+              <span>Batik, kebaya, dan sepatu</span>
             </div>
           </section>
 
           <main className="container section">
-            <p className="eyebrow center">
-              CURATED FOR YOU
-            </p>
-
-            <h2 className="section-title">
-              Featured Collection
-            </h2>
-
+            <p className="eyebrow center">CURATED FOR YOU</p>
+            <h2 className="section-title">Featured Collection</h2>
             <p className="section-description">
-              Koleksi fashion untuk seluruh keluarga.
+              Pilihan fashion untuk seluruh keluarga.
             </p>
-
             <ProductGrid
-              items={products.slice(0, 6)}
+              items={products.slice(0, 9)}
               {...gridProps}
             />
-
             <div className="center action-space">
-              <button
-                className="btn-dark"
-                onClick={() => go("shop")}
-              >
+              <button className="btn-dark" onClick={() => navigate("shop")}>
                 View All Products →
               </button>
             </div>
           </main>
 
           <section className="promo">
-            <p className="eyebrow">
-              THE LUMINA EDIT
-            </p>
+            <p className="eyebrow">THE LUMINA EDIT</p>
             <h2>Style for every generation.</h2>
-            <p>
-              Batik, kebaya, sepatu, dan fashion keluarga.
-            </p>
-
-            <button
-              className="btn-dark"
-              onClick={() => go("shop")}
-            >
+            <p>Batik, kebaya, sepatu, dan fashion keluarga.</p>
+            <button className="btn-dark" onClick={() => navigate("shop")}>
               Explore Collection
             </button>
           </section>
@@ -1910,114 +1570,108 @@ export default function App() {
       {/* SHOP */}
       {page === "shop" && (
         <main className="container section">
-          <p className="eyebrow center">
-            LUMINA COLLECTION
-          </p>
-
-          <h1 className="section-title">
-            Shop Our Collection
-          </h1>
-
+          <p className="eyebrow center">LUMINA COLLECTION</p>
+          <h1 className="section-title">Shop Our Collection</h1>
           <p className="section-description">
-            Temukan batik, kebaya, dan sepatu
-            untuk anak-anak hingga dewasa.
+            Temukan pilihan baju dan sepatu untuk setiap usia.
           </p>
 
           <div className="toolbar">
             <input
               type="search"
-              placeholder="Contoh: batik cowok, kebaya anak..."
+              placeholder="Cari batik cowok, kebaya anak, sepatu gereja..."
               value={search}
-              onChange={(e) =>
-                setSearch(e.target.value)
-              }
+              onChange={(e) => setSearch(e.target.value)}
             />
-
             <select
               value={category}
-              onChange={(e) =>
-                setCategory(e.target.value)
-              }
+              onChange={(e) => setCategory(e.target.value)}
             >
-              {categories.map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
+              {categoryOptions.map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
               ))}
             </select>
-
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value)}
-            >
-              <option value="default">
-                Default
-              </option>
-              <option value="low">
-                Harga Terendah
-              </option>
-              <option value="high">
-                Harga Tertinggi
-              </option>
+            <select value={sort} onChange={(e) => setSort(e.target.value)}>
+              <option value="default">Urutan Default</option>
+              <option value="low">Harga Terendah</option>
+              <option value="high">Harga Tertinggi</option>
             </select>
           </div>
 
-          <p
-            className="muted"
-            style={{ marginBottom: 20 }}
+          <div
+            className="toolbar"
+            style={{
+              gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr) auto",
+            }}
           >
-            {filteredProducts.length} produk ditemukan
+            <select
+              value={sizeFilter}
+              onChange={(e) => setSizeFilter(e.target.value)}
+            >
+              <option value="">Semua Ukuran</option>
+              {sizesAvailable.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+            <select
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(e.target.value)}
+            >
+              <option value="">Semua Harga</option>
+              <option value="150000">Maks. Rp150.000</option>
+              <option value="250000">Maks. Rp250.000</option>
+              <option value="400000">Maks. Rp400.000</option>
+              <option value="600000">Maks. Rp600.000</option>
+            </select>
+            <button
+              className="btn-light"
+              type="button"
+              onClick={() => {
+                setSearch("");
+                setCategory("All");
+                setSizeFilter("");
+                setMaxPrice("");
+                setSort("default");
+              }}
+            >
+              Reset Filter
+            </button>
+          </div>
+
+          <p className="muted" style={{ marginBottom: 20 }}>
+            {filtered.length} produk ditemukan
           </p>
 
-          <ProductGrid
-            items={filteredProducts}
-            {...gridProps}
-          />
+          <ProductGrid items={filtered} {...gridProps} />
         </main>
       )}
 
       {/* DETAIL PRODUK */}
       {page === "detail" && selected && (
         <main className="container section">
-          <button
-            className="back"
-            onClick={() => go("shop")}
-          >
+          <button className="back" onClick={() => navigate("shop")}>
             ← Kembali ke toko
           </button>
-
           <div className="detail-layout">
             <img
               className="detail-image"
               src={selected.image}
               alt={selected.name}
             />
-
             <div className="detail-copy">
-              <p className="eyebrow">
-                {selected.category}
-              </p>
-
+              <p className="eyebrow">{selected.category}</p>
               <h1>{selected.name}</h1>
-              <h2 className="price">
-                {rupiah(selected.price)}
-              </h2>
-
+              <h2 className="price">{money(selected.price)}</h2>
               <p>{selected.description}</p>
-
-              <p className="muted">
-                Stok tersedia: {selected.stock}
-              </p>
+              <p className="muted">Stok: {selected.stock}</p>
 
               <label>Ukuran</label>
               <div className="option-row">
                 {(selected.sizes || []).map((s) => (
                   <button
                     key={s}
-                    className={
-                      size === s ? "chosen" : ""
-                    }
-                    onClick={() => setSize(s)}
+                    className={selectedSize === s ? "chosen" : ""}
+                    onClick={() => setSelectedSize(s)}
                   >
                     {s}
                   </button>
@@ -2029,10 +1683,8 @@ export default function App() {
                 {(selected.colors || []).map((c) => (
                   <button
                     key={c}
-                    className={
-                      color === c ? "chosen" : ""
-                    }
-                    onClick={() => setColor(c)}
+                    className={selectedColor === c ? "chosen" : ""}
+                    onClick={() => setSelectedColor(c)}
                   >
                     {c}
                   </button>
@@ -2043,7 +1695,7 @@ export default function App() {
                 className="btn-dark wide"
                 disabled={selected.stock <= 0}
                 onClick={() =>
-                  addToCart(selected, size, color)
+                  addToCart(selected, selectedSize, selectedColor)
                 }
               >
                 + Add to Cart
@@ -2056,79 +1708,40 @@ export default function App() {
       {/* WISHLIST */}
       {page === "wishlist" && (
         <main className="container section">
-          <h1 className="section-title">
-            My Wishlist ♡
-          </h1>
-
+          <h1 className="section-title">My Wishlist ♡</h1>
           <ProductGrid
-            items={products.filter((product) =>
-              wishlist.includes(product.id)
-            )}
+            items={products.filter((item) => wishlist.includes(item.id))}
             {...gridProps}
           />
         </main>
       )}
 
-      {/* CART */}
+      {/* KERANJANG */}
       {page === "cart" && (
         <main className="container section">
-          <h1 className="section-title">
-            Shopping Cart
-          </h1>
-
+          <h1 className="section-title">Shopping Cart</h1>
           <div className="two-column">
             <div className="panel">
-              {cart.length === 0 && (
-                <p>Keranjang masih kosong.</p>
-              )}
-
+              {cart.length === 0 && <p>Keranjang masih kosong.</p>}
               {cart.map((item) => (
-                <div
-                  className="cart-row"
-                  key={item.key}
-                >
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                  />
-
+                <div className="cart-row" key={item.key}>
+                  <img src={item.image} alt={item.name} />
                   <div className="grow">
                     <h3>{item.name}</h3>
-
-                    <p className="muted">
-                      {item.size} / {item.color}
-                    </p>
-
-                    <strong>
-                      {rupiah(item.price)}
-                    </strong>
-
+                    <p className="muted">{item.size} / {item.color}</p>
+                    <strong>{money(item.price)}</strong>
                     <div className="quantity">
-                      <button
-                        onClick={() =>
-                          changeQty(item.key, -1)
-                        }
-                      >
+                      <button onClick={() => changeQuantity(item.key, -1)}>
                         −
                       </button>
-
                       <span>{item.quantity}</span>
-
-                      <button
-                        onClick={() =>
-                          changeQty(item.key, 1)
-                        }
-                      >
+                      <button onClick={() => changeQuantity(item.key, 1)}>
                         +
                       </button>
-
                       <button
                         onClick={() =>
-                          setCart((current) =>
-                            current.filter(
-                              (p) =>
-                                p.key !== item.key
-                            )
+                          setCart((old) =>
+                            old.filter((p) => p.key !== item.key)
                           )
                         }
                       >
@@ -2142,23 +1755,18 @@ export default function App() {
 
             <div className="panel summary">
               <h2>Order Summary</h2>
-
               <div className="between">
                 <span>Total Item</span>
                 <strong>{cartCount}</strong>
               </div>
-
               <div className="between">
                 <span>Subtotal</span>
-                <strong>
-                  {rupiah(subtotal)}
-                </strong>
+                <strong>{money(subtotal)}</strong>
               </div>
-
               <button
                 className="btn-dark wide"
                 disabled={!cart.length}
-                onClick={() => go("checkout")}
+                onClick={() => navigate("checkout")}
               >
                 Continue to Checkout →
               </button>
@@ -2170,15 +1778,9 @@ export default function App() {
       {/* CHECKOUT */}
       {page === "checkout" && (
         <main className="container section">
-          <h1 className="section-title">
-            Checkout — Demo
-          </h1>
-
+          <h1 className="section-title">Checkout — Demo</h1>
           <div className="two-column">
-            <form
-              className="panel form-stack"
-              onSubmit={placeOrder}
-            >
+            <form className="panel form-stack" onSubmit={placeOrder}>
               <h2>Informasi Pembeli</h2>
 
               <label>Nama Lengkap</label>
@@ -2186,10 +1788,7 @@ export default function App() {
                 required
                 value={checkout.name}
                 onChange={(e) =>
-                  setCheckout({
-                    ...checkout,
-                    name: e.target.value,
-                  })
+                  setCheckout({ ...checkout, name: e.target.value })
                 }
               />
 
@@ -2199,10 +1798,7 @@ export default function App() {
                 type="tel"
                 value={checkout.phone}
                 onChange={(e) =>
-                  setCheckout({
-                    ...checkout,
-                    phone: e.target.value,
-                  })
+                  setCheckout({ ...checkout, phone: e.target.value })
                 }
               />
 
@@ -2212,10 +1808,7 @@ export default function App() {
                 rows={4}
                 value={checkout.address}
                 onChange={(e) =>
-                  setCheckout({
-                    ...checkout,
-                    address: e.target.value,
-                  })
+                  setCheckout({ ...checkout, address: e.target.value })
                 }
               />
 
@@ -2223,833 +1816,98 @@ export default function App() {
               <select
                 value={checkout.shipping}
                 onChange={(e) =>
-                  setCheckout({
-                    ...checkout,
-                    shipping: e.target.value,
-                  })
+                  setCheckout({ ...checkout, shipping: e.target.value })
                 }
               >
-                <option value="regular">
-                  Regular — Rp12.000
-                </option>
-
-                <option value="express">
-                  Express — Rp25.000
-                </option>
+                <option value="regular">Regular — Rp12.000</option>
+                <option value="express">Express — Rp25.000</option>
               </select>
 
               <p className="muted">
-                Gunakan data fiktif karena
-                checkout ini hanya simulasi.
+                Ini checkout simulasi. Gunakan data fiktif.
               </p>
-
-              <button
-                className="btn-dark wide"
-                type="submit"
-                disabled={!cart.length}
-              >
+              <button className="btn-dark wide" disabled={!cart.length}>
                 Konfirmasi Pesanan Simulasi
               </button>
             </form>
 
             <div className="panel summary">
               <h2>Ringkasan Pesanan</h2>
-
               {cart.map((item) => (
-                <div
-                  className="between"
-                  key={item.key}
-                >
-                  <span>
-                    {item.name} × {item.quantity}
-                  </span>
-
-                  <strong>
-                    {rupiah(
-                      item.price * item.quantity
-                    )}
-                  </strong>
+                <div className="between" key={item.key}>
+                  <span>{item.name} × {item.quantity}</span>
+                  <strong>{money(item.price * item.quantity)}</strong>
                 </div>
               ))}
-
               <div className="between">
                 <span>Subtotal</span>
-                <strong>
-                  {rupiah(subtotal)}
-                </strong>
+                <strong>{money(subtotal)}</strong>
               </div>
-
               <div className="between">
                 <span>Pengiriman</span>
-                <strong>
-                  {rupiah(shippingFee)}
-                </strong>
+                <strong>{money(shippingFee)}</strong>
               </div>
-
               <div className="between grand-total">
                 <span>Total</span>
-                <strong>
-                  {rupiah(
-                    subtotal + shippingFee
-                  )}
-                </strong>
+                <strong>{money(subtotal + shippingFee)}</strong>
               </div>
             </div>
           </div>
         </main>
       )}
 
-      {/* SUCCESS */}
+      {/* SUKSES */}
       {page === "success" && (
         <main className="container section center">
           <div className="panel success-panel">
-            <div className="success-icon">
-              ✓
-            </div>
-
-            <h1>
-              Pesanan Simulasi Berhasil!
-            </h1>
-
-            <p>
-              Pesanan sudah dicatat di dashboard admin.
-            </p>
-
-            <p>
-              Tidak ada pembayaran nyata.
-            </p>
-
-            <button
-              className="btn-dark"
-              onClick={() => go("home")}
-            >
+            <div className="success-icon">✓</div>
+            <h1>Pesanan Simulasi Berhasil!</h1>
+            <p>Pesanan berhasil dicatat di dashboard Admin.</p>
+            <p>Belum ada transaksi atau pembayaran nyata.</p>
+            <button className="btn-dark" onClick={() => navigate("home")}>
               Kembali ke Home
             </button>
           </div>
         </main>
       )}
 
-      {/* ADMIN FULLSCREEN */}
+      {/* ADMIN */}
       {page === "admin" && (
         <AdminDashboard
           products={products}
           orders={orders}
-          section={adminSection}
-          setSection={setAdminSection}
-          onBack={() => go("home")}
-          onSaveProduct={saveProduct}
-          onEditProduct={editProduct}
-          onDeleteProduct={deleteProduct}
-          onUpdateStatus={updateOrderStatus}
+          onBack={() => navigate("home")}
+          onSave={saveProduct}
+          onEdit={editProduct}
+          onDelete={deleteProduct}
+          onStatus={updateStatus}
           form={form}
           setForm={setForm}
           editingId={editingId}
-          cancelEdit={() => {
+          onCancel={() => {
             setEditingId(null);
             setForm(emptyForm);
           }}
         />
       )}
 
-      {/* FOOTER HANYA DI TOKO */}
       {page !== "admin" && (
         <footer className="footer">
           <div>
             <h2>LUMINA.</h2>
-            <p>Modern Fashion & Lifestyle</p>
+            <p>Fashion for Every Generation</p>
           </div>
-
-          <p>
-            React.js E-Commerce Portfolio Project
-          </p>
-
-          <p>
-            © 2026 LUMINA STORE · Demo Only
-          </p>
+          <p>React.js E-Commerce Portfolio Project</p>
+          <p>© 2026 LUMINA STORE · Demo Only</p>
         </footer>
       )}
 
-      {/* NOTIFIKASI */}
       {message && (
         <div className="toast" role="status">
           <span>{message}</span>
-
-          <button onClick={() => setMessage("")}>
-            ×
-          </button>
+          <button onClick={() => setMessage("")}>×</button>
         </div>
       )}
     </div>
   );
 }
-
-// ============================================
-// CSS ADMIN
-// DISIMPAN DALAM App.jsx
-// ============================================
-
-const adminStyles = `
-.lumina.admin-mode {
-  width: 100%;
-  min-height: 100vh;
-  margin: 0;
-  padding: 0;
-  background: #fff;
-}
-
-.lum-dash {
-  display: grid;
-  grid-template-columns: 245px minmax(0,1fr) 270px;
-  min-height: 100vh;
-  width: 100%;
-  background: #fff;
-  color: #28221f;
-  font-family: Arial, sans-serif;
-}
-
-.lum-dash * {
-  box-sizing: border-box;
-}
-
-.lum-dash-sidebar {
-  background: #faf1ed;
-  padding: 38px 25px;
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-  min-width: 0;
-}
-
-.lum-dash-logo {
-  font-size: 27px;
-  font-weight: 900;
-  letter-spacing: 3px;
-  margin: 0 10px 20px;
-}
-
-.lum-dash-logo span {
-  color: #bb9683;
-}
-
-.lum-dash-menu-label {
-  background: #25201e;
-  color: #e8c7b6;
-  padding: 10px 20px;
-  border-radius: 5px;
-  font-weight: 700;
-  width: max-content;
-}
-
-.lum-dash-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.lum-dash-menu button {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  background: transparent;
-  border: 0;
-  border-radius: 9px;
-  padding: 14px 12px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #322c29;
-  text-align: left;
-  cursor: pointer;
-}
-
-.lum-dash-menu button span {
-  width: 24px;
-  font-size: 19px;
-  text-align: center;
-}
-
-.lum-dash-menu button.active,
-.lum-dash-menu button:hover {
-  background: #eadbd3;
-}
-
-.lum-dash-sidebar-bottom {
-  margin-top: auto;
-  padding: 20px 10px 0;
-  border-top: 1px solid #eadbd3;
-}
-
-.lum-dash-sidebar-bottom p {
-  color: #89776e;
-  font-size: 12px;
-}
-
-.lum-dash-sidebar-bottom small {
-  display: block;
-  color: #926d4d;
-  margin: 16px 0;
-}
-
-.lum-dash-back {
-  background: #29231d;
-  color: #fff;
-  border: 0;
-  border-radius: 8px;
-  padding: 12px;
-  cursor: pointer;
-}
-
-.lum-dash-main {
-  min-width: 0;
-  padding: 38px 35px;
-}
-
-.lum-dash-topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 15px;
-  margin-bottom: 35px;
-}
-
-.lum-dash-eyebrow {
-  display: block;
-  color: #aa8a79;
-  font-size: 10px;
-  letter-spacing: 1.5px;
-  margin-bottom: 9px;
-}
-
-.lum-dash-topbar h1 {
-  font-size: 25px;
-  margin: 0;
-}
-
-.lum-dash-search {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  max-width: 350px;
-  padding: 0 12px;
-  border: 1.5px solid #2c2521;
-  border-radius: 30px;
-}
-
-.lum-dash-search span {
-  font-size: 22px;
-}
-
-.lumina .lum-dash-search input {
-  width: 100%;
-  min-width: 0;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-  padding: 10px 0;
-  font-size: 12px;
-}
-
-.lum-dash-avatar {
-  display: grid;
-  place-items: center;
-  width: 37px;
-  height: 37px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: #29231d;
-  color: white;
-  font-weight: 700;
-}
-
-.lum-dash-stats {
-  display: grid;
-  grid-template-columns: repeat(4,minmax(0,1fr));
-  gap: 14px;
-  margin-bottom: 25px;
-}
-
-.lum-dash-metric {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-height: 143px;
-  min-width: 0;
-  padding: 18px 14px;
-  background: #faf6f3;
-}
-
-.lum-dash-metric-head {
-  display: flex;
-  justify-content: space-between;
-  gap: 5px;
-}
-
-.lum-dash-metric-icon {
-  font-size: 23px;
-}
-
-.lum-dash-metric-head small {
-  color: #b9a79c;
-  font-size: 9px;
-  text-align: right;
-}
-
-.lum-dash-metric strong {
-  font-size: clamp(13px,1.2vw,18px);
-  overflow-wrap: anywhere;
-}
-
-.lum-dash-metric > span:last-child {
-  color: #72665e;
-  font-size: 11px;
-}
-
-.lum-dash-card {
-  min-width: 0;
-  padding: 26px;
-  margin-bottom: 23px;
-  border-radius: 5px;
-  background: #fcf8f5;
-}
-
-.lum-dash-card h2 {
-  margin: 0 0 8px;
-  font-size: 19px;
-}
-
-.lum-dash-card-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 15px;
-}
-
-.lum-dash-card-head p {
-  color: #948278;
-  font-size: 11px;
-  margin: 0;
-}
-
-.lumina .lum-dash-card-head select {
-  color: white;
-  background: #29231d;
-  border: 0;
-  border-radius: 5px;
-  padding: 9px 13px;
-}
-
-.lum-dash-chart-total {
-  margin: 24px 0 10px;
-  font-size: 21px;
-  font-weight: 700;
-}
-
-.lum-dash-chart-total small {
-  margin-left: 12px;
-  font-size: 11px;
-  color: #98867c;
-  font-weight: 400;
-}
-
-.lum-dash-chart {
-  display: grid;
-  grid-template-columns: repeat(12,minmax(0,1fr));
-  align-items: end;
-  gap: 8px;
-  height: 245px;
-  margin-top: 15px;
-  border-bottom: 1px solid #eadfd9;
-}
-
-.lum-dash-bar-col {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  height: 100%;
-  min-width: 0;
-}
-
-.lum-dash-bar-col > span {
-  height: 20px;
-  color: #8f7668;
-  font-size: 9px;
-}
-
-.lum-dash-bar-area {
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  height: 185px;
-  width: 100%;
-}
-
-.lum-dash-bar {
-  width: 62%;
-  max-width: 38px;
-  background: linear-gradient(
-    180deg,#e6cfc2,#aa8d7e
-  );
-  border-radius: 20px;
-  transition: height .3s;
-}
-
-.lum-dash-bar-col small {
-  padding: 10px 0;
-  font-size: 10px;
-}
-
-.lum-dash-link {
-  border: 0;
-  background: transparent;
-  color: #a07965;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.lum-dash-table-wrap {
-  overflow-x: auto;
-  margin-top: 20px;
-}
-
-.lumina .lum-dash-table {
-  width: 100%;
-  min-width: 650px;
-  border-collapse: collapse;
-  text-align: left;
-  font-size: 12px;
-}
-
-.lumina .lum-dash-table th {
-  background: transparent;
-  padding: 15px 9px;
-  color: #6e5b51;
-}
-
-.lumina .lum-dash-table td {
-  padding: 14px 9px;
-  border-bottom: 1px solid #eee1d9;
-}
-
-.lum-dash-order-product {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.lum-dash-order-product img {
-  width: 43px;
-  height: 48px;
-  object-fit: cover;
-  border-radius: 5px;
-}
-
-.lum-dash-status {
-  display: inline-block;
-  border-radius: 20px;
-  padding: 7px 10px;
-  background: #eee5da;
-  white-space: nowrap;
-}
-
-.lum-dash-status.selesai {
-  color: #2e7e50;
-  background: #e0f3e7;
-}
-
-.lum-dash-status.dibatalkan {
-  color: #ad4545;
-  background: #fae2e2;
-}
-
-.lum-dash-status.diproses,
-.lum-dash-status.dikirim {
-  color: #846039;
-  background: #f8ebd9;
-}
-
-.lum-dash-empty {
-  padding: 35px !important;
-  text-align: center;
-  color: #908177;
-}
-
-.lum-dash-right {
-  padding: 40px 23px;
-  background: #fff;
-  border-left: 1px solid #f1e9e4;
-  min-width: 0;
-}
-
-.lum-dash-right section {
-  margin-bottom: 38px;
-}
-
-.lum-dash-right h3 {
-  margin: 0 0 8px;
-  font-size: 16px;
-}
-
-.lum-dash-small {
-  color: #9c8b80;
-  font-size: 11px;
-  line-height: 1.6;
-}
-
-.lum-dash-side-product {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  margin: 17px 0;
-}
-
-.lum-dash-side-product img {
-  width: 52px;
-  height: 56px;
-  object-fit: cover;
-  border-radius: 5px;
-}
-
-.lum-dash-side-product div {
-  flex: 1;
-  min-width: 0;
-}
-
-.lum-dash-side-product strong {
-  display: block;
-  font-size: 12px;
-  overflow-wrap: anywhere;
-}
-
-.lum-dash-side-product small {
-  display: block;
-  margin-top: 6px;
-  color: #948177;
-  font-size: 10px;
-}
-
-.lum-dash-stock {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid #f1e9e4;
-  font-size: 11px;
-}
-
-.lum-dash-stock strong {
-  color: #b86647;
-}
-
-.lum-dash-status-grid {
-  display: grid;
-  grid-template-columns: repeat(5,minmax(0,1fr));
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.lum-dash-status-grid > div {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 16px 10px;
-  background: #fff;
-}
-
-.lum-dash-status-grid strong {
-  font-size: 25px;
-}
-
-.lum-dash-status-grid span {
-  color: #85766a;
-  font-size: 10px;
-}
-
-.lum-dash-products {
-  display: grid;
-  grid-template-columns: 1fr 1.3fr;
-  gap: 20px;
-  align-items: start;
-}
-
-.lum-dash-product-form {
-  display: flex;
-  flex-direction: column;
-  gap: 11px;
-}
-
-.lum-dash-product-form label {
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.lum-dash-product-form button {
-  margin-top: 8px;
-}
-
-.lum-dash-preview {
-  width: 100%;
-  max-height: 150px;
-  object-fit: contain;
-}
-
-.lum-dash-product-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 0;
-  border-bottom: 1px solid #eee2d9;
-  flex-wrap: wrap;
-}
-
-.lum-dash-product-row img {
-  width: 55px;
-  height: 60px;
-  object-fit: cover;
-  border-radius: 7px;
-}
-
-.lum-dash-product-row > div {
-  flex: 1;
-  min-width: 120px;
-}
-
-.lum-dash-product-row strong {
-  font-size: 12px;
-}
-
-.lum-dash-product-row p {
-  color: #8c7c70;
-  font-size: 11px;
-}
-
-.lum-dash-product-row button {
-  padding: 9px;
-  font-size: 11px;
-}
-
-@media(min-width:1261px) {
-  .lum-dash-sidebar,
-  .lum-dash-right {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    overflow-y: auto;
-    align-self: start;
-  }
-}
-
-@media(min-width:781px) and (max-width:1260px) {
-  .lum-dash {
-    grid-template-columns: 190px minmax(0,1fr);
-  }
-
-  .lum-dash-main {
-    padding: 28px 22px;
-  }
-
-  .lum-dash-right {
-    grid-column: 2;
-    display: grid;
-    grid-template-columns: repeat(3,minmax(0,1fr));
-    gap: 20px;
-    border-top: 1px solid #eee7e2;
-  }
-
-  .lum-dash-stats {
-    grid-template-columns: repeat(2,minmax(0,1fr));
-  }
-
-  .lum-dash-products {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media(max-width:780px) {
-  .lum-dash {
-    grid-template-columns: minmax(0,1fr);
-  }
-
-  .lum-dash-sidebar {
-    padding: 20px;
-    gap: 15px;
-  }
-
-  .lum-dash-logo {
-    margin: 0;
-  }
-
-  .lum-dash-menu-label {
-    display: none;
-  }
-
-  .lum-dash-menu {
-    flex-direction: row;
-    overflow-x: auto;
-  }
-
-  .lum-dash-menu button {
-    white-space: nowrap;
-  }
-
-  .lum-dash-sidebar-bottom {
-    margin-top: 0;
-  }
-
-  .lum-dash-main {
-    padding: 22px 15px;
-  }
-
-  .lum-dash-right {
-    grid-column: 1;
-    display: block;
-    padding: 25px 20px;
-  }
-
-  .lum-dash-topbar {
-    flex-wrap: wrap;
-  }
-
-  .lum-dash-search {
-    order: 3;
-    flex-basis: 100%;
-    max-width: none;
-  }
-
-  .lum-dash-stats {
-    grid-template-columns: repeat(2,minmax(0,1fr));
-  }
-
-  .lum-dash-products {
-    grid-template-columns: 1fr;
-  }
-
-  .lum-dash-status-grid {
-    grid-template-columns: repeat(2,1fr);
-  }
-}
-
-@media(max-width:480px) {
-  .lum-dash-metric {
-    padding: 12px;
-  }
-
-  .lum-dash-metric strong {
-    font-size: 14px;
-  }
-
-  .lum-dash-card {
-    padding: 16px;
-  }
-
-  .lum-dash-chart {
-    gap: 2px;
-  }
-
-  .lum-dash-bar-col small,
-  .lum-dash-bar-col > span {
-    font-size: 8px;
-  }
-}
-`;

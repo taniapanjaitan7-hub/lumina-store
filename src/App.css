@@ -1,21 +1,80 @@
 
-/* =====================================
+/* ==========================================
    LUMINA STORE
-   Additional Styles & UI Enhancements
-===================================== */
+   PREMIUM FAMILY FASHION E-COMMERCE
+   FULL APP.CSS - UPDATED 2026
+========================================== */
 
 :root {
   font-family: "Segoe UI", Arial, sans-serif;
+  color: #302821;
+  background: #faf8f5;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  --lum-dark: #30261f;
+  --lum-brown: #94714d;
+  --lum-gold: #c09c75;
+  --lum-cream: #faf8f5;
+  --lum-soft: #f4ede6;
+  --lum-border: #e7dcd1;
+  --lum-muted: #897b70;
+  --lum-white: #ffffff;
 }
 
-/* Transisi umum */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-width: 0;
+  min-height: 100%;
+  margin: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--lum-cream);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+img {
+  max-width: 100%;
+}
+
+.lumina {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--lum-cream);
+  color: var(--lum-dark);
+}
+
 .lumina button,
 .lumina a,
 .lumina input,
-.lumina select {
+.lumina select,
+.lumina textarea {
   transition:
     background-color 0.25s ease,
     color 0.25s ease,
@@ -24,30 +83,326 @@
     transform 0.25s ease;
 }
 
-/* Tombol premium */
+/* ==========================================
+   GLOBAL BUTTONS
+========================================== */
+
+.lumina .btn-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 43px;
+  padding: 12px 21px;
+  border: 1px solid var(--lum-dark);
+  border-radius: 7px;
+  background: var(--lum-dark);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
 .lumina .btn-dark:hover:not(:disabled) {
-  background: #94714d;
+  background: var(--lum-brown);
+  border-color: var(--lum-brown);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(80, 55, 30, 0.15);
+  box-shadow: 0 10px 24px rgba(80, 55, 30, 0.15);
+}
+
+.lumina .btn-light {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 43px;
+  padding: 12px 20px;
+  background: #fff;
+  border: 1px solid var(--lum-border);
+  border-radius: 7px;
+  color: var(--lum-dark);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .lumina .btn-light:hover:not(:disabled) {
   background: #f0e7dc;
-  border-color: #bb9e7d;
+  border-color: var(--lum-gold);
 }
 
-/* Navigasi */
+.lumina .wide {
+  width: 100%;
+}
+
+.lumina .center {
+  text-align: center;
+}
+
+.lumina .muted {
+  color: var(--lum-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.lumina .empty {
+  grid-column: 1 / -1;
+  padding: 55px 20px;
+  text-align: center;
+  color: var(--lum-muted);
+}
+
+/* ==========================================
+   ANNOUNCEMENT
+========================================== */
+
+.lumina .announcement {
+  width: 100%;
+  padding: 10px 16px;
+  background: var(--lum-dark);
+  color: #f4e8dc;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 1.3px;
+}
+
+/* ==========================================
+   NAVBAR
+========================================== */
+
+.lumina .navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  width: 100%;
+  min-height: 85px;
+  padding: 18px clamp(20px, 6vw, 90px);
+  background: rgba(255, 255, 255, 0.97);
+  border-bottom: 1px solid #eee7e0;
+  backdrop-filter: blur(15px);
+}
+
+.lumina .logo {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--lum-dark);
+  font-size: clamp(22px, 2.4vw, 29px);
+  font-weight: 900;
+  letter-spacing: 4px;
+  white-space: nowrap;
+}
+
+.lumina .logo span {
+  color: var(--lum-gold);
+}
+
+.lumina .nav-menu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: clamp(12px, 2.4vw, 30px);
+}
+
+.lumina .nav-menu button {
+  padding: 7px 3px;
+  border: 0;
+  background: transparent;
+  color: #514a43;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
 .lumina .nav-menu button:hover {
-  color: #a47e52;
+  color: var(--lum-brown);
+}
+
+.lumina .cart-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 45px;
+  padding: 12px 19px;
+  border: 1px solid #e1d2c3;
+  border-radius: 30px;
+  background: #faf5f0;
+  color: var(--lum-dark);
+  font-size: 13px;
+  white-space: nowrap;
 }
 
 .lumina .cart-link:hover {
   background: #f2e8dc;
-  border-color: #b99a70;
+  border-color: var(--lum-gold);
 }
 
-/* Kartu produk */
+/* ==========================================
+   CONTAINER & SECTION
+========================================== */
+
+.lumina .container {
+  width: min(100% - 48px, 1240px);
+  margin-inline: auto;
+}
+
+.lumina .section {
+  padding-top: 65px;
+  padding-bottom: 85px;
+}
+
+.lumina .eyebrow {
+  margin: 0 0 16px;
+  color: var(--lum-brown);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+}
+
+.lumina .section-title {
+  margin: 0 0 16px;
+  color: var(--lum-dark);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(29px, 4vw, 44px);
+  font-weight: 500;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.lumina .section-description {
+  max-width: 620px;
+  margin: 0 auto 40px;
+  color: var(--lum-muted);
+  font-size: 14px;
+  line-height: 1.8;
+  text-align: center;
+}
+
+.lumina .action-space {
+  margin-top: 38px;
+}
+
+/* ==========================================
+   HERO BANNER
+========================================== */
+
+.lumina .hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 560px;
+  background: #f1e8df;
+}
+
+.lumina .hero-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 65px clamp(28px, 7vw, 110px);
+}
+
+.lumina .hero-copy h1 {
+  max-width: 570px;
+  margin: 0 0 24px;
+  color: var(--lum-dark);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(40px, 5.2vw, 75px);
+  font-weight: 500;
+  line-height: 1.07;
+  letter-spacing: -1.7px;
+}
+
+.lumina .hero-copy h1 em {
+  color: var(--lum-brown);
+  font-style: italic;
+}
+
+.lumina .hero-copy > p:not(.eyebrow):not(.hero-bottom) {
+  max-width: 460px;
+  margin: 0 0 30px;
+  color: #6c5b4f;
+  font-size: 15px;
+  line-height: 1.85;
+}
+
+.lumina .hero-bottom {
+  margin-top: 45px;
+  color: #9b806b;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+}
+
+.lumina .hero-photo {
+  min-height: 560px;
+  overflow: hidden;
+  background: #e5d6c9;
+}
+
+.lumina .hero-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 560px;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* ==========================================
+   FEATURES / PERKS
+========================================== */
+
+.lumina .perks {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  padding: 28px clamp(24px, 7vw, 110px);
+  background: #fff;
+  border-bottom: 1px solid #eee6dd;
+}
+
+.lumina .perks > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  text-align: center;
+  color: var(--lum-brown);
+  font-size: 18px;
+}
+
+.lumina .perks strong {
+  color: var(--lum-dark);
+  font-size: 13px;
+}
+
+.lumina .perks span {
+  color: var(--lum-muted);
+  font-size: 11px;
+}
+
+/* ==========================================
+   PRODUCT CATALOG
+========================================== */
+
+.lumina .product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 27px;
+  align-items: stretch;
+}
+
 .lumina .product-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #eee4db;
+  border-radius: 17px;
+  background: #fff;
+  box-shadow: 0 5px 22px rgba(40, 30, 20, 0.035);
   transition:
     transform 0.3s ease,
     box-shadow 0.3s ease;
@@ -59,20 +414,52 @@
 }
 
 .lumina .product-picture {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 4.4;
+  overflow: hidden;
+  background: #e9dcd3;
+}
+
+.lumina .image-button {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
   overflow: hidden;
 }
 
 .lumina .product-picture img {
-  transition: transform 0.4s ease;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.45s ease;
 }
 
 .lumina .product-card:hover .product-picture img {
-  transform: scale(1.05);
+  transform: scale(1.055);
 }
 
-/* Wishlist */
 .lumina .heart {
-  transition: transform 0.2s ease, color 0.2s ease;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  color: #a16e5b;
+  font-size: 25px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
 }
 
 .lumina .heart:hover {
@@ -80,120 +467,1051 @@
   color: #c65c68;
 }
 
-/* Formulir */
+.lumina .stock-label {
+  position: absolute;
+  top: 18px;
+  left: 16px;
+  padding: 9px 13px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.96);
+  color: #745747;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.lumina .product-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 22px;
+}
+
+.lumina .product-body small {
+  color: #ab825f;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.lumina .product-body h3 {
+  margin: 11px 0 9px;
+  color: var(--lum-dark);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.lumina .product-body .price {
+  margin: 0 0 8px;
+  color: var(--lum-brown);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.lumina .product-body .muted {
+  margin: 0 0 19px;
+}
+
+.lumina .product-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-top: auto;
+}
+
+.lumina .product-actions button {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 9px;
+  font-size: 12px;
+}
+
+/* ==========================================
+   SHOP TOOLBAR / SEARCH
+========================================== */
+
+.lumina .toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 190px 180px;
+  gap: 15px;
+  align-items: center;
+  margin: 0 0 25px;
+}
+
+.lumina .toolbar input,
+.lumina .toolbar select {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 12px 16px;
+  border: 1px solid #e0d0c0;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--lum-dark);
+  font-size: 13px;
+}
+
+.lumina .toolbar input::placeholder {
+  color: #a39284;
+}
+
 .lumina input:focus,
 .lumina select:focus,
 .lumina textarea:focus {
   outline: none;
-  border-color: #b99a70;
+  border-color: var(--lum-gold);
   box-shadow: 0 0 0 3px rgba(185, 154, 112, 0.12);
 }
 
-/* Dashboard Admin */
-.lumina .stat {
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+/* ==========================================
+   DETAIL PRODUK
+========================================== */
+
+.lumina .back {
+  margin: 0 0 28px;
+  padding: 8px 0;
+  border: none;
+  background: transparent;
+  color: var(--lum-brown);
+  font-size: 13px;
 }
 
-.lumina .stat:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 28px rgba(40, 30, 20, 0.08);
+.lumina .detail-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(30px, 6vw, 80px);
+  align-items: start;
 }
 
-.lumina .bar-fill {
-  background: linear-gradient(180deg, #d9bd97, #94714d);
+.lumina .detail-image {
+  display: block;
+  width: 100%;
+  max-height: 680px;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: 16px;
+  background: #ebded5;
 }
 
-/* Responsif */
-@media (max-width: 650px) {
-  .lumina .product-actions {
-    flex-wrap: wrap;
-  }
-
-  .lumina .product-actions button {
-    min-width: 105px;
-  }
-
-  .lumina .nav-menu {
-    row-gap: 12px;
-  }
-
-  .lumina .chart-area {
-    overflow-x: auto;
-  }
+.lumina .detail-copy {
+  padding: 20px 0;
 }
 
-/* Mengurangi animasi jika pengguna memilihnya */
-@media (prefers-reduced-motion: reduce) {
-  .lumina *,
-  .lumina *::before,
-  .lumina *::after {
-    transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
-  }
+.lumina .detail-copy h1 {
+  margin: 8px 0 18px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(30px, 4vw, 48px);
+  font-weight: 500;
+  line-height: 1.2;
 }
 
-
-/* Tampilan khusus Admin Overview baru */
-.admin-area:has(.lum-admin-dashboard) {
-  max-width: 1700px;
-  padding: 24px 20px 65px;
+.lumina .detail-copy .price {
+  margin: 0 0 20px;
+  color: var(--lum-brown);
+  font-size: 26px;
 }
 
-.admin-area:has(.lum-admin-dashboard) > .pro-admin-heading,
-.admin-area:has(.lum-admin-dashboard) > .pro-admin-tabs {
-  display: none;
+.lumina .detail-copy > p {
+  line-height: 1.8;
+  color: #76685e;
 }
 
-@media (max-width: 650px) {
-  .admin-area:has(.lum-admin-dashboard) {
-    padding: 15px 10px 45px;
-  }
+.lumina .detail-copy label {
+  display: block;
+  margin: 24px 0 11px;
+  font-size: 13px;
+  font-weight: 700;
 }
 
+.lumina .option-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.lumina .option-row button {
+  min-width: 45px;
+  padding: 10px 14px;
+  border: 1px solid #dfd2c6;
+  border-radius: 7px;
+  background: white;
+  font-size: 12px;
+}
+
+.lumina .option-row button.chosen {
+  background: var(--lum-dark);
+  border-color: var(--lum-dark);
+  color: #fff;
+}
+
+.lumina .detail-copy > .btn-dark {
+  margin-top: 28px;
+}
 
 /* ==========================================
-   LUMINA STORE - FULL SCREEN ADMIN DASHBOARD
+   CART / CHECKOUT
+========================================== */
+
+.lumina .two-column {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.lumina .panel {
+  padding: 30px;
+  border: 1px solid #eee4db;
+  border-radius: 13px;
+  background: #fff;
+}
+
+.lumina .panel h2 {
+  margin: 0 0 24px;
+  font-size: 21px;
+}
+
+.lumina .cart-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 20px 0;
+  border-bottom: 1px solid #eee8e2;
+}
+
+.lumina .cart-row:first-child {
+  padding-top: 0;
+}
+
+.lumina .cart-row:last-child {
+  border-bottom: none;
+}
+
+.lumina .cart-row img {
+  flex-shrink: 0;
+  width: 115px;
+  height: 132px;
+  border-radius: 9px;
+  object-fit: cover;
+  background: #eee2d8;
+}
+
+.lumina .grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.lumina .grow h3 {
+  margin: 4px 0 8px;
+  font-size: 17px;
+}
+
+.lumina .quantity {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.lumina .quantity button {
+  min-width: 30px;
+  min-height: 30px;
+  padding: 5px 9px;
+  border: 1px solid #e4d8cd;
+  border-radius: 6px;
+  background: #fbf8f5;
+}
+
+.lumina .quantity span {
+  min-width: 18px;
+  text-align: center;
+  font-size: 13px;
+}
+
+.lumina .summary {
+  position: sticky;
+  top: 110px;
+}
+
+.lumina .between {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 12px 0;
+  color: #67594f;
+  font-size: 13px;
+}
+
+.lumina .between strong {
+  color: var(--lum-dark);
+  text-align: right;
+}
+
+.lumina .grand-total {
+  margin: 16px 0 22px;
+  padding-top: 20px;
+  border-top: 1px solid var(--lum-border);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.lumina .summary > .btn-dark {
+  margin-top: 20px;
+}
+
+.lumina .form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lumina .form-stack label {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.lumina .form-stack input,
+.lumina .form-stack select,
+.lumina .form-stack textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 12px;
+  border: 1px solid #e0d0c0;
+  border-radius: 7px;
+  background: white;
+  font-size: 13px;
+}
+
+.lumina .form-stack textarea {
+  resize: vertical;
+}
+
+.lumina .success-panel {
+  max-width: 600px;
+  margin: 30px auto;
+  text-align: center;
+}
+
+.lumina .success-icon {
+  display: grid;
+  place-items: center;
+  width: 75px;
+  height: 75px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background: #e6f4e8;
+  color: #39824f;
+  font-size: 35px;
+}
+
+.lumina .success-panel h1 {
+  font-size: 29px;
+}
+
+.lumina .success-panel p {
+  color: var(--lum-muted);
+  line-height: 1.7;
+}
+
+/* ==========================================
+   PROMO
+========================================== */
+
+.lumina .promo {
+  padding: 95px 24px;
+  background: #e9d8c9;
+  text-align: center;
+}
+
+.lumina .promo h2 {
+  margin: 0 0 18px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(30px, 4vw, 50px);
+  font-weight: 500;
+}
+
+.lumina .promo p:not(.eyebrow) {
+  margin: 0 0 25px;
+  color: #786355;
+}
+
+/* ==========================================
+   FOOTER
+========================================== */
+
+.lumina .footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 25px;
+  padding: 45px clamp(24px, 6vw, 90px);
+  background: #2c241e;
+  color: #e9dbcd;
+}
+
+.lumina .footer h2 {
+  margin: 0 0 10px;
+  color: white;
+  font-size: 27px;
+  letter-spacing: 3px;
+}
+
+.lumina .footer p {
+  margin: 0;
+  color: #d4c0ac;
+  font-size: 12px;
+}
+
+/* ==========================================
+   NOTIFICATION TOAST
+========================================== */
+
+.lumina .toast {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  max-width: min(430px, calc(100vw - 40px));
+  padding: 15px 19px;
+  border-radius: 10px;
+  background: #332820;
+  color: white;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.18);
+  font-size: 13px;
+}
+
+.lumina .toast button {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: white;
+  font-size: 23px;
+}
+
+/* ==========================================
+   ADMIN DASHBOARD FULLSCREEN
 ========================================== */
 
 .lumina.admin-mode {
   width: 100%;
   min-height: 100vh;
-  margin: 0;
   padding: 0;
-  background: #ffffff;
+  margin: 0;
+  background: white;
 }
 
 .lumina.admin-mode .lum-dash {
+  display: grid;
+  grid-template-columns: 245px minmax(0, 1fr) 270px;
   width: 100%;
   min-height: 100vh;
-  grid-template-columns: 245px minmax(0, 1fr) 270px;
+  background: #fff;
+  color: #28221f;
 }
 
+.lumina.admin-mode .lum-dash * {
+  box-sizing: border-box;
+}
+
+/* SIDEBAR KIRI */
+
 .lumina.admin-mode .lum-dash-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  min-width: 0;
   min-height: 100vh;
   padding: 38px 25px;
+  background: #faf1ed;
 }
+
+.lumina.admin-mode .lum-dash-logo {
+  margin: 0 10px 20px;
+  font-size: 27px;
+  font-weight: 900;
+  letter-spacing: 3px;
+}
+
+.lumina.admin-mode .lum-dash-logo span {
+  color: #bb9683;
+}
+
+.lumina.admin-mode .lum-dash-menu-label {
+  width: max-content;
+  padding: 10px 20px;
+  border-radius: 5px;
+  background: #25201e;
+  color: #e8c7b6;
+  font-weight: 700;
+}
+
+.lumina.admin-mode .lum-dash-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lumina.admin-mode .lum-dash-menu button {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 14px 12px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #322c29;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.lumina.admin-mode .lum-dash-menu button.active,
+.lumina.admin-mode .lum-dash-menu button:hover {
+  background: #eadbd3;
+}
+
+.lumina.admin-mode .lum-dash-menu button span {
+  width: 24px;
+  font-size: 19px;
+  text-align: center;
+}
+
+.lumina.admin-mode .lum-dash-sidebar-bottom {
+  margin-top: auto;
+  padding: 20px 10px 0;
+  border-top: 1px solid #eadbd3;
+}
+
+.lumina.admin-mode .lum-dash-sidebar-bottom p {
+  color: #89776e;
+  font-size: 12px;
+}
+
+.lumina.admin-mode .lum-dash-sidebar-bottom small {
+  display: block;
+  margin: 16px 0;
+  color: #926d4d;
+}
+
+.lumina.admin-mode .lum-dash-back {
+  padding: 12px;
+  border: 0;
+  border-radius: 8px;
+  background: #29231d;
+  color: white;
+  font-size: 12px;
+}
+
+.lumina.admin-mode .lum-dash-back:hover {
+  background: #94714d;
+}
+
+/* ADMIN MAIN */
 
 .lumina.admin-mode .lum-dash-main {
   min-width: 0;
   padding: 38px 35px;
 }
 
-.lumina.admin-mode .lum-dash-right {
-  min-height: 100vh;
-  padding: 40px 23px;
+.lumina.admin-mode .lum-dash-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 35px;
 }
 
-/* Sidebar tetap terlihat ketika halaman digulir */
-@media (min-width: 1261px) {
-  .lumina.admin-mode .lum-dash-sidebar {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    overflow-y: auto;
-    align-self: start;
-  }
+.lumina.admin-mode .lum-dash-eyebrow {
+  display: block;
+  margin-bottom: 9px;
+  color: #aa8a79;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+}
 
+.lumina.admin-mode .lum-dash-topbar h1 {
+  margin: 0;
+  font-size: 25px;
+}
+
+.lumina.admin-mode .lum-dash-search {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 8px;
+  max-width: 350px;
+  padding: 0 12px;
+  border: 1.5px solid #2c2521;
+  border-radius: 30px;
+}
+
+.lumina.admin-mode .lum-dash-search span {
+  font-size: 22px;
+}
+
+.lumina.admin-mode .lum-dash-search input {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  font-size: 12px;
+}
+
+.lumina.admin-mode .lum-dash-avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 37px;
+  height: 37px;
+  border-radius: 50%;
+  background: #29231d;
+  color: white;
+  font-weight: 700;
+}
+
+/* METRIK */
+
+.lumina.admin-mode .lum-dash-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 25px;
+}
+
+.lumina.admin-mode .lum-dash-metric {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+  min-height: 143px;
+  padding: 18px 14px;
+  border-radius: 9px;
+  background: #faf6f3;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.lumina.admin-mode .lum-dash-metric:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(40, 30, 20, 0.08);
+}
+
+.lumina.admin-mode .lum-dash-metric-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+}
+
+.lumina.admin-mode .lum-dash-metric-icon {
+  font-size: 23px;
+}
+
+.lumina.admin-mode .lum-dash-metric-head small {
+  color: #b9a79c;
+  font-size: 9px;
+  text-align: right;
+}
+
+.lumina.admin-mode .lum-dash-metric strong {
+  font-size: clamp(13px, 1.2vw, 18px);
+  overflow-wrap: anywhere;
+}
+
+.lumina.admin-mode .lum-dash-metric > span:last-child {
+  color: #72665e;
+  font-size: 11px;
+}
+
+/* ADMIN CARDS */
+
+.lumina.admin-mode .lum-dash-card {
+  min-width: 0;
+  margin-bottom: 23px;
+  padding: 26px;
+  border-radius: 8px;
+  background: #fcf8f5;
+}
+
+.lumina.admin-mode .lum-dash-card h2 {
+  margin: 0 0 8px;
+  font-size: 19px;
+}
+
+.lumina.admin-mode .lum-dash-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.lumina.admin-mode .lum-dash-card-head p {
+  margin: 0;
+  color: #948278;
+  font-size: 11px;
+}
+
+.lumina.admin-mode .lum-dash-card-head select {
+  padding: 9px 13px;
+  border: 0;
+  border-radius: 5px;
+  background: #29231d;
+  color: white;
+  font-size: 12px;
+}
+
+/* GRAFIK */
+
+.lumina.admin-mode .lum-dash-chart-total {
+  margin: 24px 0 10px;
+  font-size: 21px;
+  font-weight: 700;
+}
+
+.lumina.admin-mode .lum-dash-chart-total small {
+  margin-left: 12px;
+  color: #98867c;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.lumina.admin-mode .lum-dash-chart {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: end;
+  gap: 8px;
+  height: 245px;
+  margin-top: 15px;
+  border-bottom: 1px solid #eadfd9;
+}
+
+.lumina.admin-mode .lum-dash-bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  min-width: 0;
+}
+
+.lumina.admin-mode .lum-dash-bar-col > span {
+  height: 20px;
+  color: #8f7668;
+  font-size: 9px;
+}
+
+.lumina.admin-mode .lum-dash-bar-area {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  height: 185px;
+}
+
+.lumina.admin-mode .lum-dash-bar {
+  width: 62%;
+  max-width: 38px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #e6cfc2, #94714d);
+  transition: height 0.3s ease;
+}
+
+.lumina.admin-mode .lum-dash-bar-col small {
+  padding: 10px 0;
+  font-size: 10px;
+}
+
+.lumina.admin-mode .lum-dash-link {
+  border: 0;
+  background: transparent;
+  color: #a07965;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* TABLE */
+
+.lumina.admin-mode .lum-dash-table-wrap {
+  max-width: 100%;
+  margin-top: 20px;
+  overflow-x: auto;
+}
+
+.lumina.admin-mode .lum-dash-table {
+  width: 100%;
+  min-width: 650px;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 12px;
+}
+
+.lumina.admin-mode .lum-dash-table th {
+  padding: 15px 9px;
+  background: transparent;
+  color: #6e5b51;
+  text-align: left;
+}
+
+.lumina.admin-mode .lum-dash-table td {
+  padding: 14px 9px;
+  border-bottom: 1px solid #eee1d9;
+}
+
+.lumina.admin-mode .lum-dash-table select {
+  min-width: 120px;
+  padding: 8px;
+  border: 1px solid #e4d5c9;
+  border-radius: 6px;
+  background: white;
+  font-size: 11px;
+}
+
+.lumina.admin-mode .lum-dash-order-product {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lumina.admin-mode .lum-dash-order-product img {
+  width: 43px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.lumina.admin-mode .lum-dash-status {
+  display: inline-block;
+  padding: 7px 10px;
+  border-radius: 20px;
+  background: #eee5da;
+  white-space: nowrap;
+}
+
+.lumina.admin-mode .lum-dash-status.selesai {
+  color: #2e7e50;
+  background: #e0f3e7;
+}
+
+.lumina.admin-mode .lum-dash-status.dibatalkan {
+  color: #ad4545;
+  background: #fae2e2;
+}
+
+.lumina.admin-mode .lum-dash-status.diproses,
+.lumina.admin-mode .lum-dash-status.dikirim {
+  color: #846039;
+  background: #f8ebd9;
+}
+
+.lumina.admin-mode .lum-dash-empty {
+  padding: 35px !important;
+  color: #908177;
+  text-align: center;
+}
+
+/* RIGHT SIDEBAR */
+
+.lumina.admin-mode .lum-dash-right {
+  min-width: 0;
+  min-height: 100vh;
+  padding: 40px 23px;
+  border-left: 1px solid #f1e9e4;
+  background: #fff;
+}
+
+.lumina.admin-mode .lum-dash-right section {
+  margin-bottom: 38px;
+}
+
+.lumina.admin-mode .lum-dash-right h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.lumina.admin-mode .lum-dash-small {
+  color: #9c8b80;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.lumina.admin-mode .lum-dash-side-product {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 17px 0;
+}
+
+.lumina.admin-mode .lum-dash-side-product img {
+  width: 52px;
+  height: 56px;
+  border-radius: 5px;
+  object-fit: cover;
+  background: #f3e8df;
+}
+
+.lumina.admin-mode .lum-dash-side-product div {
+  flex: 1;
+  min-width: 0;
+}
+
+.lumina.admin-mode .lum-dash-side-product strong {
+  display: block;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.lumina.admin-mode .lum-dash-side-product small {
+  display: block;
+  margin-top: 6px;
+  color: #948177;
+  font-size: 10px;
+}
+
+.lumina.admin-mode .lum-dash-stock {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1e9e4;
+  font-size: 11px;
+}
+
+.lumina.admin-mode .lum-dash-stock strong {
+  color: #b86647;
+}
+
+/* STATUS GRID */
+
+.lumina.admin-mode .lum-dash-status-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.lumina.admin-mode .lum-dash-status-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 10px;
+  background: #fff;
+}
+
+.lumina.admin-mode .lum-dash-status-grid strong {
+  font-size: 25px;
+}
+
+.lumina.admin-mode .lum-dash-status-grid span {
+  color: #85766a;
+  font-size: 10px;
+}
+
+/* PRODUCT MANAGEMENT */
+
+.lumina.admin-mode .lum-dash-products {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.lumina.admin-mode .lum-dash-product-form {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.lumina.admin-mode .lum-dash-product-form label {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.lumina.admin-mode .lum-dash-product-form input,
+.lumina.admin-mode .lum-dash-product-form select,
+.lumina.admin-mode .lum-dash-product-form textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid #e0d0c0;
+  border-radius: 7px;
+  background: white;
+  color: #302821;
+  font-size: 12px;
+}
+
+.lumina.admin-mode .lum-dash-product-form button {
+  margin-top: 8px;
+}
+
+.lumina.admin-mode .lum-dash-preview {
+  width: 100%;
+  max-height: 150px;
+  object-fit: contain;
+}
+
+.lumina.admin-mode .lum-dash-product-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 14px 0;
+  border-bottom: 1px solid #eee2d9;
+}
+
+.lumina.admin-mode .lum-dash-product-row img {
+  width: 55px;
+  height: 60px;
+  border-radius: 7px;
+  object-fit: cover;
+}
+
+.lumina.admin-mode .lum-dash-product-row > div {
+  flex: 1;
+  min-width: 120px;
+}
+
+.lumina.admin-mode .lum-dash-product-row strong {
+  font-size: 12px;
+}
+
+.lumina.admin-mode .lum-dash-product-row p {
+  color: #8c7c70;
+  font-size: 11px;
+}
+
+.lumina.admin-mode .lum-dash-product-row button {
+  padding: 9px;
+  font-size: 11px;
+}
+
+.lumina.admin-mode .delete-btn {
+  border: 1px solid #e9b9b9;
+  border-radius: 6px;
+  background: #fff4f4;
+  color: #ac4444;
+}
+
+.lumina.admin-mode .delete-btn:hover {
+  background: #fbe1e1;
+}
+
+/* ==========================================
+   RESPONSIVE - DESKTOP
+========================================== */
+
+@media (min-width: 1261px) {
+  .lumina.admin-mode .lum-dash-sidebar,
   .lumina.admin-mode .lum-dash-right {
     position: sticky;
     top: 0;
@@ -203,28 +1521,175 @@
   }
 }
 
-/* Laptop */
+/* ==========================================
+   RESPONSIVE - LAPTOP
+========================================== */
+
 @media (min-width: 781px) and (max-width: 1260px) {
   .lumina.admin-mode .lum-dash {
     grid-template-columns: 190px minmax(0, 1fr);
   }
 
-  .lumina.admin-mode .lum-dash-right {
-    grid-column: 2;
-    min-height: auto;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 20px;
-    border-top: 1px solid #eee7e2;
-  }
-
   .lumina.admin-mode .lum-dash-main {
     padding: 28px 22px;
   }
+
+  .lumina.admin-mode .lum-dash-right {
+    grid-column: 2;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    min-height: auto;
+    border-top: 1px solid #eee7e2;
+  }
+
+  .lumina.admin-mode .lum-dash-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lumina.admin-mode .lum-dash-products {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
-/* HP */
+/* ==========================================
+   RESPONSIVE - TABLET
+========================================== */
+
+@media (max-width: 1000px) {
+  .lumina .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .lumina .hero {
+    min-height: 480px;
+  }
+
+  .lumina .hero-photo,
+  .lumina .hero-photo img {
+    min-height: 480px;
+  }
+
+  .lumina .toolbar {
+    grid-template-columns: minmax(0, 1fr) 170px;
+  }
+
+  .lumina .toolbar select:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .lumina .two-column {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lumina .summary {
+    position: static;
+  }
+}
+
+/* ==========================================
+   RESPONSIVE - HP
+========================================== */
+
 @media (max-width: 780px) {
+  .lumina .navbar {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    min-height: auto;
+    padding: 16px 20px;
+    gap: 14px;
+  }
+
+  .lumina .logo {
+    font-size: 24px;
+  }
+
+  .lumina .nav-menu {
+    order: 3;
+    justify-content: center;
+    width: 100%;
+    gap: 18px;
+    padding-top: 6px;
+  }
+
+  .lumina .nav-menu button {
+    font-size: 12px;
+  }
+
+  .lumina .cart-link {
+    min-height: 39px;
+    padding: 9px 14px;
+    font-size: 12px;
+  }
+
+  .lumina .container {
+    width: min(100% - 30px, 1240px);
+  }
+
+  .lumina .section {
+    padding-top: 40px;
+    padding-bottom: 60px;
+  }
+
+  .lumina .hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lumina .hero-copy {
+    padding: 55px 28px;
+  }
+
+  .lumina .hero-copy h1 {
+    font-size: clamp(36px, 9vw, 53px);
+  }
+
+  .lumina .hero-bottom {
+    margin-top: 30px;
+  }
+
+  .lumina .hero-photo,
+  .lumina .hero-photo img {
+    min-height: 350px;
+    height: 350px;
+  }
+
+  .lumina .perks {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 28px;
+  }
+
+  .lumina .toolbar {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .lumina .toolbar select:last-child {
+    grid-column: auto;
+  }
+
+  .lumina .detail-layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .lumina .detail-image {
+    max-height: 470px;
+  }
+
+  .lumina .panel {
+    padding: 22px;
+  }
+
+  .lumina .footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 35px 25px;
+  }
+
+  /* Dashboard HP */
   .lumina.admin-mode .lum-dash {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -232,6 +1697,28 @@
   .lumina.admin-mode .lum-dash-sidebar {
     min-height: auto;
     padding: 20px;
+    gap: 15px;
+  }
+
+  .lumina.admin-mode .lum-dash-logo {
+    margin: 0;
+  }
+
+  .lumina.admin-mode .lum-dash-menu-label {
+    display: none;
+  }
+
+  .lumina.admin-mode .lum-dash-menu {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .lumina.admin-mode .lum-dash-menu button {
+    white-space: nowrap;
+  }
+
+  .lumina.admin-mode .lum-dash-sidebar-bottom {
+    margin-top: 0;
   }
 
   .lumina.admin-mode .lum-dash-main {
@@ -240,8 +1727,169 @@
 
   .lumina.admin-mode .lum-dash-right {
     grid-column: 1;
-    min-height: auto;
     display: block;
+    min-height: auto;
     padding: 25px 20px;
+  }
+
+  .lumina.admin-mode .lum-dash-topbar {
+    flex-wrap: wrap;
+  }
+
+  .lumina.admin-mode .lum-dash-search {
+    order: 3;
+    flex-basis: 100%;
+    max-width: none;
+  }
+
+  .lumina.admin-mode .lum-dash-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lumina.admin-mode .lum-dash-products {
+    grid-template-columns: 1fr;
+  }
+
+  .lumina.admin-mode .lum-dash-status-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ==========================================
+   RESPONSIVE - SMALL PHONES
+========================================== */
+
+@media (max-width: 480px) {
+  .lumina .announcement {
+    font-size: 9px;
+    line-height: 1.5;
+  }
+
+  .lumina .navbar {
+    padding: 15px;
+  }
+
+  .lumina .nav-menu {
+    gap: 12px;
+  }
+
+  .lumina .nav-menu button {
+    font-size: 11px;
+  }
+
+  .lumina .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 11px;
+  }
+
+  .lumina .product-card {
+    border-radius: 11px;
+  }
+
+  .lumina .product-picture {
+    aspect-ratio: 3 / 4;
+  }
+
+  .lumina .heart {
+    top: 9px;
+    right: 9px;
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+  }
+
+  .lumina .stock-label {
+    top: 10px;
+    left: 8px;
+    padding: 7px 8px;
+    font-size: 7px;
+  }
+
+  .lumina .product-body {
+    padding: 12px;
+  }
+
+  .lumina .product-body h3 {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .lumina .product-body .price {
+    font-size: 13px;
+  }
+
+  .lumina .product-body .muted {
+    font-size: 10px;
+  }
+
+  .lumina .product-actions {
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .lumina .product-actions button {
+    width: 100%;
+    min-height: 34px;
+    padding: 8px 6px;
+    font-size: 10px;
+  }
+
+  .lumina .cart-row {
+    gap: 12px;
+  }
+
+  .lumina .cart-row img {
+    width: 85px;
+    height: 100px;
+  }
+
+  .lumina .grow h3 {
+    font-size: 14px;
+  }
+
+  .lumina .quantity {
+    gap: 7px;
+  }
+
+  .lumina .promo {
+    padding: 60px 20px;
+  }
+
+  .lumina.admin-mode .lum-dash-metric {
+    padding: 12px;
+  }
+
+  .lumina.admin-mode .lum-dash-metric strong {
+    font-size: 14px;
+  }
+
+  .lumina.admin-mode .lum-dash-card {
+    padding: 16px;
+  }
+
+  .lumina.admin-mode .lum-dash-chart {
+    gap: 2px;
+  }
+
+  .lumina.admin-mode .lum-dash-bar-col small,
+  .lumina.admin-mode .lum-dash-bar-col > span {
+    font-size: 8px;
+  }
+}
+
+/* ==========================================
+   ACCESSIBILITY & MOTION
+========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .lumina *,
+  .lumina *::before,
+  .lumina *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }
