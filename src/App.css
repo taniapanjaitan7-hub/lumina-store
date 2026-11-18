@@ -1,51 +1,54 @@
 
-/* ==========================================
-   LUMINA STORE
-   PREMIUM FAMILY FASHION E-COMMERCE
-   FULL APP.CSS - UPDATED 2026
-========================================== */
+/* ===================================================
+   LUMINA STORE — PREMIUM FASHION UI
+   HOME • SHOP • CART • ADMIN • MOBILE
+   REPLACE ENTIRE src/App.css
+=================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap");
 
 :root {
-  font-family: "Segoe UI", Arial, sans-serif;
-  color: #302821;
-  background: #faf8f5;
+  font-family: "DM Sans", Arial, sans-serif;
+  color: #28231f;
+  background: #fcfaf7;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  --lum-dark: #30261f;
-  --lum-brown: #94714d;
-  --lum-gold: #c09c75;
-  --lum-cream: #faf8f5;
-  --lum-soft: #f4ede6;
-  --lum-border: #e7dcd1;
-  --lum-muted: #897b70;
-  --lum-white: #ffffff;
+
+  --bg: #fcfaf7;
+  --paper: #ffffff;
+  --cream: #f3ece5;
+  --cream-dark: #e9dcd0;
+  --ink: #28231f;
+  --muted: #887a70;
+  --gold: #aa8062;
+  --border: #e9e1d9;
+  --shadow: 0 14px 35px rgba(49, 35, 24, .07);
 }
 
 * {
   box-sizing: border-box;
 }
 
-html,
-body,
-#root {
-  min-width: 0;
-  min-height: 100%;
-  margin: 0;
-}
-
 html {
   scroll-behavior: smooth;
 }
 
+body,
+#root {
+  margin: 0;
+  min-width: 0;
+  min-height: 100vh;
+}
+
 body {
-  background: var(--lum-cream);
+  background: var(--bg);
 }
 
 button,
 input,
-select,
-textarea {
+textarea,
+select {
   font: inherit;
 }
 
@@ -54,9 +57,8 @@ button {
 }
 
 button:disabled {
-  opacity: 0.55;
   cursor: not-allowed;
-  transform: none !important;
+  opacity: .5;
 }
 
 img {
@@ -64,139 +66,177 @@ img {
 }
 
 .lumina {
-  width: 100%;
   min-height: 100vh;
-  background: var(--lum-cream);
-  color: var(--lum-dark);
+  width: 100%;
+  background: var(--bg);
+  color: var(--ink);
 }
 
 .lumina button,
-.lumina a,
 .lumina input,
 .lumina select,
 .lumina textarea {
   transition:
-    background-color 0.25s ease,
-    color 0.25s ease,
-    border-color 0.25s ease,
-    box-shadow 0.25s ease,
-    transform 0.25s ease;
+    color .2s ease,
+    background .2s ease,
+    border-color .2s ease,
+    transform .2s ease,
+    box-shadow .2s ease;
 }
 
-/* ==========================================
-   GLOBAL BUTTONS
-========================================== */
-
-.lumina .btn-dark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 43px;
-  padding: 12px 21px;
-  border: 1px solid var(--lum-dark);
-  border-radius: 7px;
-  background: var(--lum-dark);
-  color: white;
-  font-size: 13px;
-  font-weight: 600;
-  text-align: center;
+.lumina button:focus-visible,
+.lumina a:focus-visible,
+.lumina input:focus-visible,
+.lumina select:focus-visible,
+.lumina textarea:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
 }
 
-.lumina .btn-dark:hover:not(:disabled) {
-  background: var(--lum-brown);
-  border-color: var(--lum-brown);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(80, 55, 30, 0.15);
+/* ===================================================
+   TYPOGRAPHY & BUTTONS
+=================================================== */
+
+.lumina .container {
+  width: min(1240px, calc(100% - 60px));
+  margin-inline: auto;
 }
 
-.lumina .btn-light {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 43px;
-  padding: 12px 20px;
-  background: #fff;
-  border: 1px solid var(--lum-border);
-  border-radius: 7px;
-  color: var(--lum-dark);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.lumina .btn-light:hover:not(:disabled) {
-  background: #f0e7dc;
-  border-color: var(--lum-gold);
-}
-
-.lumina .wide {
-  width: 100%;
+.lumina .section {
+  padding-block: 76px 95px;
 }
 
 .lumina .center {
   text-align: center;
 }
 
-.lumina .muted {
-  color: var(--lum-muted);
+.lumina .eyebrow {
+  color: var(--gold);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.8px;
+  text-transform: uppercase;
+}
+
+.lumina .section-title {
+  margin: 8px 0 14px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -.7px;
+  text-align: center;
+}
+
+.lumina .section-description {
+  max-width: 660px;
+  margin: 0 auto 40px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.lumina .muted,
+.lumina .empty {
+  color: var(--muted);
   font-size: 13px;
-  line-height: 1.6;
 }
 
 .lumina .empty {
   grid-column: 1 / -1;
-  padding: 55px 20px;
+  padding: 60px 18px;
   text-align: center;
-  color: var(--lum-muted);
 }
 
-/* ==========================================
-   ANNOUNCEMENT
-========================================== */
+.lumina .action-space {
+  margin-top: 40px;
+}
+
+.lumina .btn-dark,
+.lumina .btn-light {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+
+.lumina .btn-dark {
+  background: var(--ink);
+  border: 1px solid var(--ink);
+  color: white;
+}
+
+.lumina .btn-dark:hover:not(:disabled) {
+  background: var(--gold);
+  border-color: var(--gold);
+  box-shadow: 0 12px 22px rgba(89, 63, 44, .15);
+  transform: translateY(-2px);
+}
+
+.lumina .btn-light {
+  background: white;
+  border: 1px solid var(--border);
+  color: var(--ink);
+}
+
+.lumina .btn-light:hover:not(:disabled) {
+  border-color: var(--gold);
+  background: #f7f0e9;
+}
+
+.lumina .wide {
+  width: 100%;
+}
+
+/* ===================================================
+   TOP ANNOUNCEMENT & HEADER
+=================================================== */
 
 .lumina .announcement {
-  width: 100%;
-  padding: 10px 16px;
-  background: var(--lum-dark);
-  color: #f4e8dc;
+  padding: 11px 18px;
+  background: var(--ink);
+  color: #f5e9df;
   text-align: center;
-  font-size: 11px;
-  letter-spacing: 1.3px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.8px;
 }
-
-/* ==========================================
-   NAVBAR
-========================================== */
 
 .lumina .navbar {
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 90;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  width: 100%;
-  min-height: 85px;
-  padding: 18px clamp(20px, 6vw, 90px);
-  background: rgba(255, 255, 255, 0.97);
-  border-bottom: 1px solid #eee7e0;
-  backdrop-filter: blur(15px);
+  gap: 22px;
+  min-height: 86px;
+  padding: 17px clamp(25px, 5vw, 85px);
+  background: rgba(255,255,255,.97);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(14px);
 }
 
 .lumina .logo {
-  padding: 0;
   border: 0;
+  padding: 0;
   background: transparent;
-  color: var(--lum-dark);
-  font-size: clamp(22px, 2.4vw, 29px);
-  font-weight: 900;
+  color: var(--ink);
+  font-size: 28px;
+  font-weight: 700;
   letter-spacing: 4px;
   white-space: nowrap;
 }
 
 .lumina .logo span {
-  color: var(--lum-gold);
+  color: var(--gold);
 }
 
 .lumina .nav-menu {
@@ -204,96 +244,47 @@ img {
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  gap: clamp(12px, 2.4vw, 30px);
+  gap: clamp(12px, 2.5vw, 32px);
 }
 
 .lumina .nav-menu button {
-  padding: 7px 3px;
   border: 0;
+  padding: 7px 2px;
   background: transparent;
-  color: #514a43;
-  font-size: 13px;
-  font-weight: 500;
+  color: #544d46;
+  font-size: 12px;
+  font-weight: 600;
   white-space: nowrap;
 }
 
 .lumina .nav-menu button:hover {
-  color: var(--lum-brown);
+  color: var(--gold);
 }
 
 .lumina .cart-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 45px;
-  padding: 12px 19px;
-  border: 1px solid #e1d2c3;
-  border-radius: 30px;
-  background: #faf5f0;
-  color: var(--lum-dark);
-  font-size: 13px;
+  padding: 12px 17px;
+  border: 1px solid #e6d9cd;
+  border-radius: 100px;
+  background: #f9f3ed;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
   white-space: nowrap;
 }
 
 .lumina .cart-link:hover {
-  background: #f2e8dc;
-  border-color: var(--lum-gold);
+  background: #efdfd1;
 }
 
-/* ==========================================
-   CONTAINER & SECTION
-========================================== */
-
-.lumina .container {
-  width: min(100% - 48px, 1240px);
-  margin-inline: auto;
-}
-
-.lumina .section {
-  padding-top: 65px;
-  padding-bottom: 85px;
-}
-
-.lumina .eyebrow {
-  margin: 0 0 16px;
-  color: var(--lum-brown);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 2.5px;
-}
-
-.lumina .section-title {
-  margin: 0 0 16px;
-  color: var(--lum-dark);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(29px, 4vw, 44px);
-  font-weight: 500;
-  line-height: 1.2;
-  text-align: center;
-}
-
-.lumina .section-description {
-  max-width: 620px;
-  margin: 0 auto 40px;
-  color: var(--lum-muted);
-  font-size: 14px;
-  line-height: 1.8;
-  text-align: center;
-}
-
-.lumina .action-space {
-  margin-top: 38px;
-}
-
-/* ==========================================
-   HERO BANNER
-========================================== */
+/* ===================================================
+   HOMEPAGE HERO — EDITORIAL FASHION
+=================================================== */
 
 .lumina .hero {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  min-height: 560px;
-  background: #f1e8df;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 610px;
+  background: linear-gradient(115deg, #f7f1eb, #eadbcd);
 }
 
 .lumina .hero-copy {
@@ -301,124 +292,129 @@ img {
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  padding: 65px clamp(28px, 7vw, 110px);
+  padding: 75px clamp(30px, 7vw, 120px);
+}
+
+.lumina .hero-copy .eyebrow {
+  margin-bottom: 23px;
 }
 
 .lumina .hero-copy h1 {
-  max-width: 570px;
-  margin: 0 0 24px;
-  color: var(--lum-dark);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(40px, 5.2vw, 75px);
+  max-width: 650px;
+  margin: 0 0 25px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(43px, 5.4vw, 76px);
   font-weight: 500;
-  line-height: 1.07;
+  line-height: 1.12;
   letter-spacing: -1.7px;
 }
 
 .lumina .hero-copy h1 em {
-  color: var(--lum-brown);
-  font-style: italic;
+  color: #9b745b;
+  font-weight: 400;
 }
 
 .lumina .hero-copy > p:not(.eyebrow):not(.hero-bottom) {
-  max-width: 460px;
+  max-width: 470px;
   margin: 0 0 30px;
-  color: #6c5b4f;
+  color: #716358;
   font-size: 15px;
-  line-height: 1.85;
+  line-height: 1.9;
 }
 
 .lumina .hero-bottom {
-  margin-top: 45px;
-  color: #9b806b;
+  margin-top: 50px;
+  color: #977f6d;
   font-size: 10px;
-  letter-spacing: 1.5px;
+  letter-spacing: 2px;
 }
 
 .lumina .hero-photo {
-  min-height: 560px;
+  min-height: 610px;
   overflow: hidden;
-  background: #e5d6c9;
+  background: #e9ded5;
 }
 
 .lumina .hero-photo img {
   display: block;
   width: 100%;
   height: 100%;
-  min-height: 560px;
+  min-height: 610px;
   object-fit: cover;
-  object-position: center;
+  object-position: center 32%;
+  transition: transform .7s ease;
 }
 
-/* ==========================================
-   FEATURES / PERKS
-========================================== */
+.lumina .hero:hover .hero-photo img {
+  transform: scale(1.025);
+}
+
+/* ===================================================
+   HOMEPAGE BENEFITS
+=================================================== */
 
 .lumina .perks {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 24px;
-  padding: 28px clamp(24px, 7vw, 110px);
-  background: #fff;
-  border-bottom: 1px solid #eee6dd;
+  gap: 30px;
+  padding: 36px clamp(20px, 7vw, 100px);
+  border-bottom: 1px solid var(--border);
+  background: white;
 }
 
 .lumina .perks > div {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 7px;
+  gap: 10px;
+  color: var(--gold);
   text-align: center;
-  color: var(--lum-brown);
-  font-size: 18px;
+  font-size: 22px;
 }
 
 .lumina .perks strong {
-  color: var(--lum-dark);
+  color: var(--ink);
   font-size: 13px;
 }
 
 .lumina .perks span {
-  color: var(--lum-muted);
+  color: var(--muted);
   font-size: 11px;
 }
 
-/* ==========================================
-   PRODUCT CATALOG
-========================================== */
+/* ===================================================
+   PREMIUM PRODUCT CATALOG
+=================================================== */
 
 .lumina .product-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 27px;
+  gap: 30px;
   align-items: stretch;
 }
 
 .lumina .product-card {
   display: flex;
   flex-direction: column;
-  min-width: 0;
   overflow: hidden;
-  border: 1px solid #eee4db;
-  border-radius: 17px;
+  min-width: 0;
   background: #fff;
-  box-shadow: 0 5px 22px rgba(40, 30, 20, 0.035);
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 5px 18px rgba(49, 35, 24, .025);
+  transition: transform .3s ease, box-shadow .3s ease;
 }
 
 .lumina .product-card:hover {
-  transform: translateY(-7px);
-  box-shadow: 0 18px 38px rgba(40, 30, 20, 0.12);
+  transform: translateY(-6px);
+  box-shadow: var(--shadow);
 }
 
 .lumina .product-picture {
   position: relative;
-  width: 100%;
-  aspect-ratio: 4 / 4.4;
+  aspect-ratio: 4 / 4.8;
   overflow: hidden;
-  background: #e9dcd3;
+  background: #ede4dc;
 }
 
 .lumina .image-button {
@@ -426,9 +422,8 @@ img {
   width: 100%;
   height: 100%;
   padding: 0;
-  border: none;
+  border: 0;
   background: transparent;
-  overflow: hidden;
 }
 
 .lumina .product-picture img {
@@ -437,7 +432,7 @@ img {
   height: 100%;
   object-fit: cover;
   object-position: center;
-  transition: transform 0.45s ease;
+  transition: transform .5s ease;
 }
 
 .lumina .product-card:hover .product-picture img {
@@ -446,35 +441,33 @@ img {
 
 .lumina .heart {
   position: absolute;
+  z-index: 2;
   top: 16px;
   right: 16px;
-  z-index: 3;
   display: grid;
   place-items: center;
-  width: 42px;
-  height: 42px;
-  padding: 0;
-  border: none;
+  width: 40px;
+  height: 40px;
+  border: 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.95);
-  color: #a16e5b;
+  background: rgba(255,255,255,.94);
+  color: #ac7769;
   font-size: 25px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
 }
 
 .lumina .heart:hover {
-  transform: scale(1.12);
-  color: #c65c68;
+  color: #c44b66;
+  transform: scale(1.1);
 }
 
 .lumina .stock-label {
   position: absolute;
-  top: 18px;
+  top: 17px;
   left: 16px;
-  padding: 9px 13px;
+  padding: 8px 11px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.96);
-  color: #745747;
+  background: rgba(255,255,255,.94);
+  color: #7e6354;
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 1px;
@@ -485,104 +478,101 @@ img {
   flex: 1;
   flex-direction: column;
   align-items: flex-start;
-  padding: 22px;
+  padding: 24px;
 }
 
 .lumina .product-body small {
-  color: #ab825f;
+  color: var(--gold);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.7px;
   text-transform: uppercase;
 }
 
 .lumina .product-body h3 {
-  margin: 11px 0 9px;
-  color: var(--lum-dark);
+  margin: 12px 0 9px;
   font-size: 17px;
   font-weight: 600;
   line-height: 1.5;
 }
 
 .lumina .product-body .price {
-  margin: 0 0 8px;
-  color: var(--lum-brown);
+  margin: 0 0 7px;
+  color: #927053;
   font-size: 18px;
   font-weight: 700;
 }
 
 .lumina .product-body .muted {
-  margin: 0 0 19px;
+  margin: 0 0 20px;
 }
 
 .lumina .product-actions {
   display: flex;
-  gap: 10px;
   width: 100%;
+  gap: 10px;
   margin-top: auto;
 }
 
 .lumina .product-actions button {
   flex: 1;
   min-width: 0;
-  padding: 12px 9px;
-  font-size: 12px;
+  padding-inline: 8px;
 }
 
-/* ==========================================
-   SHOP TOOLBAR / SEARCH
-========================================== */
+/* ===================================================
+   SHOP SEARCH & FILTER
+=================================================== */
 
 .lumina .toolbar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 190px 180px;
-  gap: 15px;
+  grid-template-columns: minmax(0, 1fr) 190px 190px;
   align-items: center;
-  margin: 0 0 25px;
+  gap: 14px;
+  margin-bottom: 24px;
 }
 
 .lumina .toolbar input,
-.lumina .toolbar select {
+.lumina .toolbar select,
+.lumina .form-stack input,
+.lumina .form-stack select,
+.lumina .form-stack textarea {
   width: 100%;
   min-width: 0;
   min-height: 48px;
-  padding: 12px 16px;
-  border: 1px solid #e0d0c0;
-  border-radius: 10px;
-  background: #fff;
-  color: var(--lum-dark);
+  padding: 12px 15px;
+  border: 1px solid #ded0c4;
+  border-radius: 7px;
+  background: white;
+  color: var(--ink);
   font-size: 13px;
-}
-
-.lumina .toolbar input::placeholder {
-  color: #a39284;
 }
 
 .lumina input:focus,
 .lumina select:focus,
 .lumina textarea:focus {
   outline: none;
-  border-color: var(--lum-gold);
-  box-shadow: 0 0 0 3px rgba(185, 154, 112, 0.12);
+  border-color: #b49070;
+  box-shadow: 0 0 0 3px rgba(180,144,112,.14);
 }
 
-/* ==========================================
-   DETAIL PRODUK
-========================================== */
+/* ===================================================
+   PRODUCT DETAIL
+=================================================== */
 
 .lumina .back {
-  margin: 0 0 28px;
+  margin-bottom: 30px;
   padding: 8px 0;
-  border: none;
+  border: 0;
   background: transparent;
-  color: var(--lum-brown);
+  color: #99775f;
   font-size: 13px;
 }
 
 .lumina .detail-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: clamp(30px, 6vw, 80px);
+  gap: clamp(30px, 6vw, 85px);
   align-items: start;
 }
 
@@ -591,37 +581,35 @@ img {
   width: 100%;
   max-height: 680px;
   aspect-ratio: 4 / 5;
+  border-radius: 12px;
   object-fit: cover;
-  border-radius: 16px;
-  background: #ebded5;
+  background: var(--cream);
 }
 
 .lumina .detail-copy {
-  padding: 20px 0;
+  padding-top: 25px;
 }
 
 .lumina .detail-copy h1 {
-  margin: 8px 0 18px;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(30px, 4vw, 48px);
+  margin: 10px 0 18px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(30px, 3.5vw, 47px);
   font-weight: 500;
-  line-height: 1.2;
 }
 
 .lumina .detail-copy .price {
-  margin: 0 0 20px;
-  color: var(--lum-brown);
+  color: var(--gold);
   font-size: 26px;
 }
 
 .lumina .detail-copy > p {
+  color: #75685f;
   line-height: 1.8;
-  color: #76685e;
 }
 
 .lumina .detail-copy label {
   display: block;
-  margin: 24px 0 11px;
+  margin: 24px 0 12px;
   font-size: 13px;
   font-weight: 700;
 }
@@ -630,31 +618,30 @@ img {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 10px;
 }
 
 .lumina .option-row button {
-  min-width: 45px;
-  padding: 10px 14px;
-  border: 1px solid #dfd2c6;
-  border-radius: 7px;
+  min-width: 44px;
+  padding: 11px 13px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
   background: white;
   font-size: 12px;
 }
 
 .lumina .option-row button.chosen {
-  background: var(--lum-dark);
-  border-color: var(--lum-dark);
+  background: var(--ink);
   color: #fff;
+  border-color: var(--ink);
 }
 
-.lumina .detail-copy > .btn-dark {
-  margin-top: 28px;
+.lumina .detail-copy .wide {
+  margin-top: 30px;
 }
 
-/* ==========================================
-   CART / CHECKOUT
-========================================== */
+/* ===================================================
+   SHOPPING CART, CHECKOUT & SUCCESS
+=================================================== */
 
 .lumina .two-column {
   display: grid;
@@ -665,39 +652,30 @@ img {
 
 .lumina .panel {
   padding: 30px;
-  border: 1px solid #eee4db;
-  border-radius: 13px;
   background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
 }
 
 .lumina .panel h2 {
-  margin: 0 0 24px;
-  font-size: 21px;
+  margin: 0 0 23px;
+  font-size: 20px;
 }
 
 .lumina .cart-row {
   display: flex;
   align-items: flex-start;
   gap: 20px;
-  padding: 20px 0;
-  border-bottom: 1px solid #eee8e2;
-}
-
-.lumina .cart-row:first-child {
-  padding-top: 0;
-}
-
-.lumina .cart-row:last-child {
-  border-bottom: none;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border);
 }
 
 .lumina .cart-row img {
-  flex-shrink: 0;
   width: 115px;
-  height: 132px;
-  border-radius: 9px;
+  height: 135px;
+  flex-shrink: 0;
+  border-radius: 7px;
   object-fit: cover;
-  background: #eee2d8;
 }
 
 .lumina .grow {
@@ -706,63 +684,44 @@ img {
 }
 
 .lumina .grow h3 {
-  margin: 4px 0 8px;
-  font-size: 17px;
+  font-size: 16px;
+  margin: 0 0 8px;
 }
 
 .lumina .quantity {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 15px;
+  gap: 10px;
+  margin-top: 16px;
 }
 
 .lumina .quantity button {
-  min-width: 30px;
-  min-height: 30px;
-  padding: 5px 9px;
-  border: 1px solid #e4d8cd;
-  border-radius: 6px;
-  background: #fbf8f5;
-}
-
-.lumina .quantity span {
-  min-width: 18px;
-  text-align: center;
-  font-size: 13px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg);
 }
 
 .lumina .summary {
   position: sticky;
-  top: 110px;
+  top: 112px;
 }
 
 .lumina .between {
   display: flex;
-  align-items: flex-start;
   justify-content: space-between;
-  gap: 20px;
+  gap: 12px;
   padding: 12px 0;
-  color: #67594f;
   font-size: 13px;
 }
 
-.lumina .between strong {
-  color: var(--lum-dark);
-  text-align: right;
-}
-
 .lumina .grand-total {
-  margin: 16px 0 22px;
-  padding-top: 20px;
-  border-top: 1px solid var(--lum-border);
-  font-size: 17px;
+  margin: 14px 0 25px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
   font-weight: 700;
-}
-
-.lumina .summary > .btn-dark {
-  margin-top: 20px;
+  font-size: 16px;
 }
 
 .lumina .form-stack {
@@ -776,26 +735,13 @@ img {
   font-weight: 700;
 }
 
-.lumina .form-stack input,
-.lumina .form-stack select,
-.lumina .form-stack textarea {
-  width: 100%;
-  min-height: 44px;
-  padding: 12px;
-  border: 1px solid #e0d0c0;
-  border-radius: 7px;
-  background: white;
-  font-size: 13px;
-}
-
-.lumina .form-stack textarea {
+.lumina textarea {
   resize: vertical;
 }
 
 .lumina .success-panel {
-  max-width: 600px;
-  margin: 30px auto;
-  text-align: center;
+  max-width: 560px;
+  margin: 28px auto;
 }
 
 .lumina .success-icon {
@@ -803,400 +749,386 @@ img {
   place-items: center;
   width: 75px;
   height: 75px;
-  margin: 0 auto 20px;
+  margin: auto;
   border-radius: 50%;
-  background: #e6f4e8;
-  color: #39824f;
-  font-size: 35px;
+  background: #e6f5e8;
+  color: #318151;
+  font-size: 38px;
 }
 
-.lumina .success-panel h1 {
-  font-size: 29px;
-}
-
-.lumina .success-panel p {
-  color: var(--lum-muted);
-  line-height: 1.7;
-}
-
-/* ==========================================
-   PROMO
-========================================== */
+/* ===================================================
+   PROMO & FOOTER
+=================================================== */
 
 .lumina .promo {
-  padding: 95px 24px;
-  background: #e9d8c9;
+  padding: 95px 20px;
   text-align: center;
+  background: linear-gradient(120deg, #f1e3d6, #d8bda8);
 }
 
 .lumina .promo h2 {
-  margin: 0 0 18px;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: "Playfair Display", Georgia, serif;
   font-size: clamp(30px, 4vw, 50px);
   font-weight: 500;
 }
 
 .lumina .promo p:not(.eyebrow) {
-  margin: 0 0 25px;
-  color: #786355;
+  color: #745f52;
+  font-size: 14px;
 }
-
-/* ==========================================
-   FOOTER
-========================================== */
 
 .lumina .footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
   gap: 25px;
-  padding: 45px clamp(24px, 6vw, 90px);
-  background: #2c241e;
-  color: #e9dbcd;
+  flex-wrap: wrap;
+  padding: 48px clamp(25px, 6vw, 90px);
+  background: #28231f;
+  color: #e8d9ca;
 }
 
 .lumina .footer h2 {
   margin: 0 0 10px;
-  color: white;
   font-size: 27px;
-  letter-spacing: 3px;
+  letter-spacing: 4px;
+  color: #fff;
 }
 
 .lumina .footer p {
-  margin: 0;
-  color: #d4c0ac;
   font-size: 12px;
+  color: #d5c3b3;
 }
-
-/* ==========================================
-   NOTIFICATION TOAST
-========================================== */
 
 .lumina .toast {
   position: fixed;
+  z-index: 500;
   right: 22px;
   bottom: 22px;
-  z-index: 500;
   display: flex;
   align-items: center;
-  gap: 20px;
-  max-width: min(430px, calc(100vw - 40px));
-  padding: 15px 19px;
-  border-radius: 10px;
-  background: #332820;
+  gap: 15px;
+  padding: 15px 20px;
+  border-radius: 8px;
+  background: #28231f;
   color: white;
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--shadow);
   font-size: 13px;
 }
 
 .lumina .toast button {
-  padding: 0;
-  border: none;
-  background: transparent;
+  border: 0;
+  background: none;
   color: white;
-  font-size: 23px;
+  font-size: 24px;
 }
 
-/* ==========================================
-   ADMIN DASHBOARD FULLSCREEN
-========================================== */
+/* ===================================================
+   FULLSCREEN ADMIN DASHBOARD
+   Matches the existing App.jsx classes
+=================================================== */
 
 .lumina.admin-mode {
+  margin: 0;
+  padding: 0;
   width: 100%;
   min-height: 100vh;
-  padding: 0;
-  margin: 0;
-  background: white;
+  background: #fff;
 }
 
 .lumina.admin-mode .lum-dash {
   display: grid;
-  grid-template-columns: 245px minmax(0, 1fr) 270px;
+  grid-template-columns: 238px minmax(0, 1fr) 260px;
   width: 100%;
   min-height: 100vh;
   background: #fff;
-  color: #28221f;
+  color: var(--ink);
+  font-family: "DM Sans", Arial, sans-serif;
 }
 
-.lumina.admin-mode .lum-dash * {
-  box-sizing: border-box;
-}
+/* LEFT SIDEBAR */
 
-/* SIDEBAR KIRI */
-
-.lumina.admin-mode .lum-dash-sidebar {
+.lum-dash-sidebar {
   display: flex;
   flex-direction: column;
   gap: 25px;
+  padding: 36px 22px;
   min-width: 0;
-  min-height: 100vh;
-  padding: 38px 25px;
-  background: #faf1ed;
+  background: #f6f0eb;
+  border-right: 1px solid #ede4dc;
 }
 
-.lumina.admin-mode .lum-dash-logo {
-  margin: 0 10px 20px;
-  font-size: 27px;
-  font-weight: 900;
+.lum-dash-logo {
+  margin: 0 10px 16px;
+  font-size: 26px;
+  font-weight: 700;
   letter-spacing: 3px;
 }
 
-.lumina.admin-mode .lum-dash-logo span {
-  color: #bb9683;
+.lum-dash-logo span {
+  color: var(--gold);
 }
 
-.lumina.admin-mode .lum-dash-menu-label {
+.lum-dash-menu-label {
   width: max-content;
-  padding: 10px 20px;
-  border-radius: 5px;
-  background: #25201e;
-  color: #e8c7b6;
+  border-radius: 6px;
+  padding: 10px 18px;
+  background: var(--ink);
+  color: #f2dac5;
+  font-size: 12px;
   font-weight: 700;
 }
 
-.lumina.admin-mode .lum-dash-menu {
+.lum-dash-menu {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.lumina.admin-mode .lum-dash-menu button {
+.lum-dash-menu button {
   display: flex;
   align-items: center;
-  gap: 13px;
-  padding: 14px 12px;
-  border: 0;
-  border-radius: 9px;
-  background: transparent;
-  color: #322c29;
-  font-size: 13px;
-  font-weight: 600;
-  text-align: left;
-}
-
-.lumina.admin-mode .lum-dash-menu button.active,
-.lumina.admin-mode .lum-dash-menu button:hover {
-  background: #eadbd3;
-}
-
-.lumina.admin-mode .lum-dash-menu button span {
-  width: 24px;
-  font-size: 19px;
-  text-align: center;
-}
-
-.lumina.admin-mode .lum-dash-sidebar-bottom {
-  margin-top: auto;
-  padding: 20px 10px 0;
-  border-top: 1px solid #eadbd3;
-}
-
-.lumina.admin-mode .lum-dash-sidebar-bottom p {
-  color: #89776e;
-  font-size: 12px;
-}
-
-.lumina.admin-mode .lum-dash-sidebar-bottom small {
-  display: block;
-  margin: 16px 0;
-  color: #926d4d;
-}
-
-.lumina.admin-mode .lum-dash-back {
-  padding: 12px;
+  gap: 14px;
+  width: 100%;
+  padding: 15px 14px;
   border: 0;
   border-radius: 8px;
-  background: #29231d;
-  color: white;
+  background: transparent;
+  color: #65564c;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.lum-dash-menu button span {
+  width: 22px;
+  text-align: center;
+  font-size: 18px;
+}
+
+.lum-dash-menu button:hover,
+.lum-dash-menu button.active {
+  background: #e8d7ca;
+  color: var(--ink);
+}
+
+.lum-dash-sidebar-bottom {
+  margin-top: auto;
+  padding: 22px 10px 0;
+  border-top: 1px solid #e1d4c9;
+}
+
+.lum-dash-sidebar-bottom p,
+.lum-dash-sidebar-bottom small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.lum-dash-sidebar-bottom small {
+  display: block;
+  margin: 13px 0;
+}
+
+.lum-dash-back {
+  width: 100%;
+  padding: 12px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--ink);
+  color: #fff;
   font-size: 12px;
 }
 
-.lumina.admin-mode .lum-dash-back:hover {
-  background: #94714d;
-}
+/* MAIN CONTENT */
 
-/* ADMIN MAIN */
-
-.lumina.admin-mode .lum-dash-main {
+.lum-dash-main {
   min-width: 0;
-  padding: 38px 35px;
+  padding: 35px 30px;
+  background: #fff;
 }
 
-.lumina.admin-mode .lum-dash-topbar {
+.lum-dash-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 15px;
-  margin-bottom: 35px;
+  gap: 18px;
+  margin-bottom: 30px;
 }
 
-.lumina.admin-mode .lum-dash-eyebrow {
+.lum-dash-eyebrow {
   display: block;
-  margin-bottom: 9px;
-  color: #aa8a79;
+  margin-bottom: 8px;
+  color: var(--gold);
   font-size: 10px;
-  letter-spacing: 1.5px;
+  font-weight: 700;
+  letter-spacing: 2px;
 }
 
-.lumina.admin-mode .lum-dash-topbar h1 {
+.lum-dash-topbar h1 {
   margin: 0;
-  font-size: 25px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(24px, 2.8vw, 34px);
+  font-weight: 500;
 }
 
-.lumina.admin-mode .lum-dash-search {
+.lum-dash-search {
   display: flex;
   align-items: center;
-  flex: 1;
   gap: 8px;
-  max-width: 350px;
-  padding: 0 12px;
-  border: 1.5px solid #2c2521;
-  border-radius: 30px;
+  flex: 1;
+  max-width: 330px;
+  padding: 0 15px;
+  border: 1px solid var(--border);
+  border-radius: 40px;
+  background: #fcfaf8;
 }
 
-.lumina.admin-mode .lum-dash-search span {
-  font-size: 22px;
+.lum-dash-search span {
+  font-size: 23px;
+  color: var(--gold);
 }
 
-.lumina.admin-mode .lum-dash-search input {
+.lumina .lum-dash-search input {
   width: 100%;
   min-width: 0;
-  padding: 10px 0;
+  padding: 12px 0;
   border: 0;
+  outline: 0;
   background: transparent;
   box-shadow: none;
   font-size: 12px;
 }
 
-.lumina.admin-mode .lum-dash-avatar {
+.lum-dash-avatar {
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  width: 37px;
-  height: 37px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: #29231d;
+  background: #322820;
   color: white;
+  font-size: 13px;
   font-weight: 700;
 }
 
-/* METRIK */
+/* SUMMARY METRICS */
 
-.lumina.admin-mode .lum-dash-stats {
+.lum-dash-stats {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
-  margin-bottom: 25px;
+  margin-bottom: 23px;
 }
 
-.lumina.admin-mode .lum-dash-metric {
+.lum-dash-metric {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  gap: 15px;
   min-width: 0;
-  min-height: 143px;
-  padding: 18px 14px;
-  border-radius: 9px;
-  background: #faf6f3;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  min-height: 142px;
+  padding: 20px 15px;
+  border: 1px solid #f0e7df;
+  border-radius: 12px;
+  background: #fbf7f3;
+  transition: transform .2s ease, box-shadow .2s ease;
 }
 
-.lumina.admin-mode .lum-dash-metric:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 28px rgba(40, 30, 20, 0.08);
+.lum-dash-metric:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
 }
 
-.lumina.admin-mode .lum-dash-metric-head {
+.lum-dash-metric-head {
   display: flex;
   justify-content: space-between;
-  gap: 5px;
+  gap: 6px;
 }
 
-.lumina.admin-mode .lum-dash-metric-icon {
+.lum-dash-metric-icon {
   font-size: 23px;
+  color: #a47d61;
 }
 
-.lumina.admin-mode .lum-dash-metric-head small {
-  color: #b9a79c;
+.lum-dash-metric-head small {
+  color: #a39185;
   font-size: 9px;
   text-align: right;
 }
 
-.lumina.admin-mode .lum-dash-metric strong {
-  font-size: clamp(13px, 1.2vw, 18px);
+.lum-dash-metric strong {
+  font-size: clamp(14px, 1.3vw, 20px);
   overflow-wrap: anywhere;
 }
 
-.lumina.admin-mode .lum-dash-metric > span:last-child {
-  color: #72665e;
+.lum-dash-metric > span:last-child {
+  color: var(--muted);
   font-size: 11px;
 }
 
-/* ADMIN CARDS */
+/* ADMIN CARDS & GRAPH */
 
-.lumina.admin-mode .lum-dash-card {
+.lum-dash-card {
   min-width: 0;
-  margin-bottom: 23px;
+  margin-bottom: 22px;
   padding: 26px;
-  border-radius: 8px;
-  background: #fcf8f5;
+  border: 1px solid #f0e8e1;
+  border-radius: 12px;
+  background: #fdfaf7;
 }
 
-.lumina.admin-mode .lum-dash-card h2 {
+.lum-dash-card h2 {
   margin: 0 0 8px;
-  font-size: 19px;
+  font-size: 17px;
 }
 
-.lumina.admin-mode .lum-dash-card-head {
+.lum-dash-card-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 15px;
+  gap: 12px;
 }
 
-.lumina.admin-mode .lum-dash-card-head p {
+.lum-dash-card-head p {
   margin: 0;
-  color: #948278;
+  color: var(--muted);
   font-size: 11px;
 }
 
-.lumina.admin-mode .lum-dash-card-head select {
-  padding: 9px 13px;
+.lum-dash-card-head select {
+  padding: 10px 14px;
   border: 0;
-  border-radius: 5px;
-  background: #29231d;
+  border-radius: 7px;
+  background: var(--ink);
   color: white;
   font-size: 12px;
 }
 
-/* GRAFIK */
-
-.lumina.admin-mode .lum-dash-chart-total {
-  margin: 24px 0 10px;
-  font-size: 21px;
+.lum-dash-chart-total {
+  margin: 25px 0 12px;
+  font-size: 23px;
   font-weight: 700;
 }
 
-.lumina.admin-mode .lum-dash-chart-total small {
+.lum-dash-chart-total small {
   margin-left: 12px;
-  color: #98867c;
+  color: var(--muted);
   font-size: 11px;
   font-weight: 400;
 }
 
-.lumina.admin-mode .lum-dash-chart {
+.lum-dash-chart {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   align-items: end;
-  gap: 8px;
+  gap: 7px;
   height: 245px;
-  margin-top: 15px;
-  border-bottom: 1px solid #eadfd9;
+  border-bottom: 1px solid var(--border);
 }
 
-.lumina.admin-mode .lum-dash-bar-col {
+.lum-dash-bar-col {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1205,13 +1137,13 @@ img {
   min-width: 0;
 }
 
-.lumina.admin-mode .lum-dash-bar-col > span {
+.lum-dash-bar-col > span {
   height: 20px;
-  color: #8f7668;
+  color: var(--muted);
   font-size: 9px;
 }
 
-.lumina.admin-mode .lum-dash-bar-area {
+.lum-dash-bar-area {
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -1219,300 +1151,296 @@ img {
   height: 185px;
 }
 
-.lumina.admin-mode .lum-dash-bar {
+.lum-dash-bar {
   width: 62%;
   max-width: 38px;
-  border-radius: 20px;
-  background: linear-gradient(180deg, #e6cfc2, #94714d);
-  transition: height 0.3s ease;
+  border-radius: 8px 8px 0 0;
+  background: linear-gradient(180deg, #d5b59e, #977257);
+  transition: height .3s ease;
 }
 
-.lumina.admin-mode .lum-dash-bar-col small {
+.lum-dash-bar-col small {
   padding: 10px 0;
   font-size: 10px;
 }
 
-.lumina.admin-mode .lum-dash-link {
+.lum-dash-link {
   border: 0;
   background: transparent;
-  color: #a07965;
+  color: #967057;
   font-size: 12px;
   font-weight: 700;
 }
 
-/* TABLE */
+/* ORDERS TABLE */
 
-.lumina.admin-mode .lum-dash-table-wrap {
+.lum-dash-table-wrap {
   max-width: 100%;
   margin-top: 20px;
   overflow-x: auto;
 }
 
-.lumina.admin-mode .lum-dash-table {
+.lum-dash-table {
   width: 100%;
-  min-width: 650px;
+  min-width: 630px;
   border-collapse: collapse;
   text-align: left;
   font-size: 12px;
 }
 
-.lumina.admin-mode .lum-dash-table th {
-  padding: 15px 9px;
-  background: transparent;
-  color: #6e5b51;
+.lum-dash-table th,
+.lum-dash-table td {
+  padding: 15px 10px;
+  border-bottom: 1px solid #ede3da;
   text-align: left;
 }
 
-.lumina.admin-mode .lum-dash-table td {
-  padding: 14px 9px;
-  border-bottom: 1px solid #eee1d9;
+.lum-dash-table th {
+  color: #88786d;
+  font-size: 11px;
+  font-weight: 700;
 }
 
-.lumina.admin-mode .lum-dash-table select {
+.lum-dash-order-product {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lum-dash-order-product img {
+  width: 43px;
+  height: 49px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.lum-dash-table select {
   min-width: 120px;
   padding: 8px;
-  border: 1px solid #e4d5c9;
+  border: 1px solid var(--border);
   border-radius: 6px;
   background: white;
   font-size: 11px;
 }
 
-.lumina.admin-mode .lum-dash-order-product {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.lumina.admin-mode .lum-dash-order-product img {
-  width: 43px;
-  height: 48px;
-  object-fit: cover;
-  border-radius: 5px;
-}
-
-.lumina.admin-mode .lum-dash-status {
+.lum-dash-status {
   display: inline-block;
-  padding: 7px 10px;
-  border-radius: 20px;
-  background: #eee5da;
+  padding: 7px 11px;
+  border-radius: 25px;
+  background: #f1e7dd;
   white-space: nowrap;
-}
-
-.lumina.admin-mode .lum-dash-status.selesai {
-  color: #2e7e50;
-  background: #e0f3e7;
-}
-
-.lumina.admin-mode .lum-dash-status.dibatalkan {
-  color: #ad4545;
-  background: #fae2e2;
-}
-
-.lumina.admin-mode .lum-dash-status.diproses,
-.lumina.admin-mode .lum-dash-status.dikirim {
-  color: #846039;
-  background: #f8ebd9;
-}
-
-.lumina.admin-mode .lum-dash-empty {
-  padding: 35px !important;
-  color: #908177;
-  text-align: center;
-}
-
-/* RIGHT SIDEBAR */
-
-.lumina.admin-mode .lum-dash-right {
-  min-width: 0;
-  min-height: 100vh;
-  padding: 40px 23px;
-  border-left: 1px solid #f1e9e4;
-  background: #fff;
-}
-
-.lumina.admin-mode .lum-dash-right section {
-  margin-bottom: 38px;
-}
-
-.lumina.admin-mode .lum-dash-right h3 {
-  margin: 0 0 8px;
-  font-size: 16px;
-}
-
-.lumina.admin-mode .lum-dash-small {
-  color: #9c8b80;
-  font-size: 11px;
-  line-height: 1.6;
-}
-
-.lumina.admin-mode .lum-dash-side-product {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  margin: 17px 0;
-}
-
-.lumina.admin-mode .lum-dash-side-product img {
-  width: 52px;
-  height: 56px;
-  border-radius: 5px;
-  object-fit: cover;
-  background: #f3e8df;
-}
-
-.lumina.admin-mode .lum-dash-side-product div {
-  flex: 1;
-  min-width: 0;
-}
-
-.lumina.admin-mode .lum-dash-side-product strong {
-  display: block;
-  font-size: 12px;
-  overflow-wrap: anywhere;
-}
-
-.lumina.admin-mode .lum-dash-side-product small {
-  display: block;
-  margin-top: 6px;
-  color: #948177;
-  font-size: 10px;
-}
-
-.lumina.admin-mode .lum-dash-stock {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid #f1e9e4;
   font-size: 11px;
 }
 
-.lumina.admin-mode .lum-dash-stock strong {
-  color: #b86647;
+.lum-dash-status.selesai {
+  color: #247747;
+  background: #e3f3e8;
 }
 
-/* STATUS GRID */
-
-.lumina.admin-mode .lum-dash-status-grid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 20px;
+.lum-dash-status.dibatalkan {
+  color: #a94040;
+  background: #f9e3e3;
 }
 
-.lumina.admin-mode .lum-dash-status-grid > div {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 16px 10px;
-  background: #fff;
+.lum-dash-status.diproses,
+.lum-dash-status.dikirim {
+  color: #88612f;
+  background: #f8eedc;
 }
 
-.lumina.admin-mode .lum-dash-status-grid strong {
-  font-size: 25px;
-}
-
-.lumina.admin-mode .lum-dash-status-grid span {
-  color: #85766a;
-  font-size: 10px;
+.lum-dash-empty {
+  padding: 30px !important;
+  text-align: center !important;
+  color: var(--muted);
 }
 
 /* PRODUCT MANAGEMENT */
 
-.lumina.admin-mode .lum-dash-products {
+.lum-dash-products {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
   gap: 20px;
   align-items: start;
 }
 
-.lumina.admin-mode .lum-dash-product-form {
+.lum-dash-product-form {
   display: flex;
   flex-direction: column;
   gap: 11px;
 }
 
-.lumina.admin-mode .lum-dash-product-form label {
+.lum-dash-product-form label {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
-.lumina.admin-mode .lum-dash-product-form input,
-.lumina.admin-mode .lum-dash-product-form select,
-.lumina.admin-mode .lum-dash-product-form textarea {
+.lum-dash-product-form input,
+.lum-dash-product-form select,
+.lum-dash-product-form textarea {
   width: 100%;
   min-width: 0;
-  padding: 11px 12px;
-  border: 1px solid #e0d0c0;
+  padding: 12px;
+  border: 1px solid #e3d8ce;
   border-radius: 7px;
   background: white;
-  color: #302821;
   font-size: 12px;
 }
 
-.lumina.admin-mode .lum-dash-product-form button {
+.lum-dash-product-form button {
   margin-top: 8px;
 }
 
-.lumina.admin-mode .lum-dash-preview {
-  width: 100%;
-  max-height: 150px;
+.lum-dash-preview {
+  max-width: 100%;
+  max-height: 170px;
   object-fit: contain;
 }
 
-.lumina.admin-mode .lum-dash-product-row {
+.lum-dash-product-row {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
-  padding: 14px 0;
-  border-bottom: 1px solid #eee2d9;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--border);
 }
 
-.lumina.admin-mode .lum-dash-product-row img {
-  width: 55px;
-  height: 60px;
+.lum-dash-product-row img {
+  width: 54px;
+  height: 65px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.lum-dash-product-row > div {
+  flex: 1;
+  min-width: 110px;
+}
+
+.lum-dash-product-row strong {
+  font-size: 12px;
+}
+
+.lum-dash-product-row p {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.lum-dash-product-row button {
+  padding: 8px 10px;
+  font-size: 11px;
+}
+
+.lum-dash-product-row .delete-btn {
+  border: 1px solid #efd1d1;
+  border-radius: 6px;
+  background: #fff3f3;
+  color: #ab4545;
+}
+
+/* STATUS OVERVIEW */
+
+.lum-dash-status-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.lum-dash-status-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 17px 11px;
+  border-radius: 8px;
+  background: white;
+}
+
+.lum-dash-status-grid strong {
+  font-size: 23px;
+}
+
+.lum-dash-status-grid span {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+/* RIGHT SIDEBAR */
+
+.lum-dash-right {
+  min-width: 0;
+  padding: 38px 21px;
+  border-left: 1px solid var(--border);
+  background: #fff;
+}
+
+.lum-dash-right section {
+  margin-bottom: 37px;
+}
+
+.lum-dash-right h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
+.lum-dash-small {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.lum-dash-side-product {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 15px 0;
+}
+
+.lum-dash-side-product img {
+  width: 51px;
+  height: 59px;
   border-radius: 7px;
   object-fit: cover;
 }
 
-.lumina.admin-mode .lum-dash-product-row > div {
+.lum-dash-side-product > div {
+  min-width: 0;
   flex: 1;
-  min-width: 120px;
 }
 
-.lumina.admin-mode .lum-dash-product-row strong {
-  font-size: 12px;
+.lum-dash-side-product strong {
+  display: block;
+  font-size: 11px;
+  overflow-wrap: anywhere;
 }
 
-.lumina.admin-mode .lum-dash-product-row p {
-  color: #8c7c70;
+.lum-dash-side-product small {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.lum-dash-stock {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
   font-size: 11px;
 }
 
-.lumina.admin-mode .lum-dash-product-row button {
-  padding: 9px;
-  font-size: 11px;
+.lum-dash-stock strong {
+  color: #b45e41;
 }
 
-.lumina.admin-mode .delete-btn {
-  border: 1px solid #e9b9b9;
-  border-radius: 6px;
-  background: #fff4f4;
-  color: #ac4444;
-}
-
-.lumina.admin-mode .delete-btn:hover {
-  background: #fbe1e1;
-}
-
-/* ==========================================
-   RESPONSIVE - DESKTOP
-========================================== */
+/* ===================================================
+   RESPONSIVE LAPTOP
+=================================================== */
 
 @media (min-width: 1261px) {
-  .lumina.admin-mode .lum-dash-sidebar,
-  .lumina.admin-mode .lum-dash-right {
+  .lum-dash-sidebar,
+  .lum-dash-right {
     position: sticky;
     top: 0;
     height: 100vh;
@@ -1521,40 +1449,31 @@ img {
   }
 }
 
-/* ==========================================
-   RESPONSIVE - LAPTOP
-========================================== */
-
 @media (min-width: 781px) and (max-width: 1260px) {
   .lumina.admin-mode .lum-dash {
-    grid-template-columns: 190px minmax(0, 1fr);
+    grid-template-columns: 195px minmax(0, 1fr);
   }
 
-  .lumina.admin-mode .lum-dash-main {
+  .lum-dash-main {
     padding: 28px 22px;
   }
 
-  .lumina.admin-mode .lum-dash-right {
+  .lum-dash-right {
     grid-column: 2;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 20px;
-    min-height: auto;
-    border-top: 1px solid #eee7e2;
+    gap: 18px;
+    border-top: 1px solid var(--border);
   }
 
-  .lumina.admin-mode .lum-dash-stats {
+  .lum-dash-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .lumina.admin-mode .lum-dash-products {
-    grid-template-columns: minmax(0, 1fr);
+  .lum-dash-products {
+    grid-template-columns: 1fr;
   }
 }
-
-/* ==========================================
-   RESPONSIVE - TABLET
-========================================== */
 
 @media (max-width: 1000px) {
   .lumina .product-grid {
@@ -1562,25 +1481,16 @@ img {
     gap: 20px;
   }
 
-  .lumina .hero {
-    min-height: 480px;
-  }
-
-  .lumina .hero-photo,
-  .lumina .hero-photo img {
-    min-height: 480px;
-  }
-
   .lumina .toolbar {
-    grid-template-columns: minmax(0, 1fr) 170px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 
-  .lumina .toolbar select:last-child {
+  .lumina .toolbar input {
     grid-column: 1 / -1;
   }
 
   .lumina .two-column {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: 1fr;
   }
 
   .lumina .summary {
@@ -1588,17 +1498,23 @@ img {
   }
 }
 
-/* ==========================================
-   RESPONSIVE - HP
-========================================== */
+/* ===================================================
+   RESPONSIVE MOBILE
+=================================================== */
 
 @media (max-width: 780px) {
+  .lumina .container {
+    width: calc(100% - 32px);
+  }
+
+  .lumina .section {
+    padding: 48px 0 65px;
+  }
+
   .lumina .navbar {
     flex-wrap: wrap;
-    justify-content: space-between;
-    min-height: auto;
-    padding: 16px 20px;
-    gap: 14px;
+    padding: 16px 18px;
+    gap: 12px;
   }
 
   .lumina .logo {
@@ -1607,41 +1523,31 @@ img {
 
   .lumina .nav-menu {
     order: 3;
-    justify-content: center;
     width: 100%;
-    gap: 18px;
-    padding-top: 6px;
+    justify-content: space-around;
+    gap: 10px;
   }
 
   .lumina .nav-menu button {
-    font-size: 12px;
+    font-size: 11px;
   }
 
   .lumina .cart-link {
-    min-height: 39px;
-    padding: 9px 14px;
-    font-size: 12px;
-  }
-
-  .lumina .container {
-    width: min(100% - 30px, 1240px);
-  }
-
-  .lumina .section {
-    padding-top: 40px;
-    padding-bottom: 60px;
+    padding: 10px 13px;
+    font-size: 11px;
   }
 
   .lumina .hero {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: 1fr;
+    min-height: auto;
   }
 
   .lumina .hero-copy {
-    padding: 55px 28px;
+    padding: 60px 28px;
   }
 
   .lumina .hero-copy h1 {
-    font-size: clamp(36px, 9vw, 53px);
+    font-size: clamp(39px, 9vw, 58px);
   }
 
   .lumina .hero-bottom {
@@ -1650,32 +1556,18 @@ img {
 
   .lumina .hero-photo,
   .lumina .hero-photo img {
-    min-height: 350px;
-    height: 350px;
+    min-height: 390px;
+    height: 390px;
   }
 
   .lumina .perks {
     grid-template-columns: 1fr;
-    gap: 20px;
-    padding: 28px;
-  }
-
-  .lumina .toolbar {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-
-  .lumina .toolbar select:last-child {
-    grid-column: auto;
+    gap: 24px;
   }
 
   .lumina .detail-layout {
     grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .lumina .detail-image {
-    max-height: 470px;
+    gap: 25px;
   }
 
   .lumina .panel {
@@ -1685,124 +1577,89 @@ img {
   .lumina .footer {
     flex-direction: column;
     align-items: flex-start;
-    gap: 16px;
-    padding: 35px 25px;
+    gap: 12px;
   }
 
-  /* Dashboard HP */
   .lumina.admin-mode .lum-dash {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: 1fr;
   }
 
-  .lumina.admin-mode .lum-dash-sidebar {
-    min-height: auto;
+  .lum-dash-sidebar {
+    gap: 13px;
     padding: 20px;
-    gap: 15px;
   }
 
-  .lumina.admin-mode .lum-dash-logo {
+  .lum-dash-logo {
     margin: 0;
   }
 
-  .lumina.admin-mode .lum-dash-menu-label {
+  .lum-dash-menu-label {
     display: none;
   }
 
-  .lumina.admin-mode .lum-dash-menu {
+  .lum-dash-menu {
     flex-direction: row;
     overflow-x: auto;
   }
 
-  .lumina.admin-mode .lum-dash-menu button {
+  .lum-dash-menu button {
     white-space: nowrap;
+    padding: 12px;
   }
 
-  .lumina.admin-mode .lum-dash-sidebar-bottom {
+  .lum-dash-sidebar-bottom {
     margin-top: 0;
   }
 
-  .lumina.admin-mode .lum-dash-main {
-    padding: 22px 15px;
+  .lum-dash-main {
+    padding: 24px 16px;
   }
 
-  .lumina.admin-mode .lum-dash-right {
-    grid-column: 1;
-    display: block;
-    min-height: auto;
-    padding: 25px 20px;
-  }
-
-  .lumina.admin-mode .lum-dash-topbar {
+  .lum-dash-topbar {
     flex-wrap: wrap;
   }
 
-  .lumina.admin-mode .lum-dash-search {
+  .lum-dash-search {
     order: 3;
     flex-basis: 100%;
-    max-width: none;
+    max-width: 100%;
   }
 
-  .lumina.admin-mode .lum-dash-stats {
+  .lum-dash-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .lumina.admin-mode .lum-dash-products {
+  .lum-dash-products {
     grid-template-columns: 1fr;
   }
 
-  .lumina.admin-mode .lum-dash-status-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .lum-dash-right {
+    grid-column: 1;
+    padding: 25px 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .lum-dash-status-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-
-/* ==========================================
-   RESPONSIVE - SMALL PHONES
-========================================== */
 
 @media (max-width: 480px) {
   .lumina .announcement {
     font-size: 9px;
-    line-height: 1.5;
-  }
-
-  .lumina .navbar {
-    padding: 15px;
-  }
-
-  .lumina .nav-menu {
-    gap: 12px;
-  }
-
-  .lumina .nav-menu button {
-    font-size: 11px;
   }
 
   .lumina .product-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 11px;
+    gap: 12px;
   }
 
   .lumina .product-card {
-    border-radius: 11px;
+    border-radius: 9px;
   }
 
   .lumina .product-picture {
     aspect-ratio: 3 / 4;
-  }
-
-  .lumina .heart {
-    top: 9px;
-    right: 9px;
-    width: 32px;
-    height: 32px;
-    font-size: 20px;
-  }
-
-  .lumina .stock-label {
-    top: 10px;
-    left: 8px;
-    padding: 7px 8px;
-    font-size: 7px;
   }
 
   .lumina .product-body {
@@ -1811,7 +1668,6 @@ img {
 
   .lumina .product-body h3 {
     font-size: 13px;
-    line-height: 1.4;
   }
 
   .lumina .product-body .price {
@@ -1822,16 +1678,39 @@ img {
     font-size: 10px;
   }
 
+  .lumina .stock-label {
+    left: 7px;
+    top: 9px;
+    padding: 6px 7px;
+    font-size: 7px;
+  }
+
+  .lumina .heart {
+    top: 8px;
+    right: 8px;
+    width: 30px;
+    height: 30px;
+    font-size: 20px;
+  }
+
   .lumina .product-actions {
     flex-direction: column;
     gap: 7px;
   }
 
   .lumina .product-actions button {
+    min-height: 36px;
     width: 100%;
-    min-height: 34px;
-    padding: 8px 6px;
     font-size: 10px;
+  }
+
+  .lumina .toolbar {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .lumina .toolbar input {
+    grid-column: auto;
   }
 
   .lumina .cart-row {
@@ -1840,56 +1719,40 @@ img {
 
   .lumina .cart-row img {
     width: 85px;
-    height: 100px;
-  }
-
-  .lumina .grow h3 {
-    font-size: 14px;
+    height: 105px;
   }
 
   .lumina .quantity {
     gap: 7px;
   }
 
-  .lumina .promo {
-    padding: 60px 20px;
+  .lum-dash-metric {
+    padding: 13px;
   }
 
-  .lumina.admin-mode .lum-dash-metric {
-    padding: 12px;
-  }
-
-  .lumina.admin-mode .lum-dash-metric strong {
+  .lum-dash-metric strong {
     font-size: 14px;
   }
 
-  .lumina.admin-mode .lum-dash-card {
+  .lum-dash-card {
     padding: 16px;
   }
 
-  .lumina.admin-mode .lum-dash-chart {
+  .lum-dash-chart {
     gap: 2px;
   }
 
-  .lumina.admin-mode .lum-dash-bar-col small,
-  .lumina.admin-mode .lum-dash-bar-col > span {
+  .lum-dash-bar-col small,
+  .lum-dash-bar-col > span {
     font-size: 8px;
   }
 }
 
-/* ==========================================
-   ACCESSIBILITY & MOTION
-========================================== */
-
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
-  .lumina *,
-  .lumina *::before,
-  .lumina *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
+  *,
+  *::before,
+  *::after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
   }
 }
