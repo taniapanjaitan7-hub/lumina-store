@@ -1,293 +1,84 @@
 
 import { useEffect, useState } from "react";
 import "./App.css";
+import productImages from "./product-images.json";
 
-/* =================================================
-   LUMINA STORE — PREMIUM FAMILY FASHION
-   React + Vite | Full App.jsx
-   Home • Shop • Wishlist • Cart • Checkout • Admin
-================================================= */
+/* ==========================================
+   LUMINA STORE — PREMIUM FASHION
+   FINAL SEVEN COLLECTIONS
+========================================== */
 
-const photo = (id, width = 900) =>
-  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${width}&q=85`;
+const FOLDERS = {
+  pria: {
+    title: "Pria",
+    label: "Baju Pria",
+    subtitle: "Men's Collection",
+    category: "Fashion",
+    price: 179000,
+    sizes: ["S", "M", "L", "XL", "XXL"],
+  },
 
-const IMG = {
-  hero: photo("photo-1483985988355-763728e1935b", 1400),
-  batik: photo("photo-1603252109303-2751441dd157"),
-  kebaya: photo("photo-1496747611176-843222e1e57c"),
-  shoes: photo("photo-1549298916-b41d501d3772"),
-  family: photo("photo-1529139574466-a303027c1d8b"),
-  kids: photo("photo-1518831959646-742c3a14ebf7"),
-  shirt: photo("photo-1521572163474-6864f9cf17ab"),
-  sneakers: photo("photo-1542291026-7eec264c27ff"),
-  denim: photo("photo-1544022613-e87ca75a784a"),
-  hoodie: photo("photo-1556821840-3a63f95609a7"),
-  handbag: photo("photo-1584917865442-de89df76afd3"),
-  woman: photo("photo-1515886657613-9f3515b0c78f"),
-  woman2: photo("photo-1515372039744-b8f02a3ae446"),
-  fashion: photo("photo-1539109136881-3be0616acf4b"),
-  child: photo("photo-1503919005314-30d93d07d823"),
-  flats: photo("photo-1515347619252-60a4bf4fff4f"),
-  heels: photo("photo-1543163521-1bf539c55dd2"),
-  loafers: photo("photo-1614252235316-8c857d38b5f4"),
-  formal: photo("photo-1520639888713-7851133b1ed0"),
-  sneaker2: photo("photo-1600185365483-26d7a4cc7519"),
-  sneaker3: photo("photo-1525966222134-fcfa99b8ae77"),
+  wanita: {
+    title: "Wanita",
+    label: "Baju Wanita",
+    subtitle: "Women's Collection",
+    category: "Fashion",
+    price: 199000,
+    sizes: ["S", "M", "L", "XL", "XXL"],
+  },
+
+  "batik wanita": {
+    title: "Batik Wanita",
+    label: "Batik Wanita",
+    subtitle: "Indonesian Heritage",
+    category: "Fashion",
+    price: 235000,
+    sizes: ["S", "M", "L", "XL", "XXL"],
+  },
+
+  "sepatu pria": {
+    title: "Sepatu Pria",
+    label: "Sepatu Pria",
+    subtitle: "Men's Footwear",
+    category: "Shoes",
+    price: 295000,
+    sizes: ["39", "40", "41", "42", "43", "44"],
+  },
+
+  "sepatu wanita": {
+    title: "Sepatu Wanita",
+    label: "Sepatu Wanita",
+    subtitle: "Women's Footwear",
+    category: "Shoes",
+    price: 245000,
+    sizes: ["35", "36", "37", "38", "39", "40"],
+  },
+
+  "tas wanita": {
+    title: "Tas Wanita",
+    label: "Tas Wanita",
+    subtitle: "Elegant Bags",
+    category: "Accessories",
+    price: 249000,
+    sizes: ["All Size"],
+  },
+
+  aksesoris: {
+    title: "Accessories",
+    label: "Aksesori",
+    subtitle: "Fashion Accessories",
+    category: "Accessories",
+    price: 129000,
+    sizes: ["All Size"],
+  },
 };
-
-const ADULT = ["S", "M", "L", "XL", "XXL"];
-const CHILD = [
-  "2-3 Tahun", "4-5 Tahun", "6-7 Tahun",
-  "8-10 Tahun", "11-12 Tahun",
-];
-const SHOE = ["36", "37", "38", "39", "40", "41", "42", "43"];
-
-function makeProduct(
-  id, name, category, price, stock, image,
-  sizes, colors, description, keywords = ""
-) {
-  return {
-    id, name, category, price, stock,
-    image, sizes, colors, description, keywords,
-  };
-}
-
-/* =================================================
-   DATA PRODUK DEMO
-   Foto Unsplash merupakan referensi lifestyle.
-   Untuk toko nyata, pakai foto produk asli.
-================================================= */
-
-const CATALOG = [
-  makeProduct(
-    1, "Classic T-Shirt", "Fashion", 125000, 20,
-    IMG.shirt, ADULT, ["White", "Black", "Cream"],
-    "Kaos premium yang nyaman untuk kegiatan sehari-hari.",
-    "kaos pria wanita casual dewasa"
-  ),
-  makeProduct(
-    2, "Urban Sneakers", "Shoes", 350000, 15,
-    IMG.sneakers, SHOE, ["Red", "Black", "White"],
-    "Sneakers modern dengan gaya sporty.",
-    "sepatu sneakers pria wanita"
-  ),
-  makeProduct(
-    3, "Denim Jacket", "Fashion", 275000, 12,
-    IMG.denim, ADULT, ["Blue", "Black"],
-    "Jaket denim klasik untuk berbagai gaya.",
-    "jaket pria wanita denim dewasa"
-  ),
-  makeProduct(
-    4, "Minimalist Sneakers", "Shoes", 395000, 10,
-    IMG.shoes, SHOE, ["Cream", "White"],
-    "Sneakers minimalis untuk aktivitas harian.",
-    "sepatu sneakers pria wanita"
-  ),
-  makeProduct(
-    5, "Premium Hoodie", "Fashion", 245000, 18,
-    IMG.hoodie, ADULT, ["Grey", "Black", "Cream"],
-    "Hoodie dengan bahan lembut dan nyaman.",
-    "hoodie pria wanita casual"
-  ),
-  makeProduct(
-    6, "Leather Handbag", "Accessories", 425000, 8,
-    IMG.handbag, ["All Size"], ["Brown", "Black"],
-    "Tas elegan untuk penampilan sehari-hari.",
-    "tas wanita handbag aksesoris"
-  ),
-  makeProduct(
-    101, "Batik Pria Modern", "Fashion", 189000, 25,
-    IMG.batik, ADULT, ["Brown", "Navy", "Black"],
-    "Koleksi batik pria untuk acara formal dan keluarga.",
-    "batik pria cowok laki laki bapak ayah dewasa"
-  ),
-  makeProduct(
-    102, "Batik Wanita Elegan", "Fashion", 215000, 20,
-    IMG.woman, ADULT, ["Maroon", "Cream", "Brown"],
-    "Koleksi busana batik wanita untuk acara istimewa.",
-    "batik wanita cewek ibu perempuan dewasa"
-  ),
-  makeProduct(
-    103, "Batik Anak Laki-Laki", "Fashion", 99000, 30,
-    IMG.child, CHILD, ["Blue", "Brown"],
-    "Busana anak laki-laki untuk acara keluarga.",
-    "batik anak cowok laki laki sekolah"
-  ),
-  makeProduct(
-    104, "Dress Batik Anak Perempuan", "Fashion", 115000, 24,
-    IMG.kids, CHILD, ["Pink", "Cream", "Maroon"],
-    "Dress anak perempuan dengan gaya anggun.",
-    "batik anak cewek perempuan dress"
-  ),
-  makeProduct(
-    105, "Batik Couple Suami Istri", "Fashion", 375000, 15,
-    IMG.family,
-    ["Paket S", "Paket M", "Paket L", "Paket XL"],
-    ["Brown", "Navy"],
-    "Koleksi busana pasangan bernuansa senada.",
-    "batik couple pasangan keluarga suami istri"
-  ),
-  makeProduct(
-    106, "Batik Sarimbit Keluarga", "Fashion", 575000, 12,
-    IMG.hero,
-    ["Paket S", "Paket M", "Paket L", "Paket XL"],
-    ["Brown", "Green"],
-    "Koleksi busana keluarga untuk acara bersama.",
-    "batik keluarga sarimbit ayah ibu anak"
-  ),
-  makeProduct(
-    107, "Kebaya Wanita Modern", "Fashion", 285000, 18,
-    IMG.kebaya, ADULT, ["Pink", "Cream", "Maroon"],
-    "Koleksi kebaya modern untuk acara spesial.",
-    "kebaya wanita perempuan wisuda dewasa"
-  ),
-  makeProduct(
-    108, "Kebaya Ibu Brokat Premium", "Fashion", 345000, 14,
-    IMG.woman2, ["M", "L", "XL", "XXL"],
-    ["Gold", "Brown", "Navy"],
-    "Koleksi kebaya untuk ibu dan wanita dewasa.",
-    "kebaya ibu brokat wanita formal"
-  ),
-  makeProduct(
-    109, "Kebaya Anak Perempuan", "Fashion", 145000, 22,
-    IMG.kids, CHILD, ["Pink", "White", "Purple"],
-    "Koleksi kebaya anak untuk acara keluarga.",
-    "kebaya anak perempuan cewek"
-  ),
-  makeProduct(
-    110, "Sepatu Sekolah Anak Laki-Laki", "Shoes", 159000, 40,
-    IMG.formal, ["28", "29", "30", "31", "32", "33", "34", "35"],
-    ["Black"],
-    "Sepatu sekolah hitam untuk anak laki-laki.",
-    "sepatu sekolah anak pria cowok"
-  ),
-  makeProduct(
-    111, "Sepatu Sekolah Anak Perempuan", "Shoes", 155000, 35,
-    IMG.sneaker3, ["28", "29", "30", "31", "32", "33", "34", "35"],
-    ["Black"],
-    "Sepatu sekolah anak perempuan.",
-    "sepatu sekolah anak wanita cewek"
-  ),
-  makeProduct(
-    112, "Sepatu Gereja Wanita", "Shoes", 245000, 20,
-    IMG.heels, ["36", "37", "38", "39", "40", "41"],
-    ["Black", "Cream", "Brown"],
-    "Sepatu wanita untuk kegiatan formal dan ibadah.",
-    "sepatu gereja wanita heels ibu dewasa"
-  ),
-  makeProduct(
-    113, "Sepatu Gereja Pria Formal", "Shoes", 295000, 25,
-    IMG.loafers, ["39", "40", "41", "42", "43", "44"],
-    ["Black", "Brown"],
-    "Sepatu formal pria dengan desain elegan.",
-    "sepatu gereja pria pantofel cowok"
-  ),
-  makeProduct(
-    114, "Sepatu Gereja Anak Perempuan", "Shoes", 175000, 24,
-    IMG.flats, ["27", "28", "29", "30", "31", "32", "33", "34"],
-    ["Black", "White", "Pink"],
-    "Sepatu pesta dan gereja untuk anak perempuan.",
-    "sepatu gereja anak cewek perempuan"
-  ),
-  makeProduct(
-    115, "Sepatu Gereja Anak Laki-Laki", "Shoes", 185000, 24,
-    IMG.formal, ["28", "29", "30", "31", "32", "33", "34", "35"],
-    ["Black", "Brown"],
-    "Sepatu formal untuk anak laki-laki.",
-    "sepatu gereja anak cowok pria"
-  ),
-  makeProduct(
-    116, "Sneakers Pria Casual", "Shoes", 325000, 28,
-    IMG.sneakers, SHOE, ["White", "Black", "Grey"],
-    "Sneakers casual untuk aktivitas pria.",
-    "sepatu sneakers pria cowok"
-  ),
-  makeProduct(
-    117, "Sepatu Anak Casual", "Shoes", 145000, 32,
-    IMG.sneaker2, ["26", "27", "28", "29", "30", "31", "32", "33"],
-    ["White", "Blue", "Pink"],
-    "Sepatu casual untuk bermain dan berjalan.",
-    "sepatu anak cowok cewek sneakers"
-  ),
-  makeProduct(
-    118, "Kebaya Couple Ibu dan Anak", "Fashion", 395000, 12,
-    IMG.woman2,
-    ["Paket S", "Paket M", "Paket L", "Paket XL"],
-    ["Pink", "Cream", "Maroon"],
-    "Koleksi busana senada untuk ibu dan anak.",
-    "kebaya couple ibu anak keluarga"
-  ),
-  makeProduct(
-    119, "Blouse Wanita Floral", "Fashion", 175000, 18,
-    IMG.woman, ADULT, ["White", "Pink", "Beige"],
-    "Blouse wanita dengan gaya feminim.",
-    "blouse wanita floral dewasa"
-  ),
-  makeProduct(
-    120, "Kemeja Formal Pria", "Fashion", 199000, 21,
-    IMG.batik, ADULT, ["White", "Blue", "Grey"],
-    "Kemeja pria untuk kerja dan kegiatan formal.",
-    "kemeja pria dewasa formal"
-  ),
-  makeProduct(
-    121, "Flat Shoes Wanita", "Shoes", 189000, 17,
-    IMG.flats, ["36", "37", "38", "39", "40"],
-    ["Black", "Nude", "Brown"],
-    "Sepatu flat wanita yang nyaman.",
-    "sepatu wanita cewek flat shoes"
-  ),
-  makeProduct(
-    122, "Loafers Pria Casual", "Shoes", 279000, 16,
-    IMG.loafers, ["39", "40", "41", "42", "43"],
-    ["Brown", "Black"],
-    "Loafers pria dengan desain modern.",
-    "sepatu pria loafers casual"
-  ),
-  makeProduct(
-    123, "Dress Wanita Casual", "Fashion", 225000, 20,
-    IMG.woman2, ADULT, ["Cream", "Black", "Pink"],
-    "Dress wanita untuk acara santai.",
-    "dress wanita cewek dewasa"
-  ),
-  makeProduct(
-    124, "Sepatu Sneakers Putih", "Shoes", 249000, 30,
-    IMG.sneaker3, SHOE, ["White"],
-    "Sneakers putih bergaya minimalis.",
-    "sepatu putih sneakers"
-  ),
-  makeProduct(
-    125, "Fashion Anak Perempuan", "Fashion", 135000, 25,
-    IMG.kids, CHILD, ["Pink", "Cream"],
-    "Koleksi pakaian anak perempuan.",
-    "baju anak cewek perempuan"
-  ),
-  makeProduct(
-    126, "Koleksi Fashion Wanita Premium", "Fashion", 329000, 14,
-    IMG.fashion, ADULT, ["Brown", "Cream", "Black"],
-    "Koleksi premium untuk penampilan elegan.",
-    "fashion wanita dewasa"
-  ),
-];
 
 const CATEGORIES = [
   ["All", "Semua Produk"],
-  ["Fashion", "Fashion"],
-  ["Batik", "Batik"],
-  ["Kebaya", "Kebaya"],
-  ["Shoes", "Sepatu"],
-  ["Sekolah", "Sepatu Sekolah"],
-  ["Gereja", "Sepatu Gereja"],
-  ["Anak", "Anak-Anak"],
-  ["Dewasa", "Dewasa"],
-  ["Keluarga", "Keluarga"],
-  ["Accessories", "Aksesori"],
-];
-
-const CATEGORY_TILES = [
-  { name: "Batik", image: IMG.batik, label: "Timeless Heritage" },
-  { name: "Kebaya", image: IMG.kebaya, label: "Elegant Occasion" },
-  { name: "Shoes", image: IMG.shoes, label: "Everyday Essentials" },
-  { name: "Anak", image: IMG.kids, label: "Little Ones" },
+  ...Object.values(FOLDERS).map((item) => [
+    item.title,
+    item.label,
+  ]),
 ];
 
 const STATUSES = [
@@ -300,17 +91,34 @@ const STATUSES = [
 
 const EMPTY_FORM = {
   name: "",
-  category: "Fashion",
+  collection: "Pria",
   price: "",
   stock: "",
   image: "",
+  sizes: "S,M,L,XL,XXL",
+  colors: "Sesuai foto",
   description: "",
   keywords: "",
-  sizes: "S,M,L,XL",
-  colors: "Black,White",
 };
 
-function money(value) {
+const EMPTY_CHECKOUT = {
+  name: "",
+  phone: "",
+  address: "",
+  shipping: "regular",
+};
+
+/* ==========================================
+   HELPER FUNCTIONS
+========================================== */
+
+function normalize(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase();
+}
+
+function rupiah(value) {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
@@ -318,109 +126,336 @@ function money(value) {
   }).format(Number(value) || 0);
 }
 
-function compactMoney(value) {
-  if (value >= 1000000) return `${(value / 1000000).toFixed(1)}jt`;
-  if (value >= 1000) return `${Math.round(value / 1000)}rb`;
-  return String(value);
-}
-
 function readStorage(key, fallback) {
   try {
     const value = localStorage.getItem(key);
-    return value ? JSON.parse(value) : fallback;
+
+    return value
+      ? JSON.parse(value)
+      : fallback;
   } catch {
     return fallback;
   }
 }
 
-function normalize(text) {
-  const aliases = {
-    cowok: "pria", cowo: "pria", laki: "pria",
-    ayah: "pria", bapak: "pria", suami: "pria",
-    cewek: "wanita", cewe: "wanita",
-    perempuan: "wanita", ibu: "wanita",
-    istri: "wanita", kids: "anak",
-    bocah: "anak", balita: "anak",
-    sarimbit: "keluarga",
-  };
+function readArray(key) {
+  const value = readStorage(key, []);
 
-  return String(text || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, " ")
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((word) => aliases[word] || word)
-    .join(" ");
+  return Array.isArray(value)
+    ? value
+    : [];
 }
 
-function matchesProduct(item, search, category, size, maxPrice) {
-  const text = normalize([
-    item.name,
-    item.category,
-    item.description,
-    item.keywords,
-    ...(item.sizes || []),
-    ...(item.colors || []),
-  ].join(" "));
-
-  const matchesSearch = normalize(search)
-    .split(" ")
-    .filter(Boolean)
-    .every((word) => text.includes(word));
-
-  const rules = {
-    All: true,
-    Fashion: item.category === "Fashion",
-    Shoes: item.category === "Shoes",
-    Accessories: item.category === "Accessories",
-    Batik: text.includes("batik"),
-    Kebaya: text.includes("kebaya"),
-    Sekolah: text.includes("sepatu sekolah"),
-    Gereja: text.includes("sepatu gereja"),
-    Anak: text.includes("anak"),
-    Dewasa: text.includes("dewasa"),
-    Keluarga: text.includes("keluarga"),
-  };
-
-  return (
-    matchesSearch &&
-    (rules[category] ?? true) &&
-    (!size || (item.sizes || []).includes(size)) &&
-    (!maxPrice || Number(item.price) <= Number(maxPrice))
+function getCollectionInfo(collection) {
+  return Object.values(FOLDERS).find(
+    (item) => item.title === collection
   );
 }
 
 function statusOf(status) {
-  return status && status !== "Simulasi"
+  return STATUSES.includes(status)
     ? status
     : "Pesanan Baru";
 }
 
-/* =================================================
-   PHOTO COMPONENT
-   Tidak mengubah foto menjadi gambar AI.
-================================================= */
+function shortMoney(value) {
+  if (value >= 1000000) {
+    return `${(value / 1000000).toFixed(1)}jt`;
+  }
 
-function ProductImage({ src, alt, ...props }) {
+  if (value >= 1000) {
+    return `${Math.round(value / 1000)}rb`;
+  }
+
+  return String(value);
+}
+
+function imageUrl(src) {
+  if (!src) return "";
+
+  if (src.startsWith("/images/")) {
+    return (
+      import.meta.env.BASE_URL.replace(/\/$/, "") +
+      src.split("/").map(encodeURIComponent).join("/")
+    );
+  }
+
+  return src;
+}
+
+/* ==========================================
+   READ LOCAL PRODUCT IMAGES
+========================================== */
+
+const localPhotos = (
+  Array.isArray(productImages)
+    ? productImages
+    : []
+)
+  .filter(
+    (item) =>
+      item &&
+      typeof item.folder === "string" &&
+      typeof item.url === "string" &&
+      Object.hasOwn(
+        FOLDERS,
+        normalize(item.folder)
+      )
+  )
+  .sort((a, b) =>
+    a.url.localeCompare(
+      b.url,
+      undefined,
+      { numeric: true }
+    )
+  );
+
+const LOCAL_PRODUCTS = localPhotos.map((photo) => {
+  const info = FOLDERS[normalize(photo.folder)];
+
+  return {
+    id: `local:${photo.url}`,
+
+    name: `${info.label} — ${photo.name}`,
+
+    collection: info.title,
+
+    category: info.category,
+
+    price: info.price,
+
+    stock: 20,
+
+    image: photo.url,
+
+    sizes: [...info.sizes],
+
+    colors: ["Sesuai foto"],
+
+    description:
+      `Koleksi ${info.label} dari LUMINA STORE. ` +
+      "Pilihan fashion modern untuk melengkapi gaya penampilanmu. " +
+      "Harga dan stok merupakan data simulasi.",
+
+    keywords:
+      `${info.label} ${photo.name}`,
+  };
+});
+
+/* ==========================================
+   PRODUCT MIGRATION
+
+   Mempertahankan produk yang sesuai.
+   Mengabaikan kategori lama yang dihapus.
+========================================== */
+
+function allowedCollection(product) {
+  const photo = localPhotos.find(
+    (item) => item.url === product.image
+  );
+
+  if (photo) {
+    return FOLDERS[
+      normalize(photo.folder)
+    ].title;
+  }
+
+  const text = normalize([
+    product.name,
+    product.collection,
+    product.keywords,
+  ].join(" "));
+
+  if (
+    /kebaya|anak|kids|keluarga|family|couple|sarimbit/.test(text)
+  ) {
+    return "";
+  }
+
+  if (getCollectionInfo(product.collection)) {
+    return product.collection;
+  }
+
+  if (text.includes("batik")) {
+    return /wanita|perempuan/.test(text)
+      ? "Batik Wanita"
+      : "";
+  }
+
+  if (
+    product.category === "Shoes" ||
+    /sepatu|sneakers|heels|loafers|pantofel/.test(text)
+  ) {
+    if (/wanita|perempuan/.test(text)) {
+      return "Sepatu Wanita";
+    }
+
+    if (/pria|laki-laki/.test(text)) {
+      return "Sepatu Pria";
+    }
+
+    return "";
+  }
+
+  if (
+    /tas wanita|handbag|tote bag|sling bag|shoulder bag/.test(text)
+  ) {
+    return "Tas Wanita";
+  }
+
+  if (product.category === "Accessories") {
+    return "Accessories";
+  }
+
+  if (/wanita|perempuan|women|blouse/.test(text)) {
+    return "Wanita";
+  }
+
+  if (/pria|cowok|laki-laki/.test(text)) {
+    return "Pria";
+  }
+
+  return "";
+}
+
+function loadProducts() {
+  const saved = readArray("lumina_products_v1");
+
+  const deleted = readArray(
+    "lumina_deleted_local_v1"
+  );
+
+  const existing = saved
+    .map((product) => {
+      if (!product) return null;
+
+      const collection = allowedCollection(product);
+
+      if (!collection) return null;
+
+      const info = getCollectionInfo(collection);
+
+      if (!info) return null;
+
+      const validImage = localPhotos.some(
+        (photo) =>
+          photo.url === product.image &&
+          FOLDERS[
+            normalize(photo.folder)
+          ].title === collection
+      );
+
+      const sizes = Array.isArray(product.sizes)
+        ? product.sizes.filter(
+            (size) => info.sizes.includes(size)
+          )
+        : [];
+
+      return {
+        ...product,
+
+        collection,
+
+        category: info.category,
+
+        image: validImage
+          ? product.image
+          : "",
+
+        sizes: sizes.length
+          ? sizes
+          : [...info.sizes],
+
+        colors:
+          Array.isArray(product.colors) &&
+          product.colors.length
+            ? product.colors
+            : ["Sesuai foto"],
+      };
+    })
+    .filter(Boolean);
+
+  const ids = new Set(
+    existing.map((item) => String(item.id))
+  );
+
+  const usedPhotos = new Set(
+    existing.map((item) => item.image)
+  );
+
+  const additional = LOCAL_PRODUCTS.filter(
+    (item) =>
+      !ids.has(String(item.id)) &&
+      !usedPhotos.has(item.image) &&
+      !deleted.includes(item.id)
+  );
+
+  return [...existing, ...additional];
+}
+
+/* ==========================================
+   PRODUCT IMAGE COMPONENT
+========================================== */
+
+function ProductImage({
+  src,
+  alt,
+  className = "",
+  style = {},
+}) {
+  const [failedSrc, setFailedSrc] =
+    useState(null);
+
+  if (!src || failedSrc === src) {
+    return (
+      <div
+        className={`lum-photo-missing ${className}`}
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 10,
+          background: "#eee5dc",
+          color: "#987b64",
+          textAlign: "center",
+          overflow: "hidden",
+          ...style,
+        }}
+      >
+        <span style={{ fontSize: 26 }}>
+          ▧
+        </span>
+
+        <small>Foto belum tersedia</small>
+      </div>
+    );
+  }
+
   return (
     <img
-      src={src || IMG.shirt}
-      alt={alt}
+      src={imageUrl(src)}
+      alt={alt || "Lumina Collection"}
+      className={className}
       loading="lazy"
-      onError={(event) => {
-        const img = event.currentTarget;
-        if (!img.dataset.fallback) {
-          img.dataset.fallback = "1";
-          img.src = IMG.shirt;
-        }
-      }}
-      {...props}
+      onError={() => setFailedSrc(src)}
+      style={style}
     />
   );
 }
 
+/* ==========================================
+   PRODUCT CARD
+========================================== */
+
 function ProductCard({
-  item, favorite, onFavorite, onDetail, onAdd,
+  product,
+  favorite,
+  onFavorite,
+  onDetail,
+  onAdd,
 }) {
   return (
     <article className="product-card">
@@ -428,45 +463,62 @@ function ProductCard({
         <button
           type="button"
           className="image-button"
-          onClick={() => onDetail(item)}
+          onClick={() => onDetail(product)}
         >
-          <ProductImage src={item.image} alt={item.name} />
+          <ProductImage
+            src={product.image}
+            alt={product.name}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
+              background: "#f4f0ec",
+            }}
+          />
         </button>
 
         <button
           type="button"
           className="heart"
-          aria-label={`Wishlist ${item.name}`}
+          aria-label={`Wishlist ${product.name}`}
           aria-pressed={favorite}
-          onClick={() => onFavorite(item.id)}
+          onClick={() => onFavorite(product.id)}
         >
           {favorite ? "♥" : "♡"}
         </button>
 
         <span className="stock-label">
-          {item.stock > 0 ? "NEW COLLECTION" : "SOLD OUT"}
+          {product.stock > 0
+            ? "LUMINA COLLECTION"
+            : "SOLD OUT"}
         </span>
       </div>
 
       <div className="product-body">
-        <small>{item.category}</small>
-        <h3>{item.name}</h3>
-        <p className="price">{money(item.price)}</p>
-        <p className="muted">Stok: {item.stock}</p>
+        <small>{product.collection}</small>
+
+        <h3>{product.name}</h3>
+
+        <p className="price">
+          {rupiah(product.price)}
+        </p>
+
+        <p className="muted">
+          Stok: {product.stock}
+        </p>
 
         <div className="product-actions">
           <button
-            type="button"
             className="btn-light"
-            onClick={() => onDetail(item)}
+            onClick={() => onDetail(product)}
           >
             Detail
           </button>
+
           <button
-            type="button"
             className="btn-dark"
-            disabled={item.stock <= 0}
-            onClick={() => onAdd(item)}
+            disabled={product.stock <= 0}
+            onClick={() => onAdd(product)}
           >
             + Keranjang
           </button>
@@ -477,155 +529,215 @@ function ProductCard({
 }
 
 function ProductGrid({
-  items, wishlist, onFavorite, onDetail, onAdd,
+  items,
+  wishlist,
+  onFavorite,
+  onDetail,
+  onAdd,
 }) {
   return (
     <div className="product-grid">
-      {items.map((item) => (
+      {items.map((product) => (
         <ProductCard
-          key={item.id}
-          item={item}
-          favorite={wishlist.includes(item.id)}
+          key={product.id}
+          product={product}
+          favorite={wishlist.includes(product.id)}
           onFavorite={onFavorite}
           onDetail={onDetail}
           onAdd={onAdd}
         />
       ))}
 
-      {items.length === 0 && (
+      {!items.length && (
         <p className="empty">
-          Produk tidak ditemukan. Coba kategori atau pencarian lain.
+          Belum ada produk yang sesuai.
+          Silakan pilih kategori lainnya.
         </p>
       )}
     </div>
   );
 }
 
-/* =================================================
+/* ==========================================
    CATEGORY SECTION
-================================================= */
+========================================== */
 
-function CategorySection({ onSelect }) {
+function CategorySection({
+  products,
+  onSelect,
+}) {
   return (
     <section className="container section">
-      <p className="eyebrow center">SHOP BY CATEGORY</p>
-      <h2 className="section-title">Explore Our Collections</h2>
+      <p className="eyebrow center">
+        SHOP BY CATEGORY
+      </p>
+
+      <h2 className="section-title">
+        Explore Our Collections
+      </h2>
+
       <p className="section-description">
-        Pilih gaya favorit untuk setiap generasi.
+        Tujuh koleksi fashion pilihan
+        untuk melengkapi penampilanmu.
       </p>
 
       <div
         style={{
           display: "grid",
           gridTemplateColumns:
-            "repeat(auto-fit,minmax(min(100%,220px),1fr))",
-          gap: 20,
+            "repeat(auto-fit,minmax(min(100%,230px),1fr))",
+          gap: 22,
         }}
       >
-        {CATEGORY_TILES.map((tile) => (
-          <button
-            key={tile.name}
-            type="button"
-            onClick={() => onSelect(tile.name)}
-            style={{
-              display: "block",
-              position: "relative",
-              minHeight: 330,
-              overflow: "hidden",
-              padding: 0,
-              border: 0,
-              borderRadius: 12,
-              background: "#e9dfd6",
-              color: "#fff",
-              textAlign: "left",
-              cursor: "pointer",
-            }}
-          >
-            <ProductImage
-              src={tile.image}
-              alt={`Kategori ${tile.name}`}
-              style={{
-                display: "block",
-                position: "absolute",
-                inset: 0,
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-              }}
-            />
+        {Object.entries(FOLDERS).map(
+          ([folder, info]) => {
+            const items = products.filter(
+              (p) =>
+                p.collection === info.title &&
+                p.image
+            );
 
-            <span
-              style={{
-                display: "flex",
-                position: "absolute",
-                inset: 0,
-                flexDirection: "column",
-                justifyContent: "flex-end",
-                gap: 8,
-                padding: 25,
-                background:
-                  "linear-gradient(transparent 35%,rgba(25,20,17,.77))",
-              }}
-            >
-              <span style={{ fontSize: 10, letterSpacing: 2 }}>
-                {tile.label}
-              </span>
-              <strong
+            return (
+              <button
+                type="button"
+                key={folder}
+                onClick={() => onSelect(info.title)}
                 style={{
-                  fontFamily: "Georgia,serif",
-                  fontSize: 29,
-                  fontWeight: 500,
+                  position: "relative",
+                  minHeight: 310,
+                  padding: 0,
+                  overflow: "hidden",
+                  border: 0,
+                  borderRadius: 14,
+                  background: "#eaded2",
+                  textAlign: "left",
                 }}
               >
-                {tile.name === "Shoes" ? "Sepatu" : tile.name}
-              </strong>
-              <span style={{ fontSize: 12 }}>Explore Collection →</span>
-            </span>
-          </button>
-        ))}
+                <ProductImage
+                  src={items[0]?.image}
+                  alt={info.label}
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
+
+                <span
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "flex-end",
+                    padding: 24,
+                    gap: 8,
+                    background:
+                      "linear-gradient(transparent 25%,rgba(28,20,14,.82))",
+                    color: "#fff",
+                  }}
+                >
+                  <small
+                    style={{
+                      fontSize: 10,
+                      letterSpacing: 2,
+                    }}
+                  >
+                    {info.subtitle}
+                  </small>
+
+                  <strong
+                    style={{
+                      fontFamily: "Georgia,serif",
+                      fontSize: 27,
+                    }}
+                  >
+                    {info.label}
+                  </strong>
+
+                  <span style={{ fontSize: 12 }}>
+                    {items.length} produk bergambar
+                    {" →"}
+                  </span>
+                </span>
+              </button>
+            );
+          }
+        )}
       </div>
     </section>
   );
 }
 
-/* =================================================
+/* ==========================================
    ADMIN ORDER TABLE
-================================================= */
+========================================== */
 
-function OrderTable({ orders, onStatus, editable }) {
+function OrderTable({
+  orders,
+  onStatus,
+  editable = false,
+}) {
   return (
     <div className="lum-dash-table-wrap">
       <table className="lum-dash-table">
         <thead>
           <tr>
             <th>Produk</th>
-            <th>Customer</th>
+            <th>Pembeli</th>
             <th>Order ID</th>
             <th>Total</th>
             <th>Status</th>
           </tr>
         </thead>
+
         <tbody>
           {orders.map((order) => {
-            const first = order.items?.[0];
             const status = statusOf(order.status);
+            const first = order.items?.[0];
 
             return (
               <tr key={order.id}>
                 <td>
-                  <div className="lum-dash-order-product">
-                    {first && (
+                  <div
+                    className="lum-dash-order-product"
+                  >
+                    <div
+                      style={{
+                        width: 45,
+                        height: 55,
+                        flexShrink: 0,
+                      }}
+                    >
                       <ProductImage
-                        src={first.image}
-                        alt={first.name}
+                        src={first?.image}
+                        alt={first?.name}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "contain",
+                        }}
                       />
-                    )}
-                    <span>{first?.name || "Produk"}</span>
+                    </div>
+
+                    <span>
+                      {first?.name || "Produk"}
+
+                      {order.items?.length > 1
+                        ? ` +${order.items.length - 1}`
+                        : ""}
+                    </span>
                   </div>
                 </td>
+
                 <td>{order.customer}</td>
+
                 <td>{order.id}</td>
-                <td>{money(order.total)}</td>
+
+                <td>{rupiah(order.total)}</td>
+
                 <td>
                   {editable ? (
                     <select
@@ -635,12 +747,18 @@ function OrderTable({ orders, onStatus, editable }) {
                         status === "Dibatalkan"
                       }
                       onChange={(e) =>
-                        onStatus(order.id, e.target.value)
+                        onStatus(
+                          order.id,
+                          e.target.value
+                        )
                       }
                     >
-                      {STATUSES.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
+                      {STATUSES.map((value) => (
+                        <option
+                          key={value}
+                          value={value}
+                        >
+                          {value}
                         </option>
                       ))}
                     </select>
@@ -648,7 +766,9 @@ function OrderTable({ orders, onStatus, editable }) {
                     <span
                       className={
                         "lum-dash-status " +
-                        status.toLowerCase().replaceAll(" ", "-")
+                        status
+                          .toLowerCase()
+                          .replaceAll(" ", "-")
                       }
                     >
                       {status}
@@ -659,9 +779,12 @@ function OrderTable({ orders, onStatus, editable }) {
             );
           })}
 
-          {orders.length === 0 && (
+          {!orders.length && (
             <tr>
-              <td colSpan={5} className="lum-dash-empty">
+              <td
+                colSpan={5}
+                className="lum-dash-empty"
+              >
                 Belum ada pesanan.
               </td>
             </tr>
@@ -672,136 +795,275 @@ function OrderTable({ orders, onStatus, editable }) {
   );
 }
 
-/* =================================================
-   FULL SCREEN ADMIN
-================================================= */
+/* ==========================================
+   ADMIN DASHBOARD
+========================================== */
 
 function AdminDashboard({
-  products, orders, onBack, onSave,
-  onEdit, onDelete, onStatus,
-  form, setForm, editingId, onCancel,
+  products,
+  orders,
+  onBack,
+  onStatus,
+  onSave,
+  onEdit,
+  onDelete,
+  form,
+  setForm,
+  editingId,
+  onCancel,
 }) {
-  const [section, setSection] = useState("overview");
-  const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState("Semua");
-  const [year, setYear] = useState(new Date().getFullYear());
+  const [section, setSection] =
+    useState("overview");
+
+  const [query, setQuery] =
+    useState("");
+
+  const [statusFilter, setStatusFilter] =
+    useState("Semua");
+
+  const [photoFolder, setPhotoFolder] =
+    useState("Semua");
+
+  const [year, setYear] =
+    useState(new Date().getFullYear());
 
   const completed = orders.filter(
     (o) => statusOf(o.status) === "Selesai"
   );
 
-  const active = orders.filter(
-    (o) => statusOf(o.status) !== "Dibatalkan"
+  const activeOrders = orders.filter(
+    (o) =>
+      statusOf(o.status) !== "Dibatalkan"
   );
 
   const revenue = completed.reduce(
-    (sum, o) => sum + Number(o.total || 0), 0
+    (sum, o) => sum + Number(o.total || 0),
+    0
   );
 
-  const activeValue = active.reduce(
-    (sum, o) => sum + Number(o.total || 0), 0
+  const activeValue = activeOrders.reduce(
+    (sum, o) => sum + Number(o.total || 0),
+    0
   );
 
   const totalStock = products.reduce(
-    (sum, p) => sum + Number(p.stock || 0), 0
+    (sum, p) => sum + Number(p.stock || 0),
+    0
   );
 
-  const metrics = [
-    ["◉", "Penjualan Selesai", money(revenue), "Completed"],
-    ["◈", "Nilai Pesanan Aktif", money(activeValue), "Active"],
-    ["▤", "Total Pesanan", orders.length, `${completed.length} selesai`],
-    ["▣", "Total Produk", products.length, `${totalStock} unit stok`],
-  ];
+  const lowStock = products.filter(
+    (p) => Number(p.stock) <= 5
+  );
 
   const sold = new Map();
 
-  completed.forEach((o) => {
-    (o.items || []).forEach((p) => {
-      const old = sold.get(p.id) || 0;
-      sold.set(p.id, old + Number(p.quantity || 0));
+  completed.forEach((order) => {
+    (order.items || []).forEach((item) => {
+      sold.set(
+        item.id,
+        (sold.get(item.id) || 0) +
+          Number(item.quantity || 0)
+      );
     });
   });
 
-  const popular = [...products]
-    .sort((a, b) => (sold.get(b.id) || 0) - (sold.get(a.id) || 0))
-    .slice(0, 4);
-
   const topSelling = [...products]
-    .filter((p) => (sold.get(p.id) || 0) > 0)
-    .sort((a, b) => sold.get(b.id) - sold.get(a.id))
+    .filter((p) => sold.get(p.id) > 0)
+    .sort(
+      (a, b) =>
+        sold.get(b.id) - sold.get(a.id)
+    )
     .slice(0, 5);
 
-  const lowStock = products.filter((p) => Number(p.stock) <= 5);
+  const years = [
+    ...new Set([
+      new Date().getFullYear(),
+      ...orders
+        .map((o) => new Date(o.date).getFullYear())
+        .filter(Number.isFinite),
+    ]),
+  ].sort((a, b) => b - a);
 
-  const years = [...new Set([
-    new Date().getFullYear(),
-    ...orders
-      .map((o) => new Date(o.date).getFullYear())
-      .filter(Number.isFinite),
-  ])].sort((a, b) => b - a);
+  const months = Array.from(
+    { length: 12 },
+    (_, index) => ({
+      label: new Date(
+        year,
+        index,
+        1
+      ).toLocaleString("id-ID", {
+        month: "short",
+      }),
 
-  const months = Array.from({ length: 12 }, (_, index) => ({
-    label: new Date(2026, index, 1).toLocaleDateString("id-ID", {
-      month: "short",
-    }),
-    total: completed
-      .filter((o) => {
-        const d = new Date(o.date);
-        return d.getFullYear() === year && d.getMonth() === index;
-      })
-      .reduce((sum, o) => sum + Number(o.total || 0), 0),
-  }));
+      total: completed
+        .filter((order) => {
+          const date = new Date(order.date);
 
-  const maxRevenue = Math.max(1, ...months.map((m) => m.total));
-
-  const visibleOrders = [...orders]
-    .filter((o) => {
-      const text = [
-        o.id, o.customer,
-        ...(o.items || []).map((p) => p.name),
-      ].join(" ").toLowerCase();
-
-      return (
-        text.includes(query.toLowerCase()) &&
-        (filter === "Semua" || statusOf(o.status) === filter)
-      );
+          return (
+            date.getFullYear() === year &&
+            date.getMonth() === index
+          );
+        })
+        .reduce(
+          (sum, order) =>
+            sum + Number(order.total || 0),
+          0
+        ),
     })
-    .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-  const visibleProducts = products.filter((p) =>
-    matchesProduct(p, query, "All", "", "")
   );
 
+  const maxRevenue = Math.max(
+    1,
+    ...months.map((month) => month.total)
+  );
+
+  const visibleOrders = [...orders]
+    .filter((order) => {
+      const text = normalize([
+        order.id,
+        order.customer,
+        ...(order.items || []).map(
+          (item) => item.name
+        ),
+      ].join(" "));
+
+      return (
+        text.includes(normalize(query)) &&
+        (
+          statusFilter === "Semua" ||
+          statusOf(order.status) === statusFilter
+        )
+      );
+    })
+    .sort(
+      (a, b) =>
+        new Date(b.date) - new Date(a.date)
+    );
+
+  const visibleProducts = products.filter(
+    (product) =>
+      normalize([
+        product.name,
+        product.collection,
+        product.keywords,
+      ].join(" ")).includes(
+        normalize(query)
+      )
+  );
+
+  const availablePhotos = localPhotos.filter(
+    (photo) =>
+      (
+        photoFolder === "Semua" ||
+        normalize(photo.folder) === photoFolder
+      ) &&
+      normalize(
+        `${photo.folder} ${photo.name}`
+      ).includes(normalize(query))
+  );
+
+  const metrics = [
+    [
+      "Rp",
+      "Penjualan Selesai",
+      rupiah(revenue),
+      "Completed",
+    ],
+    [
+      "◈",
+      "Nilai Pesanan",
+      rupiah(activeValue),
+      "Non-cancelled",
+    ],
+    [
+      "▤",
+      "Total Pesanan",
+      orders.length,
+      `${completed.length} selesai`,
+    ],
+    [
+      "▣",
+      "Total Produk",
+      products.length,
+      `${totalStock} unit`,
+    ],
+  ];
+
   const titles = {
-    overview: "Overview",
+    overview: "Dashboard Overview",
     report: "Sales Report",
-    orders: "Manajemen Pesanan",
-    products: "Kelola Produk",
+    orders: "Order Management",
+    products: "Product Management",
+    photos: "Photo Gallery",
   };
+
+  function changeSection(value) {
+    setSection(value);
+    setQuery("");
+    setStatusFilter("Semua");
+  }
+
+  function updateForm(key, value) {
+    setForm((old) => ({
+      ...old,
+      [key]: value,
+    }));
+  }
 
   return (
     <div className="lum-dash">
-      <aside className="lum-dash-sidebar">
-        <div className="lum-dash-logo">
+
+      {/* ADMIN SIDEBAR */}
+
+      <aside
+        className="lum-dash-sidebar"
+        style={{
+          background: "#302720",
+          color: "white",
+        }}
+      >
+        <div
+          className="lum-dash-logo"
+          style={{ color: "white" }}
+        >
           LUMINA<span>.</span>
         </div>
 
-        <div className="lum-dash-menu-label">Menu</div>
+        <p
+          style={{
+            fontSize: 10,
+            letterSpacing: 2,
+            color: "#cbb4a1",
+          }}
+        >
+          MANAGEMENT SYSTEM
+        </p>
+
+        <div className="lum-dash-menu-label">
+          WORKSPACE
+        </div>
 
         <nav className="lum-dash-menu">
           {[
             ["overview", "▦", "Overview"],
-            ["report", "▤", "Report"],
-            ["orders", "🛒", "Order"],
-            ["products", "◈", "Product"],
+            ["report", "▤", "Sales Report"],
+            ["orders", "▣", "Orders"],
+            ["products", "◈", "Products"],
+            ["photos", "▧", "Photo Gallery"],
           ].map(([key, icon, label]) => (
             <button
-              key={key}
               type="button"
-              className={section === key ? "active" : ""}
-              onClick={() => {
-                setSection(key);
-                setQuery("");
+              key={key}
+              className={
+                section === key ? "active" : ""
+              }
+              onClick={() => changeSection(key)}
+              style={{
+                color: "#fff",
+                background:
+                  section === key
+                    ? "#a98468"
+                    : "transparent",
               }}
             >
               <span>{icon}</span>
@@ -811,95 +1073,188 @@ function AdminDashboard({
         </nav>
 
         <div className="lum-dash-sidebar-bottom">
-          <strong>Business</strong>
-          <p>Family Fashion & Lifestyle</p>
-          <small>● Admin Demo</small>
+          <strong>LUMINA STORE</strong>
 
-          <button className="lum-dash-back" onClick={onBack}>
+          <p style={{ color: "#d6c3b2" }}>
+            Premium Fashion & Lifestyle
+          </p>
+
+          <small style={{ color: "#bcd6ba" }}>
+            ● Admin Demo
+          </small>
+
+          <button
+            className="lum-dash-back"
+            onClick={onBack}
+          >
             ← Kembali ke Toko
           </button>
         </div>
       </aside>
 
-      <main className="lum-dash-main">
+      {/* MAIN ADMIN */}
+
+      <main
+        className="lum-dash-main"
+        style={{ background: "#f8f6f3" }}
+      >
         <header className="lum-dash-topbar">
           <div>
             <span className="lum-dash-eyebrow">
-              LUMINA MANAGEMENT SYSTEM
+              LUMINA BUSINESS CENTER
             </span>
+
             <h1>{titles[section]}</h1>
           </div>
 
           <div className="lum-dash-search">
             <span>⌕</span>
+
             <input
               type="search"
-              placeholder="Search product or order..."
+              placeholder="Cari produk atau pesanan..."
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) =>
+                setQuery(e.target.value)
+              }
             />
           </div>
 
-          <span className="lum-dash-avatar">A</span>
+          <span className="lum-dash-avatar">
+            A
+          </span>
         </header>
 
-        {(section === "overview" || section === "report") && (
+        {/* STATISTICS */}
+
+        {(section === "overview" ||
+          section === "report") && (
           <div className="lum-dash-stats">
-            {metrics.map(([icon, label, value, note]) => (
-              <div className="lum-dash-metric" key={label}>
-                <div className="lum-dash-metric-head">
-                  <span className="lum-dash-metric-icon">
-                    {icon}
+            {metrics.map(
+              ([icon, label, value, note], index) => (
+                <div
+                  className="lum-dash-metric"
+                  key={label}
+                  style={{
+                    background:
+                      index === 0
+                        ? "linear-gradient(135deg,#49392d,#a17e62)"
+                        : "#fff",
+
+                    color:
+                      index === 0
+                        ? "#fff"
+                        : "#302720",
+
+                    borderRadius: 15,
+                  }}
+                >
+                  <div className="lum-dash-metric-head">
+                    <span
+                      className="lum-dash-metric-icon"
+                      style={{
+                        color:
+                          index === 0
+                            ? "#fff"
+                            : "#a6846b",
+                      }}
+                    >
+                      {icon}
+                    </span>
+
+                    <small
+                      style={{
+                        color:
+                          index === 0
+                            ? "#f1ddca"
+                            : "#89796b",
+                      }}
+                    >
+                      {note}
+                    </small>
+                  </div>
+
+                  <strong>{value}</strong>
+
+                  <span
+                    style={{
+                      color:
+                        index === 0
+                          ? "#fff"
+                          : "#89796b",
+                    }}
+                  >
+                    {label}
                   </span>
-                  <small>{note}</small>
                 </div>
-                <strong>{value}</strong>
-                <span>{label}</span>
-              </div>
-            ))}
+              )
+            )}
           </div>
         )}
+
+        {/* DASHBOARD OVERVIEW */}
 
         {section === "overview" && (
           <>
             <section className="lum-dash-card">
               <div className="lum-dash-card-head">
                 <div>
-                  <h2>Earning Revenue</h2>
-                  <p>Pendapatan dari pesanan selesai</p>
+                  <h2>Revenue Analytics</h2>
+
+                  <p>
+                    Pendapatan dari pesanan selesai
+                  </p>
                 </div>
+
                 <select
                   value={year}
-                  onChange={(e) => setYear(Number(e.target.value))}
+                  onChange={(e) =>
+                    setYear(Number(e.target.value))
+                  }
                 >
-                  {years.map((y) => (
-                    <option key={y} value={y}>{y}</option>
+                  {years.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
                   ))}
                 </select>
               </div>
 
               <div className="lum-dash-chart-total">
-                {money(months.reduce((s, m) => s + m.total, 0))}
+                {rupiah(
+                  months.reduce(
+                    (sum, month) =>
+                      sum + month.total,
+                    0
+                  )
+                )}
+
                 <small>Total {year}</small>
               </div>
 
               <div className="lum-dash-chart">
                 {months.map((month, index) => (
-                  <div className="lum-dash-bar-col" key={index}>
+                  <div
+                    className="lum-dash-bar-col"
+                    key={index}
+                  >
                     <span>
                       {month.total
-                        ? compactMoney(month.total)
+                        ? shortMoney(month.total)
                         : ""}
                     </span>
 
                     <div className="lum-dash-bar-area">
                       <div
                         className="lum-dash-bar"
+                        title={rupiah(month.total)}
                         style={{
                           height:
                             `${month.total / maxRevenue * 100}%`,
+
+                          background:
+                            "linear-gradient(180deg,#d7b79b,#89664c)",
                         }}
-                        title={money(month.total)}
                       />
                     </div>
 
@@ -907,17 +1262,103 @@ function AdminDashboard({
                   </div>
                 ))}
               </div>
+
+              {!completed.length && (
+                <p className="lum-dash-small">
+                  Grafik akan terisi setelah
+                  pesanan berstatus Selesai.
+                </p>
+              )}
+            </section>
+
+            <section className="lum-dash-card">
+              <h2>Collection Overview</h2>
+
+              <p className="lum-dash-small">
+                Tujuh kategori koleksi LUMINA STORE.
+              </p>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns:
+                    "repeat(auto-fit,minmax(125px,1fr))",
+                  gap: 14,
+                  marginTop: 20,
+                }}
+              >
+                {Object.entries(FOLDERS).map(
+                  ([folder, info]) => {
+                    const count = products.filter(
+                      (p) =>
+                        p.collection === info.title
+                    ).length;
+
+                    const photos = localPhotos.filter(
+                      (p) =>
+                        normalize(p.folder) === folder
+                    );
+
+                    return (
+                      <button
+                        key={folder}
+                        className="btn-light"
+                        onClick={() => {
+                          setPhotoFolder(folder);
+                          changeSection("photos");
+                        }}
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          padding: 12,
+                          gap: 10,
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: "100%",
+                            height: 110,
+                            overflow: "hidden",
+                            borderRadius: 8,
+                          }}
+                        >
+                          <ProductImage
+                            src={photos[0]?.url}
+                            alt={info.label}
+                            style={{
+                              objectFit: "contain",
+                              width: "100%",
+                              height: "100%",
+                            }}
+                          />
+                        </div>
+
+                        <strong
+                          style={{ fontSize: 22 }}
+                        >
+                          {count}
+                        </strong>
+
+                        <span>{info.label}</span>
+                      </button>
+                    );
+                  }
+                )}
+              </div>
             </section>
 
             <section className="lum-dash-card">
               <div className="lum-dash-card-head">
                 <div>
                   <h2>Recent Orders</h2>
-                  <p>Lima pesanan terbaru</p>
+                  <p>Pesanan terbaru pelanggan</p>
                 </div>
+
                 <button
                   className="lum-dash-link"
-                  onClick={() => setSection("orders")}
+                  onClick={() =>
+                    changeSection("orders")
+                  }
                 >
                   Lihat Semua →
                 </button>
@@ -925,12 +1366,12 @@ function AdminDashboard({
 
               <OrderTable
                 orders={visibleOrders.slice(0, 5)}
-                onStatus={onStatus}
-                editable={false}
               />
             </section>
           </>
         )}
+
+        {/* SALES REPORT */}
 
         {section === "report" && (
           <>
@@ -941,10 +1382,14 @@ function AdminDashboard({
                 {STATUSES.map((status) => (
                   <div key={status}>
                     <strong>
-                      {orders.filter(
-                        (o) => statusOf(o.status) === status
-                      ).length}
+                      {
+                        orders.filter(
+                          (o) =>
+                            statusOf(o.status) === status
+                        ).length
+                      }
                     </strong>
+
                     <span>{status}</span>
                   </div>
                 ))}
@@ -952,42 +1397,37 @@ function AdminDashboard({
             </section>
 
             <section className="lum-dash-card">
-              <div className="lum-dash-card-head">
-                <h2>Laporan Transaksi</h2>
-                <select
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
-                >
-                  <option>Semua</option>
-                  {STATUSES.map((s) => (
-                    <option key={s}>{s}</option>
-                  ))}
-                </select>
-              </div>
+              <h2>Laporan Transaksi</h2>
 
               <OrderTable
                 orders={visibleOrders}
-                onStatus={onStatus}
-                editable={false}
               />
             </section>
           </>
         )}
+
+        {/* ORDER MANAGEMENT */}
 
         {section === "orders" && (
           <section className="lum-dash-card">
             <div className="lum-dash-card-head">
               <div>
                 <h2>Manajemen Pesanan</h2>
-                <p>Kelola status transaksi simulasi</p>
+                <p>Kelola status pesanan pelanggan</p>
               </div>
+
               <select
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
+                value={statusFilter}
+                onChange={(e) =>
+                  setStatusFilter(e.target.value)
+                }
               >
                 <option>Semua</option>
-                {STATUSES.map((s) => (
-                  <option key={s}>{s}</option>
+
+                {STATUSES.map((status) => (
+                  <option key={status}>
+                    {status}
+                  </option>
                 ))}
               </select>
             </div>
@@ -999,6 +1439,8 @@ function AdminDashboard({
             />
           </section>
         )}
+
+        {/* PRODUCT MANAGEMENT */}
 
         {section === "products" && (
           <div className="lum-dash-products">
@@ -1013,38 +1455,59 @@ function AdminDashboard({
               </h2>
 
               <label>Nama Produk</label>
+
               <input
                 required
                 value={form.name}
                 onChange={(e) =>
-                  setForm({ ...form, name: e.target.value })
+                  updateForm("name", e.target.value)
                 }
               />
 
-              <label>Kategori</label>
+              <label>Kategori Produk</label>
+
               <select
-                value={form.category}
-                onChange={(e) =>
-                  setForm({ ...form, category: e.target.value })
-                }
+                value={form.collection}
+                onChange={(e) => {
+                  const collection = e.target.value;
+
+                  const info =
+                    getCollectionInfo(collection);
+
+                  setForm((old) => ({
+                    ...old,
+                    collection,
+                    image: "",
+                    sizes: info.sizes.join(","),
+                  }));
+                }}
               >
-                <option value="Fashion">Fashion</option>
-                <option value="Shoes">Shoes</option>
-                <option value="Accessories">Accessories</option>
+                {CATEGORIES.slice(1).map(
+                  ([value, label]) => (
+                    <option
+                      key={value}
+                      value={value}
+                    >
+                      {label}
+                    </option>
+                  )
+                )}
               </select>
 
               <label>Harga (Rp)</label>
+
               <input
                 required
                 type="number"
                 min="1"
                 value={form.price}
                 onChange={(e) =>
-                  setForm({ ...form, price: e.target.value })
+                  updateForm("price", e.target.value)
                 }
               />
 
-              <label>Stok</label>
+              <label>Jumlah Stok</label>
+
               <input
                 required
                 type="number"
@@ -1052,73 +1515,107 @@ function AdminDashboard({
                 step="1"
                 value={form.stock}
                 onChange={(e) =>
-                  setForm({ ...form, stock: e.target.value })
+                  updateForm("stock", e.target.value)
                 }
               />
 
-              <label>URL Foto Produk</label>
-              <input
-                required
-                type="url"
-                placeholder="https://..."
+              <label>Pilih Foto Lokal</label>
+
+              <select
                 value={form.image}
                 onChange={(e) =>
-                  setForm({ ...form, image: e.target.value })
+                  updateForm("image", e.target.value)
                 }
-              />
+              >
+                <option value="">
+                  Pilih foto dari folder
+                </option>
 
-              {form.image && (
+                {localPhotos
+                  .filter(
+                    (photo) =>
+                      FOLDERS[
+                        normalize(photo.folder)
+                      ].title === form.collection
+                  )
+                  .map((photo) => (
+                    <option
+                      key={photo.url}
+                      value={photo.url}
+                    >
+                      {photo.name}
+                    </option>
+                  ))}
+              </select>
+
+              <div
+                style={{
+                  height: 220,
+                  overflow: "hidden",
+                  borderRadius: 12,
+                  background: "#f3eee8",
+                }}
+              >
                 <ProductImage
-                  className="lum-dash-preview"
                   src={form.image}
-                  alt="Preview produk"
+                  alt="Preview Produk"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "contain",
+                  }}
                 />
-              )}
+              </div>
 
-              <label>Deskripsi</label>
+              <label>Deskripsi Produk</label>
+
               <textarea
-                rows={3}
+                rows={4}
                 value={form.description}
                 onChange={(e) =>
-                  setForm({
-                    ...form,
-                    description: e.target.value,
-                  })
+                  updateForm(
+                    "description",
+                    e.target.value
+                  )
                 }
               />
 
-              <label>Kata Kunci Pencarian</label>
-              <textarea
-                rows={2}
+              <label>Kata Kunci</label>
+
+              <input
                 value={form.keywords}
-                placeholder="Contoh: batik pria dewasa"
                 onChange={(e) =>
-                  setForm({
-                    ...form,
-                    keywords: e.target.value,
-                  })
+                  updateForm(
+                    "keywords",
+                    e.target.value
+                  )
                 }
               />
 
-              <label>Ukuran (pisahkan koma)</label>
+              <label>Ukuran</label>
+
               <input
                 required
                 value={form.sizes}
                 onChange={(e) =>
-                  setForm({ ...form, sizes: e.target.value })
+                  updateForm("sizes", e.target.value)
                 }
               />
 
-              <label>Warna (pisahkan koma)</label>
+              <label>Warna</label>
+
               <input
                 required
                 value={form.colors}
                 onChange={(e) =>
-                  setForm({ ...form, colors: e.target.value })
+                  updateForm("colors", e.target.value)
                 }
               />
 
-              <button className="btn-dark" type="submit">
+              <button
+                type="submit"
+                className="btn-dark"
+              >
                 {editingId !== null
                   ? "Simpan Perubahan"
                   : "+ Tambah Produk"}
@@ -1136,71 +1633,229 @@ function AdminDashboard({
             </form>
 
             <section className="lum-dash-card">
-              <h2>Daftar Produk ({products.length})</h2>
+              <h2>
+                Daftar Produk ({products.length})
+              </h2>
+
               <p className="lum-dash-small">
-                Cari produk menggunakan kolom Search di atas.
+                Gunakan kolom pencarian untuk
+                menemukan produk.
               </p>
 
-              {visibleProducts.map((item) => (
+              {visibleProducts.map((product) => (
                 <div
+                  key={product.id}
                   className="lum-dash-product-row"
-                  key={item.id}
                 >
-                  <ProductImage
-                    src={item.image}
-                    alt={item.name}
-                  />
-                  <div>
-                    <strong>{item.name}</strong>
-                    <p>
-                      {money(item.price)} · Stok {item.stock}
-                    </p>
+                  <div
+                    style={{
+                      width: 55,
+                      minWidth: 55,
+                      height: 65,
+                      flex: "0 0 55px",
+                    }}
+                  >
+                    <ProductImage
+                      src={product.image}
+                      alt={product.name}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                      }}
+                    />
                   </div>
+
+                  <div>
+                    <strong>{product.name}</strong>
+
+                    <p>
+                      {rupiah(product.price)}
+                      {" · "}
+                      Stok {product.stock}
+                    </p>
+
+                    <small>
+                      {product.collection}
+                    </small>
+                  </div>
+
                   <button
                     type="button"
                     className="btn-light"
-                    onClick={() => onEdit(item)}
+                    onClick={() => onEdit(product)}
                   >
                     Edit
                   </button>
+
                   <button
                     type="button"
                     className="delete-btn"
-                    onClick={() => onDelete(item.id)}
+                    onClick={() => onDelete(product.id)}
                   >
                     Hapus
                   </button>
                 </div>
               ))}
 
-              {visibleProducts.length === 0 && (
+              {!visibleProducts.length && (
                 <p>Produk tidak ditemukan.</p>
               )}
             </section>
           </div>
         )}
+
+        {/* ADMIN PHOTO GALLERY */}
+
+        {section === "photos" && (
+          <section className="lum-dash-card">
+            <div className="lum-dash-card-head">
+              <div>
+                <h2>Fashion Gallery</h2>
+                <p>Seluruh foto dari folder lokal</p>
+              </div>
+
+              <select
+                value={photoFolder}
+                onChange={(e) =>
+                  setPhotoFolder(e.target.value)
+                }
+              >
+                <option>Semua</option>
+
+                {Object.keys(FOLDERS).map(
+                  (folder) => (
+                    <option
+                      key={folder}
+                      value={folder}
+                    >
+                      {FOLDERS[folder].label}
+                    </option>
+                  )
+                )}
+              </select>
+            </div>
+
+            <p className="lum-dash-small">
+              {availablePhotos.length} foto ditemukan.
+            </p>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  "repeat(auto-fit,minmax(min(100%,150px),1fr))",
+                gap: 16,
+                marginTop: 25,
+              }}
+            >
+              {availablePhotos.map((photo) => (
+                <article
+                  key={photo.url}
+                  style={{
+                    background: "#fff",
+                    border: "1px solid #e9dfd6",
+                    borderRadius: 12,
+                    overflow: "hidden",
+                  }}
+                >
+                  <div
+                    style={{
+                      aspectRatio: "3/4",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <ProductImage
+                      src={photo.url}
+                      alt={photo.name}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                        background: "#f2ede8",
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ padding: 14 }}>
+                    <strong>
+                      {
+                        FOLDERS[
+                          normalize(photo.folder)
+                        ].label
+                      }
+                    </strong>
+
+                    <p className="lum-dash-small">
+                      {photo.name}
+                    </p>
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            {!availablePhotos.length && (
+              <p className="empty">
+                Belum ada foto di folder ini.
+              </p>
+            )}
+          </section>
+        )}
       </main>
+
+      {/* RIGHT SIDEBAR */}
 
       <aside className="lum-dash-right">
         <section>
-          <h3>Produk Populer</h3>
-          <p className="lum-dash-small">
-            Berdasarkan penjualan selesai
-          </p>
+          <h3>Store Summary</h3>
 
-          {popular.map((item) => (
+          {[
+            ["Kategori", 7],
+            ["Foto Lokal", localPhotos.length],
+            ["Total Produk", products.length],
+            ["Total Stok", totalStock],
+            ["Pesanan Selesai", completed.length],
+            ["Stok Menipis", lowStock.length],
+          ].map(([label, value]) => (
+            <div
+              className="lum-dash-stock"
+              key={label}
+            >
+              <span>{label}</span>
+              <strong>{value}</strong>
+            </div>
+          ))}
+        </section>
+
+        <section>
+          <h3>Top Selling Products</h3>
+
+          {!topSelling.length && (
+            <p className="lum-dash-small">
+              Belum ada penjualan selesai.
+            </p>
+          )}
+
+          {topSelling.map((product) => (
             <div
               className="lum-dash-side-product"
-              key={item.id}
+              key={product.id}
             >
               <ProductImage
-                src={item.image}
-                alt={item.name}
+                src={product.image}
+                alt={product.name}
+                style={{
+                  width: 50,
+                  height: 60,
+                  objectFit: "contain",
+                }}
               />
+
               <div>
-                <strong>{item.name}</strong>
+                <strong>{product.name}</strong>
+
                 <small>
-                  {sold.get(item.id) || 0} unit terjual
+                  {sold.get(product.id)} unit terjual
                 </small>
               </div>
             </div>
@@ -1208,124 +1863,120 @@ function AdminDashboard({
         </section>
 
         <section>
-          <h3>Top Selling Product</h3>
-          {topSelling.length === 0 && (
+          <h3>Stock Alert</h3>
+
+          {!lowStock.length && (
             <p className="lum-dash-small">
-              Belum ada pesanan selesai.
+              ✓ Stok masih mencukupi.
             </p>
           )}
 
-          {topSelling.map((item) => (
+          {lowStock.map((product) => (
             <div
-              className="lum-dash-side-product"
-              key={item.id}
+              className="lum-dash-stock"
+              key={product.id}
             >
-              <ProductImage
-                src={item.image}
-                alt={item.name}
-              />
-              <div>
-                <strong>{item.name}</strong>
-                <small>{sold.get(item.id)} unit</small>
-              </div>
+              <span>{product.name}</span>
+              <strong>{product.stock}</strong>
             </div>
           ))}
-        </section>
-
-        <section>
-          <h3>Stock Alert</h3>
-          <p className="lum-dash-small">
-            Stok lima unit atau kurang
-          </p>
-
-          {lowStock.length === 0 ? (
-            <p className="lum-dash-small">
-              ✓ Stok mencukupi.
-            </p>
-          ) : (
-            lowStock.map((item) => (
-              <div
-                className="lum-dash-stock"
-                key={item.id}
-              >
-                <span>{item.name}</span>
-                <strong>{item.stock}</strong>
-              </div>
-            ))
-          )}
         </section>
       </aside>
     </div>
   );
 }
 
-/* =================================================
+/* ==========================================
    MAIN APPLICATION
-================================================= */
+========================================== */
 
 export default function App() {
-  const [products, setProducts] = useState(() => {
-    const saved = readStorage("lumina_products_v1", CATALOG);
-    const old = Array.isArray(saved) ? saved : CATALOG;
+  const [products, setProducts] =
+    useState(loadProducts);
 
-    const merged = old.map((item) => {
-      const original = CATALOG.find(
-        (p) => String(p.id) === String(item.id)
-      );
-      if (!original) return item;
+  const [cart, setCart] = useState(() => {
+    const ids = new Set(
+      loadProducts().map((p) => p.id)
+    );
 
-      const placeholder =
-        !item.image ||
-        item.image.includes("placehold.co") ||
-        item.image.includes("unsplash.com/photos/");
-
-      return {
-        ...original,
-        ...item,
-        image: placeholder ? original.image : item.image,
-        keywords: item.keywords || original.keywords,
-      };
-    });
-
-    const ids = new Set(merged.map((p) => String(p.id)));
-
-    return [
-      ...merged,
-      ...CATALOG.filter((p) => !ids.has(String(p.id))),
-    ];
+    return readArray("lumina_cart_v1")
+      .filter((item) => ids.has(item.id));
   });
 
-  const [cart, setCart] = useState(() =>
-    readStorage("lumina_cart_v1", [])
-  );
-  const [wishlist, setWishlist] = useState(() =>
-    readStorage("lumina_wishlist_v1", [])
-  );
-  const [orders, setOrders] = useState(() =>
-    readStorage("lumina_orders_v1", [])
-  );
+  const [wishlist, setWishlist] = useState(() => {
+    const ids = new Set(
+      loadProducts().map((p) => p.id)
+    );
 
-  const [page, setPage] = useState("home");
-  const [selectedId, setSelectedId] = useState(null);
-  const [selectedSize, setSelectedSize] = useState("");
-  const [selectedColor, setSelectedColor] = useState("");
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("All");
-  const [sizeFilter, setSizeFilter] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
-  const [sort, setSort] = useState("default");
-  const [message, setMessage] = useState("");
-  const [editingId, setEditingId] = useState(null);
-  const [form, setForm] = useState(EMPTY_FORM);
-
-  const [checkout, setCheckout] = useState({
-    name: "",
-    phone: "",
-    address: "",
-    shipping: "regular",
+    return readArray("lumina_wishlist_v1")
+      .filter((id) => ids.has(id));
   });
+
+  const [orders, setOrders] =
+    useState(() => readArray("lumina_orders_v1"));
+
+  const [page, setPage] = useState(
+    () =>
+      window.location.hash === "#admin"
+        ? "admin"
+        : "home"
+  );
+
+  const [category, setCategory] =
+    useState("All");
+
+  const [search, setSearch] =
+    useState("");
+
+  const [sort, setSort] =
+    useState("default");
+
+  const [sizeFilter, setSizeFilter] =
+    useState("");
+
+  const [maxPrice, setMaxPrice] =
+    useState("");
+
+  const [photoOnly, setPhotoOnly] =
+    useState(true);
+
+  const [selectedId, setSelectedId] =
+    useState(null);
+
+  const [selectedSize, setSelectedSize] =
+    useState("");
+
+  const [selectedColor, setSelectedColor] =
+    useState("");
+
+  const [message, setMessage] =
+    useState("");
+
+  const [editingId, setEditingId] =
+    useState(null);
+
+  const [form, setForm] =
+    useState(EMPTY_FORM);
+
+  const [checkout, setCheckout] =
+    useState(EMPTY_CHECKOUT);
+
+  /* LOCAL STORAGE */
 
   useEffect(() => {
+    if (
+      localStorage.getItem(
+        "lumina_catalog_backup_before_7_v1"
+      ) === null
+    ) {
+      localStorage.setItem(
+        "lumina_catalog_backup_before_7_v1",
+        localStorage.getItem(
+          "lumina_products_v1"
+        ) || "[]"
+      );
+    }
+
     localStorage.setItem(
       "lumina_products_v1",
       JSON.stringify(products)
@@ -1353,44 +2004,130 @@ export default function App() {
     );
   }, [orders]);
 
+  useEffect(() => {
+    if (!message) return;
+
+    const timer = setTimeout(
+      () => setMessage(""),
+      3500
+    );
+
+    return () => clearTimeout(timer);
+  }, [message]);
+
+  /* PRODUCT DATA */
+
   const selected = products.find(
     (p) => p.id === selectedId
   );
 
-  const filtered = products
-    .filter((p) =>
-      matchesProduct(
-        p, search, category, sizeFilter, maxPrice
-      )
+  const featured = Object.values(FOLDERS)
+    .flatMap((info) =>
+      products
+        .filter(
+          (p) =>
+            p.collection === info.title &&
+            p.image
+        )
+        .slice(0, 2)
     )
+    .slice(0, 14);
+
+  const visibleProducts = products
+    .filter((product) => {
+      const text = normalize([
+        product.name,
+        product.collection,
+        product.description,
+        product.keywords,
+      ].join(" "));
+
+      return (
+        text.includes(normalize(search)) &&
+        (
+          category === "All" ||
+          product.collection === category
+        ) &&
+        (
+          !sizeFilter ||
+          product.sizes?.includes(sizeFilter)
+        ) &&
+        (
+          !maxPrice ||
+          Number(product.price) <= Number(maxPrice)
+        ) &&
+        (!photoOnly || Boolean(product.image))
+      );
+    })
     .sort((a, b) => {
-      if (sort === "low") return a.price - b.price;
-      if (sort === "high") return b.price - a.price;
-      return a.id - b.id;
+      if (sort === "low") {
+        return a.price - b.price;
+      }
+
+      if (sort === "high") {
+        return b.price - a.price;
+      }
+
+      if (sort === "name") {
+        return a.name.localeCompare(b.name);
+      }
+
+      return 0;
     });
 
-  const sizesAvailable = [...new Set(
-    products.flatMap((p) => p.sizes || [])
-  )];
+  const sizeOptions = [
+    ...new Set(
+      products
+        .filter(
+          (p) =>
+            category === "All" ||
+            p.collection === category
+        )
+        .flatMap((p) => p.sizes || [])
+    ),
+  ];
 
   const cartCount = cart.reduce(
-    (sum, p) => sum + Number(p.quantity), 0
+    (sum, item) =>
+      sum + Number(item.quantity || 0),
+    0
   );
 
   const subtotal = cart.reduce(
-    (sum, p) =>
-      sum + Number(p.price) * Number(p.quantity), 0
+    (sum, item) =>
+      sum +
+      Number(item.price) *
+      Number(item.quantity),
+    0
   );
 
   const shippingFee =
-    checkout.shipping === "express" ? 25000 : 12000;
+    checkout.shipping === "express"
+      ? 25000
+      : 12000;
 
-  function notify(text) {
-    setMessage(text);
-  }
+  const heroImage =
+    localPhotos.find(
+      (p) => normalize(p.folder) === "wanita"
+    )?.url ||
+    localPhotos.find(
+      (p) => normalize(p.folder) === "pria"
+    )?.url ||
+    localPhotos[0]?.url;
 
-  function navigate(destination) {
-    setPage(destination);
+  /* NAVIGATION */
+
+  function navigate(value) {
+    setPage(value);
+
+    window.history.replaceState(
+      null,
+      "",
+      window.location.pathname +
+        window.location.search +
+        (value === "admin" ? "#admin" : "")
+    );
+
     window.scrollTo(0, 0);
   }
 
@@ -1402,46 +2139,73 @@ export default function App() {
     navigate("shop");
   }
 
-  function openProduct(item) {
-    setSelectedId(item.id);
-    setSelectedSize(item.sizes?.[0] || "All Size");
-    setSelectedColor(item.colors?.[0] || "Default");
+  function openProduct(product) {
+    setSelectedId(product.id);
+
+    setSelectedSize(
+      product.sizes?.[0] || "All Size"
+    );
+
+    setSelectedColor(
+      product.colors?.[0] || "Sesuai foto"
+    );
+
     navigate("detail");
   }
+
+  /* WISHLIST */
 
   function toggleWishlist(id) {
     setWishlist((old) =>
       old.includes(id)
-        ? old.filter((p) => p !== id)
+        ? old.filter((item) => item !== id)
         : [...old, id]
     );
   }
 
-  function addToCart(item, size, color) {
-    const chosenSize =
-      size || item.sizes?.[0] || "All Size";
-    const chosenColor =
-      color || item.colors?.[0] || "Default";
+  /* SHOPPING CART */
 
-    const key =
-      `${item.id}-${chosenSize}-${chosenColor}`;
+  function addToCart(product, size, color) {
+    const chosenSize =
+      size || product.sizes?.[0] || "All Size";
+
+    const chosenColor =
+      color || product.colors?.[0] || "Sesuai foto";
+
+    const key = JSON.stringify([
+      product.id,
+      chosenSize,
+      chosenColor,
+    ]);
 
     const used = cart
-      .filter((p) => p.id === item.id)
-      .reduce((sum, p) => sum + p.quantity, 0);
+      .filter((p) => p.id === product.id)
+      .reduce(
+        (sum, p) => sum + Number(p.quantity),
+        0
+      );
 
-    if (used >= item.stock) {
-      notify("Stok produk tidak mencukupi.");
+    if (used >= product.stock) {
+      setMessage("Stok tidak mencukupi.");
       return;
     }
 
     setCart((old) => {
-      const existing = old.find((p) => p.key === key);
+      const existing = old.find(
+        (p) =>
+          p.id === product.id &&
+          p.size === chosenSize &&
+          p.color === chosenColor
+      );
 
       if (existing) {
         return old.map((p) =>
-          p.key === key
-            ? { ...p, quantity: p.quantity + 1 }
+          p.key === existing.key
+            ? {
+                ...p,
+                quantity:
+                  Number(p.quantity) + 1,
+              }
             : p
         );
       }
@@ -1449,7 +2213,7 @@ export default function App() {
       return [
         ...old,
         {
-          ...item,
+          ...product,
           key,
           size: chosenSize,
           color: chosenColor,
@@ -1458,23 +2222,34 @@ export default function App() {
       ];
     });
 
-    notify("Produk masuk ke keranjang.");
+    setMessage(
+      "Produk berhasil masuk keranjang."
+    );
   }
 
   function changeQuantity(key, amount) {
-    const item = cart.find((p) => p.key === key);
-    const current = products.find(
-      (p) => p.id === item?.id
+    const item = cart.find(
+      (p) => p.key === key
     );
 
-    if (!item || !current) return;
+    if (!item) return;
+
+    const product = products.find(
+      (p) => p.id === item.id
+    );
 
     const used = cart
       .filter((p) => p.id === item.id)
-      .reduce((sum, p) => sum + p.quantity, 0);
+      .reduce(
+        (sum, p) => sum + Number(p.quantity),
+        0
+      );
 
-    if (amount > 0 && used >= current.stock) {
-      notify("Jumlah melebihi stok tersedia.");
+    if (
+      amount > 0 &&
+      (!product || used >= product.stock)
+    ) {
+      setMessage("Stok tidak mencukupi.");
       return;
     }
 
@@ -1482,12 +2257,18 @@ export default function App() {
       old
         .map((p) =>
           p.key === key
-            ? { ...p, quantity: p.quantity + amount }
+            ? {
+                ...p,
+                quantity:
+                  Number(p.quantity) + amount,
+              }
             : p
         )
         .filter((p) => p.quantity > 0)
     );
   }
+
+  /* CHECKOUT */
 
   function placeOrder(event) {
     event.preventDefault();
@@ -1501,67 +2282,108 @@ export default function App() {
         checkout.phone.trim()
       )
     ) {
-      notify("Periksa kembali informasi pembeli.");
+      setMessage(
+        "Periksa kembali informasi pembeli."
+      );
+
       return;
     }
 
-    const quantities = {};
+    const quantities = new Map();
 
-    cart.forEach((p) => {
-      quantities[p.id] =
-        (quantities[p.id] || 0) + p.quantity;
+    cart.forEach((item) => {
+      quantities.set(
+        item.id,
+        (quantities.get(item.id) || 0) +
+          Number(item.quantity)
+      );
     });
 
-    for (const [id, quantity] of Object.entries(
-      quantities
-    )) {
-      const item = products.find(
-        (p) => String(p.id) === id
+    for (const [id, quantity] of quantities) {
+      const product = products.find(
+        (p) => p.id === id
       );
 
-      if (!item || item.stock < quantity) {
-        notify("Stok produk tidak mencukupi.");
+      if (
+        !product ||
+        product.stock < quantity ||
+        !Number.isFinite(quantity) ||
+        quantity <= 0
+      ) {
+        setMessage("Stok tidak mencukupi.");
+        return;
+      }
+    }
+
+    for (const item of cart) {
+      const product = products.find(
+        (p) => p.id === item.id
+      );
+
+      if (
+        !product.sizes.includes(item.size) ||
+        !product.colors.includes(item.color)
+      ) {
+        setMessage(
+          "Ukuran atau warna produk berubah. " +
+          "Silakan tambahkan ulang produk."
+        );
+
         return;
       }
     }
 
     const order = {
       id: `LM-${Date.now()}`,
+
       date: new Date().toISOString(),
+
       customer: checkout.name.trim(),
+
       phone: checkout.phone.trim(),
+
       address: checkout.address.trim(),
+
       shipping: checkout.shipping,
-      items: cart.map((p) => ({ ...p })),
+
+      items: cart.map((item) => ({ ...item })),
+
       total: subtotal + shippingFee,
+
       status: "Pesanan Baru",
+
       stockRestored: false,
     };
 
     setOrders((old) => [order, ...old]);
 
     setProducts((old) =>
-      old.map((p) => ({
-        ...p,
-        stock: p.stock - (quantities[p.id] || 0),
+      old.map((product) => ({
+        ...product,
+
+        stock:
+          Number(product.stock) -
+          (quantities.get(product.id) || 0),
       }))
     );
 
     setCart([]);
 
-    setCheckout({
-      name: "",
-      phone: "",
-      address: "",
-      shipping: "regular",
-    });
+    setCheckout(EMPTY_CHECKOUT);
 
     navigate("success");
   }
 
-  function updateStatus(id, nextStatus) {
-    const order = orders.find((o) => o.id === id);
-    if (!order) return;
+  /* UPDATE ORDER STATUS */
+
+  function updateStatus(id, value) {
+    const order = orders.find(
+      (o) => o.id === id
+    );
+
+    if (!order || !STATUSES.includes(value)) {
+      return;
+    }
 
     const previous = statusOf(order.status);
 
@@ -1569,23 +2391,26 @@ export default function App() {
       previous === "Selesai" ||
       previous === "Dibatalkan"
     ) {
-      notify("Status final tidak dapat diubah.");
       return;
     }
 
     if (
-      nextStatus === "Dibatalkan" &&
+      value === "Dibatalkan" &&
       !order.stockRestored
     ) {
       setProducts((old) =>
-        old.map((p) => ({
-          ...p,
+        old.map((product) => ({
+          ...product,
+
           stock:
-            p.stock +
+            Number(product.stock) +
             (order.items || [])
-              .filter((item) => item.id === p.id)
+              .filter(
+                (item) => item.id === product.id
+              )
               .reduce(
-                (sum, item) => sum + item.quantity,
+                (sum, item) =>
+                  sum + Number(item.quantity),
                 0
               ),
         }))
@@ -1597,34 +2422,57 @@ export default function App() {
         o.id === id
           ? {
               ...o,
-              status: nextStatus,
+              status: value,
+
               stockRestored:
                 o.stockRestored ||
-                nextStatus === "Dibatalkan",
+                value === "Dibatalkan",
             }
           : o
       )
     );
 
-    notify(`Status pesanan menjadi ${nextStatus}.`);
+    setMessage(`Status pesanan: ${value}`);
   }
+
+  /* ADMIN CRUD PRODUCTS */
 
   function saveProduct(event) {
     event.preventDefault();
 
-    const item = {
+    const info = getCollectionInfo(
+      form.collection
+    );
+
+    if (!info) {
+      setMessage("Kategori tidak valid.");
+      return;
+    }
+
+    const product = {
       id: editingId ?? Date.now(),
+
       name: form.name.trim(),
-      category: form.category,
+
+      collection: form.collection,
+
+      category: info.category,
+
       price: Number(form.price),
+
       stock: Number(form.stock),
-      image: form.image.trim(),
+
+      image: form.image,
+
       description: form.description.trim(),
+
       keywords: form.keywords.trim(),
+
       sizes: form.sizes
         .split(",")
         .map((s) => s.trim())
         .filter(Boolean),
+
       colors: form.colors
         .split(",")
         .map((s) => s.trim())
@@ -1632,77 +2480,186 @@ export default function App() {
     };
 
     if (
-      !item.name ||
-      !item.image ||
-      !Number.isFinite(item.price) ||
-      item.price <= 0 ||
-      !Number.isInteger(item.stock) ||
-      item.stock < 0 ||
-      !item.sizes.length ||
-      !item.colors.length
+      !product.name ||
+      !Number.isFinite(product.price) ||
+      product.price <= 0 ||
+      !Number.isInteger(product.stock) ||
+      product.stock < 0 ||
+      !product.sizes.length ||
+      !product.colors.length
     ) {
-      notify("Periksa data produk terlebih dahulu.");
+      setMessage("Periksa kembali data produk.");
+      return;
+    }
+
+    if (
+      product.image &&
+      !localPhotos.some(
+        (photo) =>
+          photo.url === product.image &&
+          FOLDERS[
+            normalize(photo.folder)
+          ].title === product.collection
+      )
+    ) {
+      setMessage(
+        "Pilih foto sesuai kategori produk."
+      );
+
+      return;
+    }
+
+    if (
+      product.image &&
+      products.some(
+        (p) =>
+          p.id !== editingId &&
+          p.image === product.image
+      )
+    ) {
+      setMessage(
+        "Foto sudah digunakan. Edit produk tersebut."
+      );
       return;
     }
 
     if (editingId !== null) {
+      const previous = products.find(
+        (p) => p.id === editingId
+      );
+
+      if (
+        previous?.image &&
+        previous.image !== product.image
+      ) {
+        localStorage.setItem(
+          "lumina_deleted_local_v1",
+          JSON.stringify([
+            ...new Set([
+              ...readArray(
+                "lumina_deleted_local_v1"
+              ),
+              `local:${previous.image}`,
+            ]),
+          ])
+        );
+      }
+
       setProducts((old) =>
         old.map((p) =>
-          p.id === editingId ? item : p
+          p.id === editingId ? product : p
         )
       );
+
       setCart((old) =>
         old.map((p) =>
           p.id === editingId
-            ? { ...p, ...item }
+            ? { ...p, ...product }
             : p
         )
       );
     } else {
-      setProducts((old) => [...old, item]);
+      setProducts((old) => [...old, product]);
     }
 
     setEditingId(null);
+
     setForm(EMPTY_FORM);
-    notify("Produk berhasil disimpan.");
+
+    setMessage("Produk berhasil disimpan.");
   }
 
-  function editProduct(item) {
-    setEditingId(item.id);
+  function editProduct(product) {
+    setEditingId(product.id);
 
     setForm({
-      name: item.name,
-      category: item.category,
-      price: String(item.price),
-      stock: String(item.stock),
-      image: item.image || "",
-      description: item.description || "",
-      keywords: item.keywords || "",
-      sizes: (item.sizes || []).join(","),
-      colors: (item.colors || []).join(","),
+      name: product.name,
+
+      collection: product.collection,
+
+      price: String(product.price),
+
+      stock: String(product.stock),
+
+      image: product.image || "",
+
+      description: product.description || "",
+
+      keywords: product.keywords || "",
+
+      sizes: (product.sizes || []).join(","),
+
+      colors: (product.colors || []).join(","),
     });
 
     window.scrollTo(0, 0);
   }
 
   function deleteProduct(id) {
+    const pendingOrder = orders.some(
+      (order) =>
+        !["Selesai", "Dibatalkan"].includes(
+          statusOf(order.status)
+        ) &&
+        (order.items || []).some(
+          (item) => item.id === id
+        )
+    );
+
+    if (pendingOrder) {
+      setMessage(
+        "Selesaikan pesanan aktif sebelum menghapus produk."
+      );
+      return;
+    }
+
     if (
       !window.confirm(
         "Yakin ingin menghapus produk ini?"
       )
-    ) return;
+    ) {
+      return;
+    }
+
+    const product = products.find(
+      (p) => p.id === id
+    );
+
+    const deleted = readArray(
+      "lumina_deleted_local_v1"
+    );
+
+    localStorage.setItem(
+      "lumina_deleted_local_v1",
+      JSON.stringify([
+        ...new Set([
+          ...deleted,
+          String(id),
+          ...(product?.image
+            ? [`local:${product.image}`]
+            : []),
+        ]),
+      ])
+    );
 
     setProducts((old) =>
       old.filter((p) => p.id !== id)
     );
+
     setCart((old) =>
       old.filter((p) => p.id !== id)
     );
+
     setWishlist((old) =>
-      old.filter((p) => p !== id)
+      old.filter((item) => item !== id)
     );
 
-    notify("Produk berhasil dihapus.");
+    if (editingId === id) {
+      setEditingId(null);
+      setForm(EMPTY_FORM);
+    }
+
+    setMessage("Produk berhasil dihapus.");
   }
 
   const gridProps = {
@@ -1712,16 +2669,26 @@ export default function App() {
     onAdd: addToCart,
   };
 
+  /* ==========================================
+     WEBSITE INTERFACE
+  ========================================== */
+
   return (
     <div
       className={
-        `lumina ${page === "admin" ? "admin-mode" : ""}`
+        `lumina ${
+          page === "admin" ? "admin-mode" : ""
+        }`
       }
     >
+
+      {/* HEADER AND NAVIGATION */}
+
       {page !== "admin" && (
         <>
           <div className="announcement">
-            ✦ LUMINA STORE — FASHION FOR EVERY GENERATION
+            ✦ LUMINA STORE —
+            PREMIUM FASHION & LIFESTYLE
           </div>
 
           <header className="navbar">
@@ -1733,16 +2700,55 @@ export default function App() {
             </button>
 
             <nav className="nav-menu">
-              <button onClick={() => navigate("home")}>
+              <button
+                onClick={() => navigate("home")}
+              >
                 Home
               </button>
-              <button onClick={() => selectCategory("All")}>
+
+              <button
+                onClick={() => selectCategory("All")}
+              >
                 Shop
               </button>
-              <button onClick={() => navigate("wishlist")}>
+
+              <button
+                onClick={() => selectCategory("Pria")}
+              >
+                Men
+              </button>
+
+              <button
+                onClick={() => selectCategory("Wanita")}
+              >
+                Women
+              </button>
+
+              <button
+                onClick={() =>
+                  selectCategory("Batik Wanita")
+                }
+              >
+                Batik
+              </button>
+
+              <button
+                onClick={() =>
+                  selectCategory("Tas Wanita")
+                }
+              >
+                Bags
+              </button>
+
+              <button
+                onClick={() => navigate("wishlist")}
+              >
                 ♡ Wishlist ({wishlist.length})
               </button>
-              <button onClick={() => navigate("admin")}>
+
+              <button
+                onClick={() => navigate("admin")}
+              >
                 Admin Demo
               </button>
             </nav>
@@ -1757,26 +2763,29 @@ export default function App() {
         </>
       )}
 
-      {/* ========================================
-          HOME
-      ======================================== */}
+      {/* ==========================================
+         HOME PAGE
+      ========================================== */}
 
       {page === "home" && (
         <>
           <section className="hero">
             <div className="hero-copy">
               <p className="eyebrow">
-                NEW SEASON — FAMILY COLLECTION 2026
+                THE NEW LUMINA COLLECTION
               </p>
 
               <h1>
-                Discover Your <em>Unique Style.</em>
+                Elevate Your
+                <br />
+                <em>Everyday Style.</em>
               </h1>
 
               <p>
-                Curated fashion for every generation.
-                Temukan pilihan pakaian dan sepatu
-                untuk penampilan yang elegan setiap hari.
+                Temukan koleksi pakaian pria,
+                pakaian wanita, batik wanita,
+                sepatu, tas, dan aksesori
+                dengan gaya modern dan elegan.
               </p>
 
               <button
@@ -1787,14 +2796,20 @@ export default function App() {
               </button>
 
               <p className="hero-bottom">
-                ✦ BATIK ✦ KEBAYA ✦ FAMILY FASHION
+                MODERN • ELEGANT • TIMELESS
               </p>
             </div>
 
             <div className="hero-photo">
               <ProductImage
-                src={IMG.hero}
-                alt="Lumina editorial fashion"
+                src={heroImage}
+                alt="Lumina Fashion"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
+                  background: "#e9ded3",
+                }}
               />
             </div>
           </section>
@@ -1802,24 +2817,37 @@ export default function App() {
           <section className="perks">
             <div>
               ✧
-              <strong>Premium Collection</strong>
-              <span>Pilihan fashion berkualitas</span>
+
+              <strong>Premium Fashion</strong>
+
+              <span>Koleksi modern dan elegan</span>
             </div>
+
             <div>
               ♡
-              <strong>Fashion for Everyone</strong>
-              <span>Anak-anak hingga dewasa</span>
+
+              <strong>
+                {localPhotos.length} Foto Koleksi
+              </strong>
+
+              <span>Galeri fashion lokal</span>
             </div>
+
             <div>
               ✦
-              <strong>Modern Shopping</strong>
-              <span>Pengalaman belanja lebih nyaman</span>
+
+              <strong>Seven Collections</strong>
+
+              <span>Tujuh kategori pilihan</span>
             </div>
           </section>
 
-          <CategorySection onSelect={selectCategory} />
+          <CategorySection
+            products={products}
+            onSelect={selectCategory}
+          />
 
-          <main className="container section">
+          <section className="container section">
             <p className="eyebrow center">
               CURATED FOR YOU
             </p>
@@ -1829,12 +2857,12 @@ export default function App() {
             </h2>
 
             <p className="section-description">
-              Koleksi pilihan dengan gaya modern,
-              klasik, dan elegan untuk seluruh keluarga.
+              Temukan inspirasi gaya terbaru
+              dari koleksi pilihan LUMINA STORE.
             </p>
 
             <ProductGrid
-              items={products.slice(0, 9)}
+              items={featured}
               {...gridProps}
             />
 
@@ -1846,19 +2874,22 @@ export default function App() {
                 View All Products →
               </button>
             </div>
-          </main>
+          </section>
 
           <section className="promo">
             <p className="eyebrow">
               THE LUMINA EDIT
             </p>
+
             <h2>
-              Style for every generation.
+              Confidence in Every Style.
             </h2>
+
             <p>
-              Discover timeless fashion,
-              modern essentials, and everyday elegance.
+              Modern fashion. Timeless elegance.
+              Discover your signature style.
             </p>
+
             <button
               className="btn-dark"
               onClick={() => selectCategory("All")}
@@ -1866,63 +2897,73 @@ export default function App() {
               Shop Now →
             </button>
           </section>
-
-          <section className="container section">
-            <p className="eyebrow center">
-              NEW ARRIVALS
-            </p>
-            <h2 className="section-title">
-              Discover Something New
-            </h2>
-            <p className="section-description">
-              Jelajahi pilihan produk lain dari katalog kami.
-            </p>
-
-            <ProductGrid
-              items={products.slice(9, 15)}
-              {...gridProps}
-            />
-
-            <div className="center action-space">
-              <button
-                className="btn-light"
-                onClick={() => selectCategory("All")}
-              >
-                Discover More →
-              </button>
-            </div>
-          </section>
         </>
       )}
 
-      {/* ========================================
-          SHOP
-      ======================================== */}
+      {/* ==========================================
+         SHOP PAGE
+      ========================================== */}
 
       {page === "shop" && (
         <main className="container section">
           <p className="eyebrow center">
             THE LUMINA COLLECTION
           </p>
+
           <h1 className="section-title">
             Shop Our Collection
           </h1>
+
           <p className="section-description">
-            Jelajahi fashion keluarga, batik, kebaya,
-            sepatu sekolah, sepatu formal, dan aksesori.
+            Jelajahi pakaian, batik wanita,
+            sepatu, tas dan aksesori favoritmu.
           </p>
+
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              gap: 12,
+              marginBottom: 32,
+            }}
+          >
+            {CATEGORIES.map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                className={
+                  category === value
+                    ? "btn-dark"
+                    : "btn-light"
+                }
+                style={{ borderRadius: 30 }}
+                onClick={() => {
+                  setCategory(value);
+                  setSizeFilter("");
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
 
           <div className="toolbar">
             <input
               type="search"
+              placeholder="Cari baju, batik, sepatu, tas..."
               value={search}
-              placeholder="Cari batik pria, kebaya ibu, sepatu anak..."
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) =>
+                setSearch(e.target.value)
+              }
             />
 
             <select
               value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              onChange={(e) => {
+                setCategory(e.target.value);
+                setSizeFilter("");
+              }}
             >
               {CATEGORIES.map(([value, label]) => (
                 <option key={value} value={value}>
@@ -1933,11 +2974,25 @@ export default function App() {
 
             <select
               value={sort}
-              onChange={(e) => setSort(e.target.value)}
+              onChange={(e) =>
+                setSort(e.target.value)
+              }
             >
-              <option value="default">Urutan Default</option>
-              <option value="low">Harga Termurah</option>
-              <option value="high">Harga Termahal</option>
+              <option value="default">
+                Urutan Default
+              </option>
+
+              <option value="low">
+                Harga Termurah
+              </option>
+
+              <option value="high">
+                Harga Termahal
+              </option>
+
+              <option value="name">
+                Nama A-Z
+              </option>
             </select>
           </div>
 
@@ -1954,9 +3009,12 @@ export default function App() {
                 setSizeFilter(e.target.value)
               }
             >
-              <option value="">Semua Ukuran</option>
-              {sizesAvailable.map((size) => (
-                <option key={size} value={size}>
+              <option value="">
+                Semua Ukuran
+              </option>
+
+              {sizeOptions.map((size) => (
+                <option key={size}>
                   {size}
                 </option>
               ))}
@@ -1964,44 +3022,82 @@ export default function App() {
 
             <select
               value={maxPrice}
-              onChange={(e) => setMaxPrice(e.target.value)}
+              onChange={(e) =>
+                setMaxPrice(e.target.value)
+              }
             >
-              <option value="">Semua Harga</option>
-              <option value="150000">Hingga Rp150.000</option>
-              <option value="250000">Hingga Rp250.000</option>
-              <option value="400000">Hingga Rp400.000</option>
-              <option value="600000">Hingga Rp600.000</option>
+              <option value="">
+                Semua Harga
+              </option>
+
+              <option value="150000">
+                Maks. Rp150.000
+              </option>
+
+              <option value="250000">
+                Maks. Rp250.000
+              </option>
+
+              <option value="350000">
+                Maks. Rp350.000
+              </option>
+
+              <option value="500000">
+                Maks. Rp500.000
+              </option>
             </select>
 
             <button
-              type="button"
               className="btn-light"
               onClick={() => {
-                setSearch("");
                 setCategory("All");
+                setSearch("");
+                setSort("default");
                 setSizeFilter("");
                 setMaxPrice("");
-                setSort("default");
+                setPhotoOnly(true);
               }}
             >
               Reset Filter
             </button>
           </div>
 
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              fontSize: 13,
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={photoOnly}
+              onChange={(e) =>
+                setPhotoOnly(e.target.checked)
+              }
+            />
+
+            Tampilkan hanya produk bergambar
+          </label>
+
           <p
             className="muted"
-            style={{ margin: "18px 0 25px" }}
+            style={{ margin: "20px 0" }}
           >
-            Menampilkan {filtered.length} produk
+            {visibleProducts.length} produk ditemukan
           </p>
 
-          <ProductGrid items={filtered} {...gridProps} />
+          <ProductGrid
+            items={visibleProducts}
+            {...gridProps}
+          />
         </main>
       )}
 
-      {/* ========================================
-          PRODUCT DETAIL
-      ======================================== */}
+      {/* ==========================================
+         PRODUCT DETAIL
+      ========================================== */}
 
       {page === "detail" && selected && (
         <main className="container section">
@@ -2009,59 +3105,90 @@ export default function App() {
             className="back"
             onClick={() => navigate("shop")}
           >
-            ← Kembali ke toko
+            ← Kembali ke Shop
           </button>
 
           <div className="detail-layout">
-            <ProductImage
-              className="detail-image"
-              src={selected.image}
-              alt={selected.name}
-            />
+            <div
+              style={{
+                aspectRatio: "4/5",
+                overflow: "hidden",
+                borderRadius: 14,
+                background: "#f2ece5",
+              }}
+            >
+              <ProductImage
+                src={selected.image}
+                alt={selected.name}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
+                }}
+              />
+            </div>
 
             <div className="detail-copy">
               <p className="eyebrow">
-                LUMINA / {selected.category}
+                {selected.collection}
               </p>
+
               <h1>{selected.name}</h1>
+
               <h2 className="price">
-                {money(selected.price)}
+                {rupiah(selected.price)}
               </h2>
+
               <p>{selected.description}</p>
+
               <p className="muted">
-                Tersedia: {selected.stock} unit
+                Stok tersedia: {selected.stock}
               </p>
 
               <label>Pilih Ukuran</label>
+
               <div className="option-row">
-                {(selected.sizes || []).map((size) => (
-                  <button
-                    type="button"
-                    key={size}
-                    className={
-                      selectedSize === size ? "chosen" : ""
-                    }
-                    onClick={() => setSelectedSize(size)}
-                  >
-                    {size}
-                  </button>
-                ))}
+                {(selected.sizes || []).map(
+                  (size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      className={
+                        selectedSize === size
+                          ? "chosen"
+                          : ""
+                      }
+                      onClick={() =>
+                        setSelectedSize(size)
+                      }
+                    >
+                      {size}
+                    </button>
+                  )
+                )}
               </div>
 
               <label>Pilih Warna</label>
+
               <div className="option-row">
-                {(selected.colors || []).map((color) => (
-                  <button
-                    type="button"
-                    key={color}
-                    className={
-                      selectedColor === color ? "chosen" : ""
-                    }
-                    onClick={() => setSelectedColor(color)}
-                  >
-                    {color}
-                  </button>
-                ))}
+                {(selected.colors || []).map(
+                  (color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      className={
+                        selectedColor === color
+                          ? "chosen"
+                          : ""
+                      }
+                      onClick={() =>
+                        setSelectedColor(color)
+                      }
+                    >
+                      {color}
+                    </button>
+                  )
+                )}
               </div>
 
               <button
@@ -2069,73 +3196,120 @@ export default function App() {
                 disabled={selected.stock <= 0}
                 onClick={() =>
                   addToCart(
-                    selected, selectedSize, selectedColor
+                    selected,
+                    selectedSize,
+                    selectedColor
                   )
                 }
               >
                 + Add to Cart
+              </button>
+
+              <button
+                className="btn-light wide"
+                style={{ marginTop: 12 }}
+                onClick={() =>
+                  toggleWishlist(selected.id)
+                }
+              >
+                {wishlist.includes(selected.id)
+                  ? "♥ Hapus dari Wishlist"
+                  : "♡ Simpan ke Wishlist"}
               </button>
             </div>
           </div>
         </main>
       )}
 
-      {/* ========================================
-          WISHLIST
-      ======================================== */}
+      {/* ==========================================
+         WISHLIST
+      ========================================== */}
 
       {page === "wishlist" && (
         <main className="container section">
           <p className="eyebrow center">
             YOUR FAVORITES
           </p>
+
           <h1 className="section-title">
             My Wishlist ♡
           </h1>
+
           <p className="section-description">
-            Simpan koleksi favorit untuk dilihat kembali.
+            Simpan koleksi fashion favoritmu.
           </p>
 
           <ProductGrid
-            items={products.filter((p) =>
-              wishlist.includes(p.id)
+            items={products.filter(
+              (p) => wishlist.includes(p.id)
             )}
             {...gridProps}
           />
         </main>
       )}
 
-      {/* ========================================
-          SHOPPING CART
-      ======================================== */}
+      {/* ==========================================
+         SHOPPING CART
+      ========================================== */}
 
       {page === "cart" && (
         <main className="container section">
-          <p className="eyebrow center">
-            YOUR SELECTION
-          </p>
           <h1 className="section-title">
             Shopping Cart
           </h1>
 
           <div className="two-column">
             <div className="panel">
-              {cart.length === 0 && (
-                <p>Keranjang belanja masih kosong.</p>
+              {!cart.length && (
+                <>
+                  <p>Keranjang masih kosong.</p>
+
+                  <button
+                    className="btn-dark"
+                    onClick={() => selectCategory("All")}
+                  >
+                    Mulai Belanja →
+                  </button>
+                </>
               )}
 
               {cart.map((item) => (
-                <div className="cart-row" key={item.key}>
-                  <ProductImage
-                    src={item.image}
-                    alt={item.name}
-                  />
+                <div
+                  className="cart-row"
+                  key={item.key}
+                >
+                  <div
+                    style={{
+                      width: 100,
+                      height: 125,
+                      flexShrink: 0,
+                    }}
+                  >
+                    <ProductImage
+                      src={
+                        products.find(
+                          (p) => p.id === item.id
+                        )?.image
+                      }
+                      alt={item.name}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                      }}
+                    />
+                  </div>
+
                   <div className="grow">
                     <h3>{item.name}</h3>
+
                     <p className="muted">
                       {item.size} / {item.color}
                     </p>
-                    <strong>{money(item.price)}</strong>
+
+                    <strong>
+                      {rupiah(item.price)}
+                    </strong>
 
                     <div className="quantity">
                       <button
@@ -2145,7 +3319,9 @@ export default function App() {
                       >
                         −
                       </button>
+
                       <span>{item.quantity}</span>
+
                       <button
                         onClick={() =>
                           changeQuantity(item.key, 1)
@@ -2153,11 +3329,12 @@ export default function App() {
                       >
                         +
                       </button>
+
                       <button
                         onClick={() =>
                           setCart((old) =>
-                            old.filter((p) =>
-                              p.key !== item.key
+                            old.filter(
+                              (p) => p.key !== item.key
                             )
                           )
                         }
@@ -2180,7 +3357,7 @@ export default function App() {
 
               <div className="between">
                 <span>Subtotal</span>
-                <strong>{money(subtotal)}</strong>
+                <strong>{rupiah(subtotal)}</strong>
               </div>
 
               <button
@@ -2195,15 +3372,12 @@ export default function App() {
         </main>
       )}
 
-      {/* ========================================
-          CHECKOUT
-      ======================================== */}
+      {/* ==========================================
+         CHECKOUT
+      ========================================== */}
 
       {page === "checkout" && (
         <main className="container section">
-          <p className="eyebrow center">
-            SECURE SHOPPING DEMO
-          </p>
           <h1 className="section-title">
             Checkout
           </h1>
@@ -2216,6 +3390,7 @@ export default function App() {
               <h2>Informasi Pembeli</h2>
 
               <label>Nama Lengkap</label>
+
               <input
                 required
                 value={checkout.name}
@@ -2228,6 +3403,7 @@ export default function App() {
               />
 
               <label>Nomor Telepon</label>
+
               <input
                 required
                 type="tel"
@@ -2241,6 +3417,7 @@ export default function App() {
               />
 
               <label>Alamat Pengiriman</label>
+
               <textarea
                 required
                 rows={4}
@@ -2253,7 +3430,8 @@ export default function App() {
                 }
               />
 
-              <label>Pengiriman</label>
+              <label>Metode Pengiriman</label>
+
               <select
                 value={checkout.shipping}
                 onChange={(e) =>
@@ -2266,6 +3444,7 @@ export default function App() {
                 <option value="regular">
                   Regular — Rp12.000
                 </option>
+
                 <option value="express">
                   Express — Rp25.000
                 </option>
@@ -2273,15 +3452,15 @@ export default function App() {
 
               <p className="muted">
                 Checkout hanya simulasi.
-                Gunakan data pembeli fiktif.
+                Gunakan informasi pembeli fiktif.
               </p>
 
               <button
+                type="submit"
                 className="btn-dark wide"
                 disabled={!cart.length}
-                type="submit"
               >
-                Konfirmasi Pesanan Simulasi
+                Konfirmasi Pesanan
               </button>
             </form>
 
@@ -2296,26 +3475,30 @@ export default function App() {
                   <span>
                     {item.name} × {item.quantity}
                   </span>
+
                   <strong>
-                    {money(item.price * item.quantity)}
+                    {rupiah(item.price * item.quantity)}
                   </strong>
                 </div>
               ))}
 
               <div className="between">
                 <span>Subtotal</span>
-                <strong>{money(subtotal)}</strong>
+
+                <strong>{rupiah(subtotal)}</strong>
               </div>
 
               <div className="between">
                 <span>Pengiriman</span>
-                <strong>{money(shippingFee)}</strong>
+
+                <strong>{rupiah(shippingFee)}</strong>
               </div>
 
               <div className="between grand-total">
                 <span>Total</span>
+
                 <strong>
-                  {money(subtotal + shippingFee)}
+                  {rupiah(subtotal + shippingFee)}
                 </strong>
               </div>
             </div>
@@ -2323,20 +3506,26 @@ export default function App() {
         </main>
       )}
 
-      {/* ========================================
-          ORDER SUCCESS
-      ======================================== */}
+      {/* ==========================================
+         SUCCESS PAGE
+      ========================================== */}
 
       {page === "success" && (
         <main className="container section center">
           <div className="panel success-panel">
-            <div className="success-icon">✓</div>
-            <h1>Pesanan Simulasi Berhasil!</h1>
+            <div className="success-icon">
+              ✓
+            </div>
+
+            <h1>Pesanan Berhasil!</h1>
+
             <p>
-              Pesanan sudah masuk ke dashboard admin.
+              Pesanan simulasi telah tercatat
+              di Dashboard Admin LUMINA STORE.
             </p>
+
             <p>
-              Tidak ada pembayaran atau transaksi nyata.
+              Tidak ada pembayaran nyata.
             </p>
 
             <button
@@ -2349,19 +3538,19 @@ export default function App() {
         </main>
       )}
 
-      {/* ========================================
-          ADMIN DASHBOARD
-      ======================================== */}
+      {/* ==========================================
+         ADMIN DASHBOARD
+      ========================================== */}
 
       {page === "admin" && (
         <AdminDashboard
           products={products}
           orders={orders}
           onBack={() => navigate("home")}
+          onStatus={updateStatus}
           onSave={saveProduct}
           onEdit={editProduct}
           onDelete={deleteProduct}
-          onStatus={updateStatus}
           form={form}
           setForm={setForm}
           editingId={editingId}
@@ -2372,29 +3561,47 @@ export default function App() {
         />
       )}
 
-      {/* ========================================
-          FOOTER
-      ======================================== */}
+      {/* ==========================================
+         FOOTER
+      ========================================== */}
 
       {page !== "admin" && (
         <footer className="footer">
           <div>
             <h2>LUMINA.</h2>
-            <p>Fashion for Every Generation</p>
+
+            <p>
+              Premium Fashion & Lifestyle
+            </p>
           </div>
+
+          <div>
+            <p>
+              Men • Women • Batik • Shoes • Bags
+            </p>
+
+            <p>
+              React E-Commerce Portfolio
+            </p>
+          </div>
+
           <p>
-            React E-Commerce Portfolio Project
-          </p>
-          <p>
-            © 2026 LUMINA STORE · Demo Only
+            © {new Date().getFullYear()}
+            {" "}
+            LUMINA STORE — Demo Only
           </p>
         </footer>
       )}
 
       {/* NOTIFICATION */}
+
       {message && (
-        <div className="toast" role="status">
+        <div
+          className="toast"
+          role="status"
+        >
           <span>{message}</span>
+
           <button
             type="button"
             onClick={() => setMessage("")}

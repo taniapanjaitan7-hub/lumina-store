@@ -1756,3 +1756,216 @@ img {
     animation-duration: .01ms !important;
   }
 }
+
+
+/* ==========================================
+   LUMINA STORE - PREMIUM LOCAL GALLERY
+========================================== */
+
+.lumina .local-gallery {
+  padding-top: 65px;
+  padding-bottom: 75px;
+}
+
+.gallery-filters {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.gallery-filters button {
+  text-transform: capitalize;
+  border-radius: 30px;
+  padding: 12px 24px;
+}
+
+.gallery-count {
+  color: #89776a;
+  font-size: 13px;
+  margin-bottom: 22px;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.gallery-card {
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e9dfd6;
+  border-radius: 14px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.04);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.gallery-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 15px 30px rgba(76, 51, 32, 0.12);
+}
+
+.gallery-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: contain;
+  background: #f3efeb;
+  transition: transform 0.4s;
+}
+
+.gallery-card:hover img {
+  transform: scale(1.035);
+}
+
+.gallery-content {
+  position: relative;
+  background: white;
+  padding: 20px;
+}
+
+.gallery-content small {
+  color: #a6846b;
+  font-size: 9px;
+  letter-spacing: 2px;
+  font-weight: 700;
+}
+
+.gallery-content h3 {
+  margin: 10px 0;
+  font-family: Georgia, serif;
+  font-size: 21px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.gallery-content p {
+  color: #85776c;
+  font-size: 12px;
+  margin: 0;
+}
+
+/* ==========================================
+   ADMIN DASHBOARD PREMIUM UPDATE
+========================================== */
+
+.lumina.admin-mode .lum-dash-sidebar {
+  background: #302821;
+  color: #ffffff;
+}
+
+.lumina .lum-dash-sidebar .lum-dash-logo {
+  color: #ffffff;
+  font-size: 28px;
+  letter-spacing: 4px;
+}
+
+.lumina .lum-dash-menu button {
+  color: #d7c9bd;
+  border-radius: 10px;
+  margin-bottom: 6px;
+}
+
+.lumina .lum-dash-menu button:hover,
+.lumina .lum-dash-menu button.active {
+  background: #a98468;
+  color: #ffffff;
+}
+
+.lumina .lum-dash-sidebar-bottom {
+  border-color: rgba(255,255,255,0.15);
+}
+
+.lumina .lum-dash-sidebar-bottom p,
+.lumina .lum-dash-sidebar-bottom small {
+  color: #d7c9bd;
+}
+
+.lumina .lum-dash-main {
+  background: #f8f6f3;
+}
+
+.lumina .lum-dash-card {
+  background: #ffffff;
+  border: 1px solid #eee7df;
+  border-radius: 16px;
+  box-shadow: 0 6px 22px rgba(52,36,22,0.05);
+}
+
+.lumina .lum-dash-metric {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(52,36,22,0.05);
+}
+
+.lumina .lum-dash-metric:first-child {
+  background: linear-gradient(
+    135deg,
+    #49392d,
+    #88694f
+  );
+
+  color: #ffffff;
+}
+
+.lumina .lum-dash-metric:first-child span,
+.lumina .lum-dash-metric:first-child small {
+  color: #f6e9dc;
+}
+
+.lumina .lum-dash-bar {
+  background: linear-gradient(
+    180deg,
+    #d7b79b,
+    #89664c
+  );
+  border-radius: 10px 10px 0 0;
+}
+
+.lumina .lum-dash-table tbody tr:hover {
+  background: #f8f3ee;
+}
+
+.lumina .lum-dash-right {
+  background: #fcfaf7;
+}
+
+.lumina .lum-photo-missing {
+  min-height: 0 !important;
+  overflow: hidden;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1100px) {
+  .gallery-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .gallery-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 13px;
+  }
+
+  .gallery-content {
+    padding: 13px;
+  }
+
+  .gallery-content h3 {
+    font-size: 16px;
+  }
+
+  .gallery-filters {
+    gap: 8px;
+  }
+
+  .gallery-filters button {
+    padding: 9px 14px;
+    font-size: 11px;
+  }
+}
