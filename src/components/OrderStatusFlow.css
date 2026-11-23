@@ -1,0 +1,205 @@
+
+/* ==========================================
+   LUMINA STORE - ORDER STATUS FLOW
+========================================== */
+
+.lumina .lum-order-flow {
+  background: #ffffff;
+  border: 1px solid #eae2da;
+  border-radius: 16px;
+  padding: 25px;
+  margin: 22px 0;
+  box-shadow: 0 5px 20px rgba(48,39,32,0.04);
+  width: 100%;
+}
+
+.lumina .lum-order-flow * {
+  box-sizing: border-box;
+}
+
+.lumina .lum-order-flow-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.lumina .lum-order-flow-header h3 {
+  margin: 0 0 8px;
+  color: #302720;
+  font-size: 19px;
+}
+
+.lumina .lum-order-flow-header p {
+  color: #928275;
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.lumina .lum-order-flow-badge {
+  background: #f0e6db;
+  color: #76553c;
+  border-radius: 30px;
+  padding: 9px 15px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.lumina .lum-order-flow-badge.cancelled {
+  background: #ffe8e5;
+  color: #ba4038;
+}
+
+.lumina .lum-order-flow-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  margin: 25px 0;
+  padding: 0;
+  position: relative;
+}
+
+.lumina .lum-order-flow-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  min-width: 0;
+  padding: 0 5px;
+  color: #b3a69b;
+}
+
+.lumina .lum-order-flow-step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  height: 2px;
+  width: calc(100% - 60px);
+  left: calc(50% + 30px);
+  top: 24px;
+  background: #e6ddd5;
+}
+
+.lumina .lum-order-flow-step.passed::after {
+  background: #a98569;
+}
+
+.lumina .lum-order-flow-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #f4efeb;
+  border: 2px solid #eee5dc;
+  color: #a99a8e;
+  font-size: 22px;
+  margin-bottom: 12px;
+}
+
+.lumina .lum-order-flow-step.completed
+.lum-order-flow-icon {
+  background: #a98569;
+  border-color: #a98569;
+  color: #ffffff;
+}
+
+.lumina .lum-order-flow-step.current
+.lum-order-flow-icon {
+  background: #302720;
+  border-color: #302720;
+  color: #ffffff;
+  box-shadow: 0 0 0 5px #f1e7dd;
+}
+
+.lumina .lum-order-flow-label {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #94867b;
+}
+
+.lumina .lum-order-flow-step.completed
+.lum-order-flow-label {
+  color: #76553c;
+}
+
+.lumina .lum-order-flow-step.current
+.lum-order-flow-label {
+  color: #302720;
+  font-weight: 800;
+}
+
+.lumina .lum-order-flow-active {
+  display: block;
+  margin-top: 6px;
+  color: #a98569;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.lumina .lum-order-flow-info {
+  border-top: 1px solid #f0e8e0;
+  padding-top: 17px;
+  text-align: center;
+  color: #877362;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.lumina .lum-order-flow-cancel {
+  background: #fff2f0;
+  border: 1px solid #f3d0cb;
+  border-radius: 12px;
+  padding: 17px;
+  color: #b84740;
+}
+
+.lumina .lum-order-flow-cancel strong {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.lumina .lum-order-flow-cancel p {
+  font-size: 12px;
+  line-height: 1.7;
+  margin: 0;
+}
+
+@media (max-width: 700px) {
+  .lumina .lum-order-flow {
+    padding: 18px 12px;
+  }
+
+  .lumina .lum-order-flow-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .lumina .lum-order-flow-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .lumina .lum-order-flow-step:not(:last-child)::after {
+    top: 18px;
+    left: calc(50% + 23px);
+    width: calc(100% - 46px);
+  }
+
+  .lumina .lum-order-flow-label {
+    font-size: 10px;
+  }
+
+  .lumina .lum-order-flow-active {
+    font-size: 9px;
+  }
+}
