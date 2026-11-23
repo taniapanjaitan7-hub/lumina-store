@@ -1,5 +1,4 @@
-
-# GitHub Languages - LUMINA STORE
-
+*.js linguist-language=JavaScript
+*.jsx linguist-language=JavaScript
 *.css linguist-detectable=false
 *.html linguist-detectable=false
