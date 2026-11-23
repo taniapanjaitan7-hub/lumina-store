@@ -1,23 +1,23 @@
 
 import { useEffect, useMemo, useState } from "react";
 import AuthPage from "./Auth.jsx";
+import CustomerDashboard from "./CustomerDashboard.jsx";
 import productImages from "./product-images.json";
 import "./App.css";
 
-/* ============================================
-   LUMINA STORE
-   HOME • SHOP • LOGIN • REGISTER
-   WISHLIST • CART • CHECKOUT • ACCOUNT • ADMIN
-============================================ */
+/* =========================================
+   LUMINA STORE - FULL APP.JSX
+   SHOP DESIGN + CUSTOMER + ADMIN
+========================================= */
 
 const CATEGORIES = [
-  { folder: "pria", name: "Pria", label: "Baju Pria", price: 179000, sizes: ["S", "M", "L", "XL", "XXL"], category: "Fashion" },
-  { folder: "wanita", name: "Wanita", label: "Baju Wanita", price: 199000, sizes: ["S", "M", "L", "XL", "XXL"], category: "Fashion" },
-  { folder: "batik wanita", name: "Batik Wanita", label: "Batik Wanita", price: 235000, sizes: ["S", "M", "L", "XL", "XXL"], category: "Fashion" },
-  { folder: "sepatu pria", name: "Sepatu Pria", label: "Sepatu Pria", price: 295000, sizes: ["39", "40", "41", "42", "43", "44"], category: "Shoes" },
-  { folder: "sepatu wanita", name: "Sepatu Wanita", label: "Sepatu Wanita", price: 245000, sizes: ["35", "36", "37", "38", "39", "40"], category: "Shoes" },
-  { folder: "tas wanita", name: "Tas Wanita", label: "Tas Wanita", price: 249000, sizes: ["All Size"], category: "Accessories" },
-  { folder: "aksesoris", name: "Accessories", label: "Aksesori", price: 129000, sizes: ["All Size"], category: "Accessories" },
+  { folder: "pria", name: "Pria", label: "Baju Pria", price: 179000, sizes: ["S", "M", "L", "XL", "XXL"] },
+  { folder: "wanita", name: "Wanita", label: "Baju Wanita", price: 199000, sizes: ["S", "M", "L", "XL", "XXL"] },
+  { folder: "batik wanita", name: "Batik Wanita", label: "Batik", price: 235000, sizes: ["S", "M", "L", "XL", "XXL"] },
+  { folder: "sepatu pria", name: "Sepatu Pria", label: "Sepatu Pria", price: 295000, sizes: ["39", "40", "41", "42", "43", "44"] },
+  { folder: "sepatu wanita", name: "Sepatu Wanita", label: "Sepatu Wanita", price: 245000, sizes: ["35", "36", "37", "38", "39", "40"] },
+  { folder: "tas wanita", name: "Tas Wanita", label: "Tas", price: 249000, sizes: ["All Size"] },
+  { folder: "aksesoris", name: "Accessories", label: "Aksesori", price: 129000, sizes: ["All Size"] },
 ];
 
 const STATUSES = [
@@ -28,46 +28,45 @@ const STATUSES = [
   "Dibatalkan",
 ];
 
-const PRODUCT_KEY = "lumina_products_v2";
-const ORDER_KEY = "lumina_orders_v1";
-const SESSION_KEY = "lumina_session_v1";
-const CART_KEY = "lumina_cart_v1";
-const WISHLIST_KEY = "lumina_wishlist_v1";
-const DELETED_KEY = "lumina_deleted_local_v2";
+const KEY = {
+  products: "lumina_products_v2",
+  oldProducts: "lumina_products_v1",
+  orders: "lumina_orders_v1",
+  session: "lumina_session_v1",
+  cart: "lumina_cart_v1",
+  wishlist: "lumina_wishlist_v1",
+  deleted: "lumina_deleted_local_v2",
+};
 
-const EMPTY_FORM = {
+const DEFAULT_FORM = {
   id: null,
   name: "",
   collection: "Pria",
+  image: "",
   price: "",
   stock: "20",
-  image: "",
   description: "",
   sizes: "S,M,L,XL,XXL",
   colors: "Sesuai foto",
 };
 
-const EMPTY_CHECKOUT = {
+const DEFAULT_CHECKOUT = {
   name: "",
   phone: "",
   address: "",
   shipping: "regular",
 };
 
-/* ============================================
-   HELPER
-============================================ */
-
 function read(key, fallback) {
   try {
-    const value = localStorage.getItem(key);
-    return value ? JSON.parse(value) : fallback;
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
   } catch {
     return fallback;
   }
 }
 
-function readList(key) {
+function readArray(key) {
   const value = read(key, []);
   return Array.isArray(value) ? value : [];
 }
@@ -84,241 +83,158 @@ function rupiah(value) {
   }).format(Number(value) || 0);
 }
 
-function getCategory(collection) {
-  return CATEGORIES.find(
-    (item) => item.name === collection
-  );
-}
-
-function splitValues(value) {
+function arrayFromText(value) {
   return String(value || "")
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
 }
 
-function statusOf(value) {
-  return STATUSES.includes(value)
-    ? value
+function getStatus(status) {
+  return STATUSES.includes(status)
+    ? status
     : "Pesanan Baru";
 }
 
-function getImageUrl(value) {
-  if (!value) return "";
+function photoUrl(src) {
+  if (!src) return "";
 
-  if (
-    value.startsWith("https://") ||
-    value.startsWith("http://") ||
-    value.startsWith("data:")
-  ) {
-    return value;
-  }
+  if (/^(https?:|data:)/i.test(src)) return src;
 
   const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+  const clean = String(src).replace(/\\/g, "/");
+  const encoded = clean
+    .split("/")
+    .map((part) => {
+      try {
+        return encodeURIComponent(decodeURIComponent(part));
+      } catch {
+        return encodeURIComponent(part);
+      }
+    })
+    .join("/");
 
-  const path = String(value).replace(/\\/g, "/");
-
-  return (
-    base +
-    (path.startsWith("/") ? "" : "/") +
-    path
-      .split("/")
-      .map((part) => {
-        try {
-          return encodeURIComponent(
-            decodeURIComponent(part)
-          );
-        } catch {
-          return encodeURIComponent(part);
-        }
-      })
-      .join("/")
-  );
+  return base + (encoded.startsWith("/") ? "" : "/") + encoded;
 }
 
-/* ============================================
-   FOTO DARI TUJUH FOLDER
-============================================ */
-
-const PHOTO_LIST = (
-  Array.isArray(productImages) ? productImages : []
-)
-  .filter((photo) => {
-    if (!photo?.url || !photo?.folder) return false;
-
-    return CATEGORIES.some(
-      (category) =>
-        category.folder === normalize(photo.folder)
-    );
-  })
-  .map((photo) => ({
-    ...photo,
-    url: String(photo.url).replace(/\\/g, "/"),
-  }))
-  .sort((a, b) =>
-    a.url.localeCompare(b.url, "id", {
-      numeric: true,
-    })
-  );
-
-const UNIQUE_PHOTOS = [
+const PHOTOS = [
   ...new Map(
-    PHOTO_LIST.map((photo) => [
-      photo.url,
-      photo,
-    ])
+    (Array.isArray(productImages) ? productImages : [])
+      .filter((photo) =>
+        photo?.url &&
+        CATEGORIES.some(
+          (category) =>
+            category.folder === normalize(photo.folder)
+        )
+      )
+      .map((photo) => ({
+        ...photo,
+        url: String(photo.url).replace(/\\/g, "/"),
+      }))
+      .map((photo) => [photo.url, photo])
   ).values(),
 ];
 
-const INITIAL_PRODUCTS = UNIQUE_PHOTOS.map((photo) => {
+const INITIAL_PRODUCTS = PHOTOS.map((photo) => {
   const category = CATEGORIES.find(
-    (item) =>
-      item.folder === normalize(photo.folder)
+    (item) => item.folder === normalize(photo.folder)
   );
 
   return {
     id: `local:${photo.url}`,
     name: `${category.label} — ${photo.name}`,
     collection: category.name,
-    category: category.category,
-    image: photo.url,
     price: category.price,
     stock: 20,
-    sizes: [...category.sizes],
+    image: photo.url,
+    sizes: category.sizes,
     colors: ["Sesuai foto"],
-    description:
-      `Koleksi ${category.label} LUMINA STORE. ` +
-      "Harga dan stok awal merupakan data demo.",
+    description: `Koleksi ${category.label} dari LUMINA STORE.`,
   };
 });
 
 function loadProducts() {
-  const savedV2 = readList(PRODUCT_KEY);
-  const savedV1 = readList("lumina_products_v1");
-
-  // Prioritaskan katalog baru. Katalog lama hanya
-  // digunakan untuk mengambil perubahan produk
-  // yang memiliki foto lokal yang valid.
-  const saved = localStorage.getItem(PRODUCT_KEY)
-    ? savedV2
-    : savedV1;
+  const existing =
+    localStorage.getItem(KEY.products) !== null
+      ? readArray(KEY.products)
+      : readArray(KEY.oldProducts);
 
   const deleted = new Set(
-    readList(DELETED_KEY).map(String)
+    readArray(KEY.deleted).map(String)
   );
 
-  const photoPaths = new Set(
-    UNIQUE_PHOTOS.map((photo) => photo.url)
+  const knownPhotos = new Map(
+    PHOTOS.map((photo) => [photo.url, photo])
   );
 
-  const preserved = saved
-    .filter(
-      (product) =>
-        product &&
-        photoPaths.has(product.image) &&
-        !deleted.has(String(product.id))
-    )
-    .map((product) => {
-      const photo = UNIQUE_PHOTOS.find(
-        (item) => item.url === product.image
-      );
+  const saved = existing.filter((product) => {
+    if (!product || deleted.has(String(product.id))) {
+      return false;
+    }
 
-      const category = CATEGORIES.find(
-        (item) =>
-          item.folder === normalize(photo.folder)
-      );
+    return (
+      knownPhotos.has(product.image) ||
+      String(product.id).startsWith("custom:")
+    );
+  }).map((product) => {
+    const photo = knownPhotos.get(product.image);
+    const category = photo
+      ? CATEGORIES.find(
+          (item) => item.folder === normalize(photo.folder)
+        )
+      : CATEGORIES.find(
+          (item) => item.name === product.collection
+        );
 
-      return {
-        ...product,
-        collection: category.name,
-        category: category.category,
-        sizes:
-          Array.isArray(product.sizes) &&
-          product.sizes.length
-            ? product.sizes
-            : [...category.sizes],
-        colors:
-          Array.isArray(product.colors) &&
-          product.colors.length
-            ? product.colors
-            : ["Sesuai foto"],
-      };
-    });
+    return {
+      ...product,
+      collection: category?.name || "Pria",
+      sizes: Array.isArray(product.sizes)
+        ? product.sizes
+        : category?.sizes || ["All Size"],
+      colors: Array.isArray(product.colors)
+        ? product.colors
+        : ["Sesuai foto"],
+    };
+  });
 
-  const usedPhotos = new Set(
-    preserved.map((product) => product.image)
+  const usedPhotos = new Set(saved.map((p) => p.image));
+
+  const additional = INITIAL_PRODUCTS.filter(
+    (product) =>
+      !usedPhotos.has(product.image) &&
+      !deleted.has(product.id)
   );
 
-  return [
-    ...preserved,
-    ...INITIAL_PRODUCTS.filter(
-      (product) =>
-        !usedPhotos.has(product.image) &&
-        !deleted.has(String(product.id))
-    ),
-  ];
+  return [...saved, ...additional];
 }
 
-/* ============================================
-   GAMBAR PRODUK
-============================================ */
-
-function ProductImage({
-  src,
-  alt,
-  style = {},
-}) {
+function ProductImage({ src, alt, style }) {
   const [failed, setFailed] = useState("");
 
   if (!src || failed === src) {
     return (
-      <div
-        className="lum-photo-missing"
-        style={{
-          width: "100%",
-          height: "100%",
-          minHeight: 120,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexDirection: "column",
-          background: "#efe8e1",
-          color: "#92745f",
-          textAlign: "center",
-          fontSize: 12,
-          ...style,
-        }}
-      >
-        <span style={{ fontSize: 25 }}>▧</span>
-        Foto belum tersedia
+      <div className="lum-photo-placeholder" style={style}>
+        <span>▧</span>
+        <small>Foto belum tersedia</small>
       </div>
     );
   }
 
   return (
     <img
-      src={getImageUrl(src)}
+      src={photoUrl(src)}
       alt={alt}
       loading="lazy"
+      style={style}
       onError={() => setFailed(src)}
-      style={{
-        width: "100%",
-        height: "100%",
-        objectFit: "contain",
-        display: "block",
-        ...style,
-      }}
     />
   );
 }
 
-/* ============================================
-   KARTU PRODUK
-============================================ */
-
 function ProductCard({
   product,
-  isFavorite,
+  favorite,
   onDetail,
   onFavorite,
   onCart,
@@ -330,14 +246,6 @@ function ProductCard({
           type="button"
           className="image-button"
           onClick={() => onDetail(product)}
-          style={{
-            display: "block",
-            width: "100%",
-            height: "100%",
-            padding: 0,
-            border: 0,
-            background: "#f4f0ec",
-          }}
         >
           <ProductImage
             src={product.image}
@@ -345,44 +253,39 @@ function ProductCard({
           />
         </button>
 
-        <button
-          className="heart"
-          aria-label="Wishlist"
-          onClick={() => onFavorite(product.id)}
-        >
-          {isFavorite ? "♥" : "♡"}
-        </button>
-
         <span className="stock-label">
-          {product.stock > 0
+          {Number(product.stock) > 0
             ? "LUMINA COLLECTION"
             : "SOLD OUT"}
         </span>
+
+        <button
+          type="button"
+          className="heart"
+          onClick={() => onFavorite(product.id)}
+          aria-label="Wishlist"
+        >
+          {favorite ? "♥" : "♡"}
+        </button>
       </div>
 
       <div className="product-body">
         <small>{product.collection}</small>
         <h3>{product.name}</h3>
-
-        <p className="price">
-          {rupiah(product.price)}
-        </p>
-
-        <p className="muted">
-          Stok {product.stock}
-        </p>
+        <p className="price">{rupiah(product.price)}</p>
+        <p className="muted">Stok: {product.stock}</p>
 
         <div className="product-actions">
           <button
             className="btn-light"
             onClick={() => onDetail(product)}
           >
-            Detail
+            Lihat Detail
           </button>
 
           <button
             className="btn-dark"
-            disabled={product.stock <= 0}
+            disabled={Number(product.stock) <= 0}
             onClick={() => onCart(product)}
           >
             + Keranjang
@@ -402,8 +305,9 @@ function ProductGrid({
 }) {
   if (!products.length) {
     return (
-      <div className="empty">
-        Belum ada produk pada kategori ini.
+      <div className="lum-empty">
+        <h3>Produk belum tersedia</h3>
+        <p>Coba kategori atau pencarian lainnya.</p>
       </div>
     );
   }
@@ -414,7 +318,7 @@ function ProductGrid({
         <ProductCard
           key={product.id}
           product={product}
-          isFavorite={wishlist.includes(product.id)}
+          favorite={wishlist.includes(product.id)}
           onDetail={onDetail}
           onFavorite={onFavorite}
           onCart={onCart}
@@ -424,96 +328,9 @@ function ProductGrid({
   );
 }
 
-/* ============================================
-   TABEL PESANAN
-============================================ */
-
-function OrderTable({
-  orders,
-  editable = false,
-  onStatus,
-}) {
-  return (
-    <div
-      className="lum-dash-table-wrap"
-      style={{ overflowX: "auto" }}
-    >
-      <table className="lum-dash-table">
-        <thead>
-          <tr>
-            <th>ID Pesanan</th>
-            <th>Pelanggan</th>
-            <th>Produk</th>
-            <th>Total</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {orders.map((order) => {
-            const status = statusOf(order.status);
-
-            return (
-              <tr key={order.id}>
-                <td>{order.id}</td>
-                <td>{order.customer}</td>
-
-                <td>
-                  {order.items?.[0]?.name || "Produk"}
-                </td>
-
-                <td>{rupiah(order.total)}</td>
-
-                <td>
-                  {editable ? (
-                    <select
-                      value={status}
-                      disabled={
-                        status === "Selesai" ||
-                        status === "Dibatalkan"
-                      }
-                      onChange={(e) =>
-                        onStatus(
-                          order.id,
-                          e.target.value
-                        )
-                      }
-                    >
-                      {STATUSES.map((item) => (
-                        <option
-                          key={item}
-                          value={item}
-                        >
-                          {item}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <span className="lum-dash-status">
-                      {status}
-                    </span>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-
-          {!orders.length && (
-            <tr>
-              <td colSpan={5}>
-                Belum ada pesanan.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-/* ============================================
+/* =========================================
    DASHBOARD ADMIN
-============================================ */
+========================================= */
 
 function AdminDashboard({
   products,
@@ -525,109 +342,90 @@ function AdminDashboard({
   onDelete,
   onStatus,
   onBack,
-  onCancel,
 }) {
   const [tab, setTab] = useState("overview");
   const [search, setSearch] = useState("");
   const [folder, setFolder] = useState("Semua");
-  const [year, setYear] = useState(
-    new Date().getFullYear()
-  );
 
   const finished = orders.filter(
-    (o) => statusOf(o.status) === "Selesai"
+    (order) => getStatus(order.status) === "Selesai"
   );
 
   const revenue = finished.reduce(
-    (sum, o) => sum + Number(o.total || 0),
+    (sum, order) => sum + Number(order.total || 0),
     0
   );
 
   const totalStock = products.reduce(
-    (sum, p) => sum + Number(p.stock || 0),
+    (sum, product) => sum + Number(product.stock || 0),
     0
   );
 
   const lowStock = products.filter(
-    (p) => Number(p.stock) <= 5
-  );
-
-  const months = Array.from(
-    { length: 12 },
-    (_, month) => ({
-      label: new Date(
-        year,
-        month,
-        1
-      ).toLocaleString("id-ID", {
-        month: "short",
-      }),
-
-      total: finished
-        .filter((o) => {
-          const date = new Date(o.date);
-
-          return (
-            date.getFullYear() === year &&
-            date.getMonth() === month
-          );
-        })
-        .reduce(
-          (sum, o) =>
-            sum + Number(o.total || 0),
-          0
-        ),
-    })
-  );
-
-  const maximum = Math.max(
-    1,
-    ...months.map((m) => m.total)
+    (product) => Number(product.stock) <= 5
   );
 
   const visibleProducts = products.filter(
-    (p) =>
-      normalize(
-        `${p.name} ${p.collection}`
-      ).includes(normalize(search))
+    (product) =>
+      normalize(`${product.name} ${product.collection}`)
+        .includes(normalize(search))
   );
 
-  const visibleOrders = [...orders]
-    .filter((o) =>
-      normalize(
-        `${o.id} ${o.customer}`
-      ).includes(normalize(search))
-    )
-    .sort(
-      (a, b) =>
-        new Date(b.date) - new Date(a.date)
-    );
+  const visibleOrders = orders.filter(
+    (order) =>
+      normalize(`${order.id} ${order.customer}`)
+        .includes(normalize(search))
+  );
 
-  const visiblePhotos = UNIQUE_PHOTOS.filter(
+  const visiblePhotos = PHOTOS.filter(
     (photo) =>
-      (
-        folder === "Semua" ||
-        normalize(photo.folder) === folder
-      ) &&
-      normalize(
-        `${photo.folder} ${photo.name}`
-      ).includes(normalize(search))
+      (folder === "Semua" || normalize(photo.folder) === folder) &&
+      normalize(`${photo.name} ${photo.folder}`)
+        .includes(normalize(search))
   );
 
-  function field(name, value) {
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  function updateField(name, value) {
+    setForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  const titles = {
-    overview: "Dashboard Overview",
-    products: "Product Management",
-    orders: "Order Management",
-    reports: "Sales Report",
-    gallery: "Photo Gallery",
-  };
+  function exportCSV() {
+    const rows = [
+      ["ID", "Tanggal", "Pelanggan", "Total", "Status"],
+      ...orders.map((order) => [
+        order.id,
+        order.date,
+        order.customer,
+        order.total,
+        order.status,
+      ]),
+    ];
+
+    const csv = rows
+      .map((row) =>
+        row.map((value) => {
+          let text = String(value ?? "");
+
+          if (/^[=+\-@\t\r]/.test(text)) {
+            text = "'" + text;
+          }
+
+          return `"${text.replaceAll('"', '""')}"`;
+        }).join(",")
+      )
+      .join("\r\n");
+
+    const blob = new Blob(
+      ["\uFEFF" + csv],
+      { type: "text/csv;charset=utf-8" }
+    );
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "laporan-lumina.csv";
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
 
   return (
     <div className="lum-dash">
@@ -636,44 +434,31 @@ function AdminDashboard({
           LUMINA<span>.</span>
         </div>
 
-        <p style={{ color: "#dbc6b4" }}>
-          MANAGEMENT SYSTEM
-        </p>
-
-        <div className="lum-dash-menu-label">
-          WORKSPACE
-        </div>
+        <p>MANAGEMENT SYSTEM</p>
 
         <nav className="lum-dash-menu">
           {[
-            ["overview", "▦", "Overview"],
-            ["products", "◈", "Products"],
-            ["orders", "▣", "Orders"],
-            ["reports", "▤", "Sales Report"],
-            ["gallery", "▧", "Photo Gallery"],
-          ].map(([key, symbol, label]) => (
+            ["overview", "Overview"],
+            ["products", "Products"],
+            ["orders", "Orders"],
+            ["reports", "Sales Report"],
+            ["gallery", "Photo Gallery"],
+          ].map(([value, label]) => (
             <button
-              key={key}
-              className={tab === key ? "active" : ""}
+              key={value}
+              className={tab === value ? "active" : ""}
               onClick={() => {
-                setTab(key);
+                setTab(value);
                 setSearch("");
               }}
             >
-              <span>{symbol}</span>
               {label}
             </button>
           ))}
         </nav>
 
         <div className="lum-dash-sidebar-bottom">
-          <strong>LUMINA STORE</strong>
-          <p>Fashion Management Demo</p>
-
-          <button
-            className="lum-dash-back"
-            onClick={onBack}
-          >
+          <button className="lum-dash-back" onClick={onBack}>
             ← Kembali ke Toko
           </button>
         </div>
@@ -682,158 +467,70 @@ function AdminDashboard({
       <main className="lum-dash-main">
         <header className="lum-dash-topbar">
           <div>
-            <span className="lum-dash-eyebrow">
+            <p className="lum-dash-eyebrow">
               LUMINA BUSINESS CENTER
-            </span>
-
-            <h1>{titles[tab]}</h1>
+            </p>
+            <h1>
+              {tab === "overview" && "Dashboard Overview"}
+              {tab === "products" && "Product Management"}
+              {tab === "orders" && "Order Management"}
+              {tab === "reports" && "Sales Report"}
+              {tab === "gallery" && "Photo Gallery"}
+            </h1>
           </div>
 
-          <div className="lum-dash-search">
-            <input
-              placeholder="Cari produk atau pesanan..."
-              value={search}
-              onChange={(e) =>
-                setSearch(e.target.value)
-              }
-            />
-          </div>
+          <input
+            placeholder="Cari produk atau pesanan..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </header>
-
-        {(tab === "overview" ||
-          tab === "reports") && (
-          <div className="lum-dash-stats">
-            {[
-              ["Pendapatan Selesai", rupiah(revenue)],
-              ["Total Pesanan", orders.length],
-              ["Total Produk", products.length],
-              ["Total Stok", totalStock],
-            ].map(([label, value], index) => (
-              <div
-                className="lum-dash-metric"
-                key={label}
-                style={{
-                  background:
-                    index === 0
-                      ? "#49392d"
-                      : "white",
-                  color:
-                    index === 0
-                      ? "white"
-                      : "#302720",
-                  borderRadius: 14,
-                }}
-              >
-                <strong>{value}</strong>
-                <span>{label}</span>
-              </div>
-            ))}
-          </div>
-        )}
 
         {tab === "overview" && (
           <>
+            <div className="lum-dash-stats">
+              {[
+                ["Pendapatan Selesai", rupiah(revenue)],
+                ["Total Pesanan", orders.length],
+                ["Total Produk", products.length],
+                ["Total Stok", totalStock],
+              ].map(([label, value]) => (
+                <div className="lum-dash-metric" key={label}>
+                  <strong>{value}</strong>
+                  <span>{label}</span>
+                </div>
+              ))}
+            </div>
+
             <section className="lum-dash-card">
-              <div className="lum-dash-card-head">
-                <h2>Revenue Analytics</h2>
-
-                <select
-                  value={year}
-                  onChange={(e) =>
-                    setYear(Number(e.target.value))
-                  }
-                >
-                  {[
-                    ...new Set([
-                      new Date().getFullYear(),
-                      ...orders
-                        .map((o) =>
-                          new Date(o.date).getFullYear()
-                        )
-                        .filter(Number.isFinite),
-                    ]),
-                  ].map((value) => (
-                    <option key={value} value={value}>
-                      {value}
-                    </option>
-                  ))}
-                </select>
+              <h2>Revenue Analytics</h2>
+              <div className="lum-revenue-total">
+                {rupiah(revenue)}
               </div>
-
-              <div className="lum-dash-chart-total">
-                {rupiah(
-                  months.reduce(
-                    (sum, m) => sum + m.total,
-                    0
-                  )
-                )}
-              </div>
-
-              <div className="lum-dash-chart">
-                {months.map((month, index) => (
-                  <div
-                    className="lum-dash-bar-col"
-                    key={index}
-                  >
-                    <span>
-                      {month.total
-                        ? Math.round(
-                            month.total / 1000
-                          ) + "rb"
-                        : ""}
-                    </span>
-
-                    <div className="lum-dash-bar-area">
-                      <div
-                        className="lum-dash-bar"
-                        style={{
-                          height:
-                            `${
-                              (month.total / maximum) *
-                              100
-                            }%`,
-                        }}
-                      />
-                    </div>
-
-                    <small>{month.label}</small>
-                  </div>
-                ))}
-              </div>
+              <p>
+                Pendapatan dihitung dari pesanan
+                dengan status Selesai.
+              </p>
             </section>
 
             <section className="lum-dash-card">
               <h2>Collection Overview</h2>
-
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns:
-                    "repeat(auto-fit,minmax(125px,1fr))",
-                  gap: 12,
-                  marginTop: 20,
-                }}
-              >
+              <div className="lum-category-stats">
                 {CATEGORIES.map((category) => (
                   <button
                     key={category.name}
                     className="btn-light"
-                    style={{ padding: 20 }}
                     onClick={() => {
                       setFolder(category.folder);
                       setTab("gallery");
                     }}
                   >
                     <strong>
-                      {
-                        products.filter(
-                          (p) =>
-                            p.collection === category.name
-                        ).length
-                      }
+                      {products.filter(
+                        (p) => p.collection === category.name
+                      ).length}
                     </strong>
-
-                    <p>{category.label}</p>
+                    <span>{category.label}</span>
                   </button>
                 ))}
               </div>
@@ -841,9 +538,9 @@ function AdminDashboard({
 
             <section className="lum-dash-card">
               <h2>Recent Orders</h2>
-
               <OrderTable
-                orders={visibleOrders.slice(0, 5)}
+                orders={orders.slice(0, 5)}
+                onStatus={onStatus}
               />
             </section>
           </>
@@ -856,141 +553,109 @@ function AdminDashboard({
               onSubmit={onSave}
             >
               <h2>
-                {form.id !== null
-                  ? "Edit Produk"
-                  : "Tambah Produk"}
+                {form.id === null ? "Tambah Produk" : "Edit Produk"}
               </h2>
 
               <label>Nama Produk</label>
               <input
                 required
                 value={form.name}
-                onChange={(e) =>
-                  field("name", e.target.value)
-                }
+                onChange={(e) => updateField("name", e.target.value)}
               />
 
-              <label>Kategori Produk</label>
+              <label>Kategori</label>
               <select
                 value={form.collection}
                 onChange={(e) => {
-                  const category = getCategory(
-                    e.target.value
+                  const selected = CATEGORIES.find(
+                    (item) => item.name === e.target.value
                   );
-
                   setForm((prev) => ({
                     ...prev,
-                    collection: category.name,
+                    collection: selected.name,
                     image: "",
-                    sizes: category.sizes.join(","),
+                    sizes: selected.sizes.join(","),
                   }));
                 }}
               >
                 {CATEGORIES.map((category) => (
-                  <option
-                    key={category.name}
-                    value={category.name}
-                  >
+                  <option key={category.name} value={category.name}>
                     {category.label}
                   </option>
                 ))}
               </select>
 
-              <label>Harga (Rp)</label>
+              <label>Harga</label>
               <input
-                required
                 type="number"
                 min="1"
+                required
                 value={form.price}
-                onChange={(e) =>
-                  field("price", e.target.value)
-                }
+                onChange={(e) => updateField("price", e.target.value)}
               />
 
               <label>Stok</label>
               <input
-                required
                 type="number"
                 min="0"
+                required
                 value={form.stock}
-                onChange={(e) =>
-                  field("stock", e.target.value)
-                }
+                onChange={(e) => updateField("stock", e.target.value)}
               />
 
-              <label>Pilih Foto</label>
+              <label>Gambar</label>
               <select
                 value={form.image}
-                onChange={(e) =>
-                  field("image", e.target.value)
-                }
+                onChange={(e) => updateField("image", e.target.value)}
               >
-                <option value="">
-                  Pilih gambar dari folder
-                </option>
-
-                {UNIQUE_PHOTOS.filter(
+                <option value="">Pilih gambar</option>
+                {PHOTOS.filter(
                   (photo) =>
                     normalize(photo.folder) ===
-                    getCategory(form.collection)?.folder
+                    CATEGORIES.find(
+                      (item) => item.name === form.collection
+                    )?.folder
                 ).map((photo) => (
-                  <option
-                    key={photo.url}
-                    value={photo.url}
-                  >
+                  <option key={photo.url} value={photo.url}>
                     {photo.name}
                   </option>
                 ))}
               </select>
 
-              <div style={{ height: 200 }}>
-                <ProductImage
-                  src={form.image}
-                  alt="Preview"
-                />
+              <div className="lum-admin-preview">
+                <ProductImage src={form.image} alt="Preview" />
               </div>
 
               <label>Deskripsi</label>
               <textarea
-                rows={4}
+                rows={3}
                 value={form.description}
                 onChange={(e) =>
-                  field("description", e.target.value)
+                  updateField("description", e.target.value)
                 }
               />
 
               <label>Ukuran</label>
               <input
-                required
                 value={form.sizes}
-                onChange={(e) =>
-                  field("sizes", e.target.value)
-                }
+                onChange={(e) => updateField("sizes", e.target.value)}
               />
 
               <label>Warna</label>
               <input
-                required
                 value={form.colors}
-                onChange={(e) =>
-                  field("colors", e.target.value)
-                }
+                onChange={(e) => updateField("colors", e.target.value)}
               />
 
-              <button
-                className="btn-dark"
-                type="submit"
-              >
-                {form.id !== null
-                  ? "Simpan Perubahan"
-                  : "Tambah Produk"}
+              <button className="btn-dark" type="submit">
+                Simpan Produk
               </button>
 
               {form.id !== null && (
                 <button
                   type="button"
                   className="btn-light"
-                  onClick={onCancel}
+                  onClick={() => setForm({ ...DEFAULT_FORM })}
                 >
                   Batal Edit
                 </button>
@@ -998,46 +663,36 @@ function AdminDashboard({
             </form>
 
             <section className="lum-dash-card">
-              <h2>
-                Daftar Produk ({products.length})
-              </h2>
+              <h2>Daftar Produk ({products.length})</h2>
 
-              {visibleProducts.map((p) => (
+              {visibleProducts.map((product) => (
                 <div
-                  key={p.id}
                   className="lum-dash-product-row"
+                  key={product.id}
                 >
-                  <div
-                    style={{
-                      width: 55,
-                      minWidth: 55,
-                      height: 65,
-                    }}
-                  >
+                  <div className="lum-admin-thumb">
                     <ProductImage
-                      src={p.image}
-                      alt={p.name}
+                      src={product.image}
+                      alt={product.name}
                     />
                   </div>
 
-                  <div style={{ flex: 1 }}>
-                    <strong>{p.name}</strong>
-                    <p>{rupiah(p.price)}</p>
-                    <small>Stok {p.stock}</small>
+                  <div className="lum-admin-product-info">
+                    <strong>{product.name}</strong>
+                    <p>{rupiah(product.price)}</p>
+                    <small>Stok {product.stock}</small>
                   </div>
 
                   <button
                     className="btn-light"
-                    type="button"
-                    onClick={() => onEdit(p)}
+                    onClick={() => onEdit(product)}
                   >
                     Edit
                   </button>
 
                   <button
-                    type="button"
                     className="delete-btn"
-                    onClick={() => onDelete(p.id)}
+                    onClick={() => onDelete(product.id)}
                   >
                     Hapus
                   </button>
@@ -1050,7 +705,6 @@ function AdminDashboard({
         {tab === "orders" && (
           <section className="lum-dash-card">
             <h2>Manajemen Pesanan</h2>
-
             <OrderTable
               orders={visibleOrders}
               editable
@@ -1062,131 +716,45 @@ function AdminDashboard({
         {tab === "reports" && (
           <section className="lum-dash-card">
             <h2>Laporan Penjualan</h2>
-
-            <p>
-              Pendapatan dihitung dari pesanan
-              berstatus Selesai.
-            </p>
-
             <OrderTable
               orders={visibleOrders}
+              onStatus={onStatus}
             />
-
             <button
               className="btn-dark"
-              style={{ marginTop: 20 }}
-              onClick={() => {
-                const headers = [
-                  "ID",
-                  "Tanggal",
-                  "Pelanggan",
-                  "Total",
-                  "Status",
-                ];
-
-                const rows = orders.map((o) => [
-                  o.id,
-                  o.date,
-                  o.customer,
-                  o.total,
-                  statusOf(o.status),
-                ]);
-
-                const csv = [
-                  headers,
-                  ...rows,
-                ]
-                  .map((row) =>
-                    row
-                      .map((value) =>
-                        `"${String(value ?? "").replaceAll('"', '""')}"`
-                      )
-                      .join(",")
-                  )
-                  .join("\r\n");
-
-                const blob = new Blob(
-                  ["\uFEFF" + csv],
-                  {
-                    type:
-                      "text/csv;charset=utf-8",
-                  }
-                );
-
-                const url = URL.createObjectURL(blob);
-                const link =
-                  document.createElement("a");
-
-                link.href = url;
-                link.download =
-                  "laporan-lumina.csv";
-                link.click();
-
-                URL.revokeObjectURL(url);
-              }}
+              onClick={exportCSV}
             >
-              Unduh Laporan CSV
+              Download Laporan CSV
             </button>
           </section>
         )}
 
         {tab === "gallery" && (
           <section className="lum-dash-card">
-            <div className="lum-dash-card-head">
-              <h2>Galeri Foto Lokal</h2>
+            <h2>Galeri Foto Lokal</h2>
 
-              <select
-                value={folder}
-                onChange={(e) =>
-                  setFolder(e.target.value)
-                }
-              >
-                <option value="Semua">
-                  Semua Foto
-                </option>
-
-                {CATEGORIES.map((c) => (
-                  <option
-                    key={c.folder}
-                    value={c.folder}
-                  >
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <p>
-              {visiblePhotos.length} foto tersedia.
-            </p>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns:
-                  "repeat(auto-fit,minmax(140px,1fr))",
-                gap: 15,
-              }}
+            <select
+              value={folder}
+              onChange={(e) => setFolder(e.target.value)}
             >
-              {visiblePhotos.map((photo) => (
-                <article
-                  key={photo.url}
-                  style={{
-                    border: "1px solid #eee",
-                    borderRadius: 12,
-                    overflow: "hidden",
-                  }}
-                >
-                  <div style={{ aspectRatio: "3/4" }}>
-                    <ProductImage
-                      src={photo.url}
-                      alt={photo.name}
-                    />
-                  </div>
+              <option value="Semua">Semua</option>
+              {CATEGORIES.map((item) => (
+                <option key={item.folder} value={item.folder}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
 
-                  <p style={{ padding: 10 }}>
-                    {photo.folder} / {photo.name}
-                  </p>
+            <p>{visiblePhotos.length} foto tersedia</p>
+
+            <div className="lum-gallery">
+              {visiblePhotos.map((photo) => (
+                <article key={photo.url}>
+                  <ProductImage
+                    src={photo.url}
+                    alt={photo.name}
+                  />
+                  <p>{photo.folder} / {photo.name}</p>
                 </article>
               ))}
             </div>
@@ -1197,137 +765,131 @@ function AdminDashboard({
       <aside className="lum-dash-right">
         <section>
           <h3>Store Summary</h3>
-
-          {[
-            ["Kategori", CATEGORIES.length],
-            ["Foto Lokal", UNIQUE_PHOTOS.length],
-            ["Total Produk", products.length],
-            ["Pesanan", orders.length],
-            ["Stok Menipis", lowStock.length],
-          ].map(([label, value]) => (
-            <div
-              key={label}
-              className="lum-dash-stock"
-            >
-              <span>{label}</span>
-              <strong>{value}</strong>
-            </div>
-          ))}
-        </section>
-
-        <section>
-          <h3>Stock Alert</h3>
-
-          {lowStock.length === 0 && (
-            <p>Stok masih mencukupi.</p>
-          )}
-
-          {lowStock.slice(0, 8).map((p) => (
-            <div
-              className="lum-dash-stock"
-              key={p.id}
-            >
-              <span>{p.name}</span>
-              <strong>{p.stock}</strong>
-            </div>
-          ))}
+          <p>Total Produk: {products.length}</p>
+          <p>Foto Lokal: {PHOTOS.length}</p>
+          <p>Total Pesanan: {orders.length}</p>
+          <p>Stok Menipis: {lowStock.length}</p>
         </section>
       </aside>
     </div>
   );
 }
 
-/* ============================================
+function OrderTable({
+  orders,
+  editable = false,
+  onStatus,
+}) {
+  return (
+    <div className="lum-dash-table-wrap">
+      <table className="lum-dash-table">
+        <thead>
+          <tr>
+            <th>ID Pesanan</th>
+            <th>Pelanggan</th>
+            <th>Produk</th>
+            <th>Total</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {orders.map((order) => (
+            <tr key={order.id}>
+              <td>{order.id}</td>
+              <td>{order.customer}</td>
+              <td>{order.items?.[0]?.name || "-"}</td>
+              <td>{rupiah(order.total)}</td>
+              <td>
+                {editable ? (
+                  <select
+                    value={getStatus(order.status)}
+                    disabled={["Selesai", "Dibatalkan"].includes(
+                      getStatus(order.status)
+                    )}
+                    onChange={(e) =>
+                      onStatus(order.id, e.target.value)
+                    }
+                  >
+                    {STATUSES.map((status) => (
+                      <option key={status} value={status}>
+                        {status}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  getStatus(order.status)
+                )}
+              </td>
+            </tr>
+          ))}
+
+          {orders.length === 0 && (
+            <tr>
+              <td colSpan={5}>Belum ada pesanan.</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/* =========================================
    MAIN APP
-============================================ */
+========================================= */
 
 export default function App() {
-  const [products, setProducts] =
-    useState(loadProducts);
-
+  const [products, setProducts] = useState(loadProducts);
   const [orders, setOrders] = useState(
-    () => readList(ORDER_KEY)
+    () => readArray(KEY.orders)
   );
-
   const [customer, setCustomer] = useState(
-    () => read(SESSION_KEY, null)
+    () => read(KEY.session, null)
   );
-
-  const [wishlist, setWishlist] = useState(
-    () => readList(WISHLIST_KEY)
-  );
-
   const [cart, setCart] = useState(
-    () => readList(CART_KEY)
+    () => readArray(KEY.cart)
   );
-
+  const [wishlist, setWishlist] = useState(
+    () => readArray(KEY.wishlist)
+  );
   const [page, setPage] = useState(
-    () =>
-      location.hash === "#admin"
-        ? "admin"
-        : "home"
+    () => location.hash === "#admin" ? "admin" : "home"
   );
-
-  const [authReturn, setAuthReturn] =
-    useState("home");
-
-  const [category, setCategory] =
-    useState("All");
-
-  const [query, setQuery] =
-    useState("");
-
-  const [sort, setSort] =
-    useState("default");
-
-  const [selectedId, setSelectedId] =
-    useState(null);
-
-  const [selectedSize, setSelectedSize] =
-    useState("");
-
-  const [selectedColor, setSelectedColor] =
-    useState("");
-
-  const [form, setForm] = useState({
-    ...EMPTY_FORM,
-  });
-
+  const [authReturn, setAuthReturn] = useState("home");
+  const [category, setCategory] = useState("All");
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState("default");
+  const [selectedId, setSelectedId] = useState(null);
+  const [selectedSize, setSelectedSize] = useState("");
+  const [selectedColor, setSelectedColor] = useState("");
+  const [form, setForm] = useState({ ...DEFAULT_FORM });
   const [checkout, setCheckout] = useState({
-    ...EMPTY_CHECKOUT,
+    ...DEFAULT_CHECKOUT,
   });
-
-  const [message, setMessage] =
-    useState("");
-
-  /* ----------------------------------------
-     SIMPAN DATA DEMO
-  ----------------------------------------- */
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     localStorage.setItem(
-      PRODUCT_KEY,
+      KEY.products,
       JSON.stringify(products)
     );
   }, [products]);
 
   useEffect(() => {
     localStorage.setItem(
-      ORDER_KEY,
+      KEY.orders,
       JSON.stringify(orders)
     );
   }, [orders]);
 
   useEffect(() => {
-    localStorage.setItem(
-      CART_KEY,
-      JSON.stringify(cart)
-    );
+    localStorage.setItem(KEY.cart, JSON.stringify(cart));
   }, [cart]);
 
   useEffect(() => {
     localStorage.setItem(
-      WISHLIST_KEY,
+      KEY.wishlist,
       JSON.stringify(wishlist)
     );
   }, [wishlist]);
@@ -1335,112 +897,79 @@ export default function App() {
   useEffect(() => {
     if (customer) {
       localStorage.setItem(
-        SESSION_KEY,
+        KEY.session,
         JSON.stringify(customer)
       );
     } else {
-      localStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(KEY.session);
     }
   }, [customer]);
 
   useEffect(() => {
     if (!message) return;
-
-    const id = setTimeout(
-      () => setMessage(""),
-      3500
-    );
-
-    return () => clearTimeout(id);
+    const timer = setTimeout(() => setMessage(""), 3500);
+    return () => clearTimeout(timer);
   }, [message]);
-
-  /* ----------------------------------------
-     DATA TAMPILAN
-  ----------------------------------------- */
 
   const visibleProducts = useMemo(() => {
     return products
       .filter(
-        (p) =>
-          (
-            category === "All" ||
-            p.collection === category
-          ) &&
+        (product) =>
+          (category === "All" ||
+            product.collection === category) &&
           normalize(
-            `${p.name} ${p.collection} ${p.description}`
-          ).includes(normalize(query))
+            `${product.name} ${product.collection} ${product.description}`
+          ).includes(normalize(search))
       )
       .sort((a, b) => {
-        if (sort === "low") {
-          return a.price - b.price;
-        }
-
-        if (sort === "high") {
-          return b.price - a.price;
-        }
-
+        if (sort === "low") return a.price - b.price;
+        if (sort === "high") return b.price - a.price;
         if (sort === "name") {
           return a.name.localeCompare(b.name);
         }
-
         return 0;
       });
-  }, [products, category, query, sort]);
+  }, [products, category, search, sort]);
 
-  const selected = products.find(
-    (p) => p.id === selectedId
-  );
+  const selected = products.find((p) => p.id === selectedId);
 
-  const featured = CATEGORIES.flatMap(
-    (category) =>
-      products
-        .filter(
-          (p) =>
-            p.collection === category.name &&
-            p.image
-        )
-        .slice(0, 2)
+  const featured = CATEGORIES.flatMap((item) =>
+    products
+      .filter(
+        (product) =>
+          product.collection === item.name && product.image
+      )
+      .slice(0, 2)
   );
 
   const heroPhoto =
-    UNIQUE_PHOTOS.find(
-      (p) => normalize(p.folder) === "wanita"
-    )?.url ||
-    UNIQUE_PHOTOS[0]?.url;
+    PHOTOS.find(
+      (photo) => normalize(photo.folder) === "wanita"
+    )?.url || PHOTOS[0]?.url;
 
-  const validCart = cart.filter(
-    (item) =>
-      products.some((p) => p.id === item.id)
+  const validCart = cart.filter((item) =>
+    products.some((product) => product.id === item.id)
+  );
+
+  const cartCount = validCart.reduce(
+    (sum, item) => sum + Number(item.quantity),
+    0
   );
 
   const subtotal = validCart.reduce(
     (sum, item) =>
-      sum +
-      Number(item.price) *
-      Number(item.quantity),
-    0
-  );
-
-  const cartCount = validCart.reduce(
-    (sum, item) =>
-      sum + Number(item.quantity),
+      sum + Number(item.price) * Number(item.quantity),
     0
   );
 
   const shippingFee =
-    checkout.shipping === "express"
-      ? 25000
-      : 12000;
+    checkout.shipping === "express" ? 25000 : 12000;
 
   const myOrders = customer
     ? orders.filter(
-        (o) => o.customerId === customer.id
+        (order) => order.customerId === customer.id
       )
     : [];
-
-  /* ----------------------------------------
-     NAVIGASI DAN AUTENTIKASI
-  ----------------------------------------- */
 
   function navigate(nextPage) {
     setPage(nextPage);
@@ -1450,11 +979,7 @@ export default function App() {
       "",
       location.pathname +
         location.search +
-        (
-          nextPage === "admin"
-            ? "#admin"
-            : ""
-        )
+        (nextPage === "admin" ? "#admin" : "")
     );
 
     window.scrollTo(0, 0);
@@ -1462,8 +987,17 @@ export default function App() {
 
   function selectCategory(value) {
     setCategory(value);
-    setQuery("");
+    setSearch("");
     navigate("shop");
+  }
+
+  function showProduct(product) {
+    setSelectedId(product.id);
+    setSelectedSize(product.sizes?.[0] || "All Size");
+    setSelectedColor(
+      product.colors?.[0] || "Sesuai foto"
+    );
+    navigate("detail");
   }
 
   function openAuth(returnPage = "home") {
@@ -1471,66 +1005,35 @@ export default function App() {
     navigate("auth");
   }
 
-  function onAuthSuccess(user) {
+  function loginSuccess(user) {
     setCustomer(user);
-
     setCheckout((prev) => ({
       ...prev,
       name: prev.name || user.name,
     }));
-
-    setMessage(
-      `Selamat datang, ${user.name}!`
-    );
-
     navigate(authReturn);
+    setMessage(`Selamat datang, ${user.name}!`);
   }
 
   function logout() {
     setCustomer(null);
     navigate("home");
-    setMessage("Berhasil logout.");
-  }
-
-  /* ----------------------------------------
-     PRODUK
-  ----------------------------------------- */
-
-  function showDetail(product) {
-    setSelectedId(product.id);
-    setSelectedSize(
-      product.sizes?.[0] || "All Size"
-    );
-    setSelectedColor(
-      product.colors?.[0] || "Sesuai foto"
-    );
-    navigate("detail");
+    setMessage("Berhasil Logout.");
   }
 
   function toggleWishlist(id) {
     setWishlist((prev) =>
       prev.includes(id)
-        ? prev.filter((value) => value !== id)
+        ? prev.filter((item) => item !== id)
         : [...prev, id]
     );
   }
 
-  /* ----------------------------------------
-     KERANJANG
-  ----------------------------------------- */
-
-  function addToCart(
-    product,
-    size,
-    color
-  ) {
+  function addToCart(product, size, color) {
     const chosenSize =
       size || product.sizes?.[0] || "All Size";
-
     const chosenColor =
-      color ||
-      product.colors?.[0] ||
-      "Sesuai foto";
+      color || product.colors?.[0] || "Sesuai foto";
 
     const key = JSON.stringify([
       product.id,
@@ -1538,36 +1041,26 @@ export default function App() {
       chosenColor,
     ]);
 
-    const used = validCart
-      .filter((p) => p.id === product.id)
+    const used = cart
+      .filter((item) => item.id === product.id)
       .reduce(
-        (sum, p) =>
-          sum + Number(p.quantity),
+        (sum, item) => sum + Number(item.quantity),
         0
       );
 
-    if (used >= product.stock) {
+    if (used >= Number(product.stock)) {
       setMessage("Stok tidak mencukupi.");
       return;
     }
 
     setCart((prev) => {
-      const existing = prev.find(
-        (p) =>
-          p.id === product.id &&
-          p.size === chosenSize &&
-          p.color === chosenColor
-      );
+      const existing = prev.find((item) => item.key === key);
 
       if (existing) {
-        return prev.map((p) =>
-          p.key === existing.key
-            ? {
-                ...p,
-                quantity:
-                  Number(p.quantity) + 1,
-              }
-            : p
+        return prev.map((item) =>
+          item.key === key
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
         );
       }
 
@@ -1583,31 +1076,27 @@ export default function App() {
       ];
     });
 
-    setMessage("Produk masuk keranjang.");
+    setMessage("Produk ditambahkan ke keranjang.");
   }
 
-  function changeQuantity(key, delta) {
-    const item = validCart.find(
-      (p) => p.key === key
-    );
-
+  function changeQuantity(key, amount) {
+    const item = cart.find((entry) => entry.key === key);
     if (!item) return;
 
     const product = products.find(
-      (p) => p.id === item.id
+      (entry) => entry.id === item.id
     );
 
-    const used = validCart
-      .filter((p) => p.id === item.id)
+    const used = cart
+      .filter((entry) => entry.id === item.id)
       .reduce(
-        (sum, p) =>
-          sum + Number(p.quantity),
+        (sum, entry) => sum + Number(entry.quantity),
         0
       );
 
     if (
-      delta > 0 &&
-      (!product || used >= product.stock)
+      amount > 0 &&
+      (!product || used >= Number(product.stock))
     ) {
       setMessage("Stok tidak mencukupi.");
       return;
@@ -1615,22 +1104,17 @@ export default function App() {
 
     setCart((prev) =>
       prev
-        .map((p) =>
-          p.key === key
+        .map((entry) =>
+          entry.key === key
             ? {
-                ...p,
-                quantity:
-                  Number(p.quantity) + delta,
+                ...entry,
+                quantity: Number(entry.quantity) + amount,
               }
-            : p
+            : entry
         )
-        .filter((p) => p.quantity > 0)
+        .filter((entry) => entry.quantity > 0)
     );
   }
-
-  /* ----------------------------------------
-     CHECKOUT DAN PESANAN
-  ----------------------------------------- */
 
   function checkoutOrder(event) {
     event.preventDefault();
@@ -1640,16 +1124,17 @@ export default function App() {
       return;
     }
 
-    if (!validCart.length) return;
+    if (!validCart.length) {
+      setMessage("Keranjang masih kosong.");
+      return;
+    }
 
     if (
       !checkout.name.trim() ||
       !checkout.address.trim() ||
-      !/^[0-9+()\s-]{8,20}$/.test(
-        checkout.phone.trim()
-      )
+      !/^[0-9+()\s-]{8,20}$/.test(checkout.phone.trim())
     ) {
-      setMessage("Periksa informasi pembeli.");
+      setMessage("Periksa kembali data pembeli.");
       return;
     }
 
@@ -1663,12 +1148,10 @@ export default function App() {
       );
     });
 
-    for (const [id, count] of quantities) {
-      const product = products.find(
-        (p) => p.id === id
-      );
+    for (const [id, qty] of quantities) {
+      const product = products.find((p) => p.id === id);
 
-      if (!product || product.stock < count) {
+      if (!product || Number(product.stock) < qty) {
         setMessage("Stok tidak mencukupi.");
         return;
       }
@@ -1683,64 +1166,48 @@ export default function App() {
       phone: checkout.phone.trim(),
       address: checkout.address.trim(),
       shipping: checkout.shipping,
-      items: validCart.map(
-        (p) => ({ ...p })
-      ),
+      items: validCart.map((item) => ({ ...item })),
       total: subtotal + shippingFee,
       status: "Pesanan Baru",
       stockRestored: false,
     };
 
-    setOrders((prev) => [
-      order,
-      ...prev,
-    ]);
+    setOrders((prev) => [order, ...prev]);
 
     setProducts((prev) =>
-      prev.map((p) => ({
-        ...p,
+      prev.map((product) => ({
+        ...product,
         stock:
-          p.stock -
-          (quantities.get(p.id) || 0),
+          Number(product.stock) -
+          (quantities.get(product.id) || 0),
       }))
     );
 
     setCart([]);
-    setCheckout({ ...EMPTY_CHECKOUT });
+    setCheckout({ ...DEFAULT_CHECKOUT });
     navigate("success");
   }
 
-  function changeStatus(id, status) {
+  function updateStatus(id, status) {
     if (!STATUSES.includes(status)) return;
 
-    const order = orders.find(
-      (o) => o.id === id
-    );
-
+    const order = orders.find((item) => item.id === id);
     if (!order) return;
 
     if (
       ["Selesai", "Dibatalkan"].includes(
-        statusOf(order.status)
+        getStatus(order.status)
       )
-    ) {
-      return;
-    }
+    ) return;
 
-    if (
-      status === "Dibatalkan" &&
-      !order.stockRestored
-    ) {
+    if (status === "Dibatalkan" && !order.stockRestored) {
       setProducts((prev) =>
         prev.map((product) => ({
           ...product,
           stock:
             Number(product.stock) +
-            (order.items || [])
-              .filter(
-                (item) =>
-                  item.id === product.id
-              )
+            order.items
+              .filter((item) => item.id === product.id)
               .reduce(
                 (sum, item) =>
                   sum + Number(item.quantity),
@@ -1751,40 +1218,35 @@ export default function App() {
     }
 
     setOrders((prev) =>
-      prev.map((o) =>
-        o.id === id
+      prev.map((item) =>
+        item.id === id
           ? {
-              ...o,
+              ...item,
               status,
               stockRestored:
-                o.stockRestored ||
+                item.stockRestored ||
                 status === "Dibatalkan",
             }
-          : o
+          : item
       )
     );
 
-    setMessage(`Status pesanan: ${status}`);
+    setMessage("Status pesanan diperbarui.");
   }
-
-  /* ----------------------------------------
-     CRUD PRODUK ADMIN
-  ----------------------------------------- */
 
   function saveProduct(event) {
     event.preventDefault();
 
-    const categoryInfo = getCategory(
-      form.collection
+    const category = CATEGORIES.find(
+      (item) => item.name === form.collection
     );
-
-    if (!categoryInfo) return;
 
     const price = Number(form.price);
     const stock = Number(form.stock);
 
     if (
       !form.name.trim() ||
+      !category ||
       !Number.isFinite(price) ||
       price <= 0 ||
       !Number.isInteger(stock) ||
@@ -1796,72 +1258,56 @@ export default function App() {
 
     if (
       form.image &&
-      !UNIQUE_PHOTOS.some(
+      !PHOTOS.some(
         (photo) =>
           photo.url === form.image &&
-          normalize(photo.folder) ===
-            categoryInfo.folder
+          normalize(photo.folder) === category.folder
       )
     ) {
-      setMessage(
-        "Pilih foto sesuai kategori."
-      );
+      setMessage("Foto tidak sesuai kategori.");
       return;
     }
 
-    const duplicatePhoto = products.some(
-      (p) =>
-        p.id !== form.id &&
-        p.image === form.image &&
-        Boolean(form.image)
+    const duplicate = products.some(
+      (product) =>
+        product.id !== form.id &&
+        Boolean(form.image) &&
+        product.image === form.image
     );
 
-    if (duplicatePhoto) {
-      setMessage(
-        "Foto sudah dipakai produk lain. Edit produk tersebut."
-      );
+    if (duplicate) {
+      setMessage("Foto sudah digunakan produk lain.");
       return;
     }
 
     const product = {
       id: form.id ?? `custom:${Date.now()}`,
       name: form.name.trim(),
-      collection: categoryInfo.name,
-      category: categoryInfo.category,
+      collection: category.name,
       image: form.image,
       price,
       stock,
-      description: form.description.trim(),
-      sizes: splitValues(form.sizes),
-      colors: splitValues(form.colors),
+      description: form.description,
+      sizes: arrayFromText(form.sizes),
+      colors: arrayFromText(form.colors),
     };
 
-    if (
-      !product.sizes.length ||
-      !product.colors.length
-    ) {
-      setMessage(
-        "Ukuran dan warna wajib diisi."
-      );
+    if (!product.sizes.length || !product.colors.length) {
+      setMessage("Ukuran dan warna wajib diisi.");
       return;
     }
 
     if (form.id !== null) {
       setProducts((prev) =>
-        prev.map((p) =>
-          p.id === form.id
-            ? product
-            : p
+        prev.map((item) =>
+          item.id === form.id ? product : item
         )
       );
     } else {
-      setProducts((prev) => [
-        ...prev,
-        product,
-      ]);
+      setProducts((prev) => [...prev, product]);
     }
 
-    setForm({ ...EMPTY_FORM });
+    setForm({ ...DEFAULT_FORM });
     setMessage("Produk berhasil disimpan.");
   }
 
@@ -1870,49 +1316,40 @@ export default function App() {
       id: product.id,
       name: product.name,
       collection: product.collection,
+      image: product.image || "",
       price: String(product.price),
       stock: String(product.stock),
-      image: product.image || "",
       description: product.description || "",
       sizes: (product.sizes || []).join(","),
       colors: (product.colors || []).join(","),
     });
-
     window.scrollTo(0, 0);
   }
 
   function deleteProduct(id) {
-    const pending = orders.some(
-      (o) =>
+    const active = orders.some(
+      (order) =>
         !["Selesai", "Dibatalkan"].includes(
-          statusOf(o.status)
+          getStatus(order.status)
         ) &&
-        o.items?.some(
-          (item) => item.id === id
-        )
+        order.items?.some((item) => item.id === id)
     );
 
-    if (pending) {
-      setMessage(
-        "Selesaikan pesanan aktif dahulu."
-      );
+    if (active) {
+      setMessage("Selesaikan pesanan aktif dahulu.");
       return;
     }
 
-    if (!window.confirm("Hapus produk ini?")) {
-      return;
-    }
+    if (!window.confirm("Hapus produk ini?")) return;
 
-    const product = products.find(
-      (p) => p.id === id
-    );
+    const product = products.find((p) => p.id === id);
 
     localStorage.setItem(
-      DELETED_KEY,
+      KEY.deleted,
       JSON.stringify([
         ...new Set([
-          ...readList(DELETED_KEY),
-          String(id),
+          ...readArray(KEY.deleted),
+          id,
           ...(product?.image
             ? [`local:${product.image}`]
             : []),
@@ -1921,47 +1358,388 @@ export default function App() {
     );
 
     setProducts((prev) =>
-      prev.filter((p) => p.id !== id)
+      prev.filter((product) => product.id !== id)
     );
-
-    setCart((prev) =>
-      prev.filter((p) => p.id !== id)
-    );
-
-    setWishlist((prev) =>
-      prev.filter((value) => value !== id)
-    );
-
-    setForm({ ...EMPTY_FORM });
+    setCart((prev) => prev.filter((item) => item.id !== id));
+    setWishlist((prev) => prev.filter((item) => item !== id));
+    setForm({ ...DEFAULT_FORM });
     setMessage("Produk dihapus.");
   }
 
   const gridProps = {
     wishlist,
-    onDetail: showDetail,
+    onDetail: showProduct,
     onFavorite: toggleWishlist,
     onCart: addToCart,
   };
 
-  /* ============================================
-     WEBSITE
-  ============================================ */
-
   return (
-    <div
-      className={
-        `lumina ${
-          page === "admin"
-            ? "admin-mode"
-            : ""
-        }`
-      }
-    >
+    <div className={`lumina ${page === "admin" ? "admin-mode" : ""}`}>
+      {/* ======================================
+          STYLE SHOP BARU
+      ====================================== */}
+
+      <style>{`
+        .lumina .lum-new-shop {
+          max-width: 1250px;
+          margin: auto;
+          padding: 52px 24px 90px;
+          min-height: 75vh;
+        }
+
+        .lumina .lum-shop-heading {
+          text-align: center;
+          margin-bottom: 30px;
+        }
+
+        .lumina .lum-shop-heading small {
+          display: block;
+          font-size: 11px;
+          letter-spacing: 2px;
+          color: #a28b78;
+          margin-bottom: 10px;
+        }
+
+        .lumina .lum-shop-heading h1 {
+          font-family: Georgia, serif;
+          font-size: clamp(28px, 3.8vw, 42px);
+          font-weight: 400;
+          color: #292522;
+          margin: 0 0 12px;
+        }
+
+        .lumina .lum-shop-heading p {
+          font-size: 13px;
+          color: #82766c;
+        }
+
+        .lumina .lum-shop-categories {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 27px;
+        }
+
+        .lumina .lum-shop-pill {
+          background: white;
+          color: #60564d;
+          border: 1px solid #e0d7ce;
+          border-radius: 50px;
+          padding: 10px 18px;
+          font-size: 13px;
+          font-weight: 500;
+          cursor: pointer;
+          white-space: nowrap;
+          transition: .2s;
+        }
+
+        .lumina .lum-shop-pill:hover {
+          border-color: #302720;
+        }
+
+        .lumina .lum-shop-pill.active {
+          background: #302720;
+          border-color: #302720;
+          color: white;
+        }
+
+        .lumina .lum-shop-toolbar {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 220px;
+          gap: 13px;
+          margin-bottom: 22px;
+        }
+
+        .lumina .lum-shop-search {
+          height: 50px;
+          border: 1px solid #e1d8d0;
+          border-radius: 50px;
+          background: white;
+          display: flex;
+          align-items: center;
+          padding: 0 18px;
+          gap: 10px;
+        }
+
+        .lumina .lum-shop-search span {
+          font-size: 23px;
+          color: #958273;
+        }
+
+        .lumina .lum-shop-search input {
+          flex: 1;
+          min-width: 0;
+          border: none;
+          background: transparent;
+          box-shadow: none;
+          outline: none;
+          padding: 10px 0;
+          font-size: 13px;
+          color: #302720;
+        }
+
+        .lumina .lum-shop-search button {
+          border: 0;
+          background: transparent;
+          font-size: 22px;
+          cursor: pointer;
+          color: #82766c;
+        }
+
+        .lumina .lum-shop-sort {
+          width: 100%;
+          height: 50px;
+          border: 1px solid #e1d8d0;
+          border-radius: 50px;
+          background: white;
+          color: #4f443b;
+          padding: 0 17px;
+          font-size: 13px;
+        }
+
+        .lumina .lum-shop-count {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 15px;
+          font-size: 12px;
+          color: #82766c;
+          margin-bottom: 17px;
+        }
+
+        .lumina .lum-shop-grid .product-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 22px;
+        }
+
+        .lumina .lum-shop-grid .product-card {
+          border-radius: 16px;
+          overflow: hidden;
+          border: 1px solid #ece4dc;
+          background: white;
+          min-width: 0;
+          box-shadow: 0 5px 18px rgba(48,39,32,.05);
+          transition: transform .2s, box-shadow .2s;
+        }
+
+        .lumina .lum-shop-grid .product-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 15px 30px rgba(48,39,32,.11);
+        }
+
+        .lumina .lum-shop-grid .product-picture {
+          position: relative;
+          width: 100%;
+          height: auto;
+          aspect-ratio: 4 / 5;
+          overflow: hidden;
+          background: #f3eeea;
+        }
+
+        .lumina .lum-shop-grid .image-button {
+          display: block;
+          width: 100%;
+          height: 100%;
+          padding: 0;
+          border: 0;
+          background: transparent;
+          cursor: pointer;
+        }
+
+        .lumina .lum-shop-grid .product-picture img {
+          display: block;
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+
+        .lumina .lum-shop-grid .product-body {
+          padding: 20px;
+        }
+
+        .lumina .lum-shop-grid .product-body h3 {
+          font-size: 16px;
+          line-height: 1.5;
+          color: #302720;
+          margin: 10px 0;
+        }
+
+        .lumina .lum-shop-grid .product-body .price {
+          color: #382b22;
+          font-size: 20px;
+          font-weight: 700;
+          margin: 10px 0;
+        }
+
+        .lumina .lum-shop-grid .product-actions {
+          display: flex;
+          gap: 10px;
+          margin-top: 15px;
+        }
+
+        .lumina .lum-shop-grid .product-actions button {
+          flex: 1;
+          min-width: 0;
+          padding: 12px 8px;
+          border-radius: 9px;
+          font-size: 12px;
+        }
+
+        .lumina .lum-photo-placeholder {
+          width: 100%;
+          height: 100%;
+          min-height: 120px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          gap: 8px;
+          background: #efe8e1;
+          color: #92745f;
+        }
+
+        .lumina .lum-photo-placeholder span {
+          font-size: 30px;
+        }
+
+        .lumina .lum-empty {
+          text-align: center;
+          padding: 50px 20px;
+          border: 1px solid #ece4dc;
+          border-radius: 14px;
+          background: white;
+        }
+
+        .lumina .lum-admin-thumb {
+          flex: 0 0 60px;
+          height: 75px;
+        }
+
+        .lumina .lum-admin-thumb img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+
+        .lumina .lum-admin-preview {
+          height: 190px;
+        }
+
+        .lumina .lum-admin-preview img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+
+        .lumina .lum-admin-product-info {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .lumina .lum-gallery {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+          gap: 15px;
+          margin-top: 20px;
+        }
+
+        .lumina .lum-gallery article {
+          border: 1px solid #eee;
+          border-radius: 12px;
+          overflow: hidden;
+        }
+
+        .lumina .lum-gallery img {
+          width: 100%;
+          height: 190px;
+          object-fit: contain;
+        }
+
+        .lumina .lum-gallery p {
+          padding: 10px;
+          font-size: 11px;
+        }
+
+        .lumina .lum-category-stats {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+          gap: 12px;
+        }
+
+        .lumina .lum-category-stats button {
+          padding: 20px;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .lumina .lum-revenue-total {
+          font-size: 30px;
+          font-weight: 700;
+          padding: 20px 0;
+        }
+
+        @media (max-width: 700px) {
+          .lumina .lum-new-shop {
+            padding: 28px 14px 60px;
+          }
+
+          .lumina .lum-shop-categories {
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            overflow-x: auto;
+            padding-bottom: 12px;
+          }
+
+          .lumina .lum-shop-pill {
+            flex: 0 0 auto;
+            padding: 9px 15px;
+            font-size: 12px;
+          }
+
+          .lumina .lum-shop-toolbar {
+            grid-template-columns: 1fr;
+          }
+
+          .lumina .lum-shop-grid .product-grid {
+            gap: 11px;
+          }
+
+          .lumina .lum-shop-grid .product-picture {
+            aspect-ratio: 3 / 4;
+          }
+
+          .lumina .lum-shop-grid .product-body {
+            padding: 12px;
+          }
+
+          .lumina .lum-shop-grid .product-body h3 {
+            font-size: 12px;
+          }
+
+          .lumina .lum-shop-grid .product-body .price {
+            font-size: 14px;
+          }
+
+          .lumina .lum-shop-grid .product-actions {
+            flex-direction: column;
+          }
+
+          .lumina .lum-shop-grid .product-actions button {
+            width: 100%;
+          }
+        }
+      `}</style>
+
+      {/* NAVBAR */}
+
       {page !== "admin" && (
         <>
           <div className="announcement">
-            ✦ LUMINA STORE —
-            PREMIUM FASHION & LIFESTYLE
+            ✦ LUMINA STORE — PREMIUM FASHION & LIFESTYLE
           </div>
 
           <header className="navbar">
@@ -1989,11 +1767,15 @@ export default function App() {
                 Women
               </button>
 
-              <button onClick={() => selectCategory("Batik Wanita")}>
+              <button
+                onClick={() => selectCategory("Batik Wanita")}
+              >
                 Batik
               </button>
 
-              <button onClick={() => selectCategory("Tas Wanita")}>
+              <button
+                onClick={() => selectCategory("Tas Wanita")}
+              >
                 Bags
               </button>
 
@@ -2007,13 +1789,12 @@ export default function App() {
 
               {customer ? (
                 <>
-                  <button onClick={() => navigate("account")}>
+                  <button
+                    onClick={() => navigate("account")}
+                  >
                     Halo, {customer.name}
                   </button>
-
-                  <button onClick={logout}>
-                    Logout
-                  </button>
+                  <button onClick={logout}>Logout</button>
                 </>
               ) : (
                 <button onClick={() => openAuth("home")}>
@@ -2069,30 +1850,25 @@ export default function App() {
             <div className="hero-photo">
               <ProductImage
                 src={heroPhoto}
-                alt="Lumina Fashion"
+                alt="LUMINA Fashion"
               />
             </div>
           </section>
 
           <section className="perks">
             <div>
-              ✧
-              <strong>Premium Fashion</strong>
+              ✧ <strong>Premium Fashion</strong>
               <span>Modern & Elegant</span>
             </div>
 
             <div>
-              ♡
-              <strong>
-                {UNIQUE_PHOTOS.length} Foto Koleksi
-              </strong>
-              <span>Katalog foto lokal</span>
+              ♡ <strong>{PHOTOS.length} Foto Koleksi</strong>
+              <span>Katalog Foto Lokal</span>
             </div>
 
             <div>
-              ✦
-              <strong>Seven Collections</strong>
-              <span>Fashion for Everyone</span>
+              ✦ <strong>Seven Collections</strong>
+              <span>Fashion For Everyone</span>
             </div>
           </section>
 
@@ -2105,46 +1881,37 @@ export default function App() {
               Explore Our Collections
             </h2>
 
-            <p className="section-description">
-              Pilih koleksi favoritmu.
-            </p>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns:
-                  "repeat(auto-fit,minmax(min(100%,225px),1fr))",
-                gap: 20,
-              }}
-            >
-              {CATEGORIES.map((category) => {
+            <div className="lum-home-categories">
+              {CATEGORIES.map((item) => {
                 const cover = products.find(
-                  (p) =>
-                    p.collection === category.name &&
-                    p.image
+                  (product) =>
+                    product.collection === item.name &&
+                    product.image
                 );
 
                 return (
                   <button
-                    key={category.name}
-                    onClick={() =>
-                      selectCategory(category.name)
-                    }
+                    key={item.name}
+                    onClick={() => selectCategory(item.name)}
                     style={{
                       position: "relative",
-                      height: 290,
+                      height: 280,
                       border: 0,
-                      borderRadius: 14,
                       padding: 0,
+                      borderRadius: 15,
                       overflow: "hidden",
-                      background: "#e9ded3",
                       cursor: "pointer",
+                      background: "#e9ded3",
                     }}
                   >
                     <ProductImage
                       src={cover?.image}
-                      alt={category.label}
-                      style={{ objectFit: "cover" }}
+                      alt={item.label}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
                     />
 
                     <span
@@ -2154,25 +1921,15 @@ export default function App() {
                         display: "flex",
                         flexDirection: "column",
                         justifyContent: "flex-end",
-                        padding: 22,
+                        padding: 20,
                         textAlign: "left",
                         background:
                           "linear-gradient(transparent,rgba(30,22,17,.85))",
                         color: "white",
                       }}
                     >
-                      <small>
-                        LUMINA COLLECTION
-                      </small>
-
-                      <strong
-                        style={{
-                          fontFamily: "Georgia,serif",
-                          fontSize: 25,
-                        }}
-                      >
-                        {category.label}
-                      </strong>
+                      <small>LUMINA COLLECTION</small>
+                      <strong>{item.label}</strong>
                     </span>
                   </button>
                 );
@@ -2184,7 +1941,6 @@ export default function App() {
             <p className="eyebrow center">
               CURATED FOR YOU
             </p>
-
             <h2 className="section-title">
               Featured Collection
             </h2>
@@ -2203,109 +1959,75 @@ export default function App() {
               </button>
             </div>
           </section>
-
-          <section className="promo">
-            <p className="eyebrow">
-              THE LUMINA EDIT
-            </p>
-
-            <h2>
-              Confidence in Every Style.
-            </h2>
-
-            <button
-              className="btn-dark"
-              onClick={() => selectCategory("All")}
-            >
-              Shop Now →
-            </button>
-          </section>
         </>
       )}
 
-      {/* SHOP */}
+      {/* ======================================
+          SHOP BARU SESUAI CONTOH GAMBAR
+      ====================================== */}
 
       {page === "shop" && (
-        <main
-          className="container section"
-          style={{ paddingTop: 75 }}
-        >
-          <p className="eyebrow center">
-            THE LUMINA COLLECTION
-          </p>
+        <main className="lum-new-shop">
+          <div className="lum-shop-heading">
+            <small>DISCOVER YOUR STYLE</small>
 
-          <h1 className="section-title">
-            Shop Our Collection
-          </h1>
+            <h1>Shop Our Collection</h1>
 
-          <p className="section-description">
-            Jelajahi koleksi fashion favoritmu.
-          </p>
+            <p>
+              Temukan gaya terbaik dari koleksi LUMINA
+            </p>
+          </div>
 
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              justifyContent: "center",
-              gap: 10,
-              marginBottom: 30,
-            }}
-          >
+          <div className="lum-shop-categories">
             {[
-              { name: "All", label: "Semua Produk" },
-              ...CATEGORIES,
+              { name: "All", label: "Semua" },
+              ...CATEGORIES.map((item) => ({
+                name: item.name,
+                label: item.label,
+              })),
             ].map((item) => (
               <button
                 key={item.name}
                 className={
                   category === item.name
-                    ? "btn-dark"
-                    : "btn-light"
+                    ? "lum-shop-pill active"
+                    : "lum-shop-pill"
                 }
-                onClick={() =>
-                  setCategory(item.name)
-                }
+                onClick={() => {
+                  setCategory(item.name);
+                  setSearch("");
+                }}
               >
                 {item.label}
               </button>
             ))}
           </div>
 
-          <div className="toolbar">
-            <input
-              type="search"
-              value={query}
-              placeholder="Cari produk..."
-              onChange={(e) =>
-                setQuery(e.target.value)
-              }
-            />
+          <div className="lum-shop-toolbar">
+            <div className="lum-shop-search">
+              <span>⌕</span>
 
-            <select
-              value={category}
-              onChange={(e) =>
-                setCategory(e.target.value)
-              }
-            >
-              <option value="All">
-                Semua Produk
-              </option>
+              <input
+                type="search"
+                placeholder="Cari produk favoritmu..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
 
-              {CATEGORIES.map((item) => (
-                <option
-                  key={item.name}
-                  value={item.name}
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
                 >
-                  {item.label}
-                </option>
-              ))}
-            </select>
+                  ×
+                </button>
+              )}
+            </div>
 
             <select
+              className="lum-shop-sort"
               value={sort}
-              onChange={(e) =>
-                setSort(e.target.value)
-              }
+              onChange={(e) => setSort(e.target.value)}
             >
               <option value="default">
                 Urutan Default
@@ -2317,23 +2039,50 @@ export default function App() {
                 Harga Termahal
               </option>
               <option value="name">
-                Nama A-Z
+                Nama A–Z
               </option>
             </select>
           </div>
 
-          <p className="muted">
-            {visibleProducts.length} produk ditemukan
-          </p>
+          <div className="lum-shop-count">
+            <span>
+              {visibleProducts.length} produk ditemukan
+            </span>
 
-          <ProductGrid
-            products={visibleProducts}
-            {...gridProps}
-          />
+            <span>▦ Grid View</span>
+          </div>
+
+          {visibleProducts.length ? (
+            <div className="lum-shop-grid">
+              <ProductGrid
+                products={visibleProducts}
+                {...gridProps}
+              />
+            </div>
+          ) : (
+            <div className="lum-empty">
+              <h3>Produk tidak ditemukan</h3>
+              <p>
+                Coba kata kunci lain atau pilih
+                kategori berbeda.
+              </p>
+
+              <button
+                className="btn-dark"
+                onClick={() => {
+                  setCategory("All");
+                  setSearch("");
+                  setSort("default");
+                }}
+              >
+                Lihat Semua Produk
+              </button>
+            </div>
+          )}
         </main>
       )}
 
-      {/* DETAIL */}
+      {/* DETAIL PRODUK */}
 
       {page === "detail" && selected && (
         <main className="container section">
@@ -2345,12 +2094,7 @@ export default function App() {
           </button>
 
           <div className="detail-layout">
-            <div
-              style={{
-                aspectRatio: "4/5",
-                background: "#f3efeb",
-              }}
-            >
+            <div className="lum-detail-photo">
               <ProductImage
                 src={selected.image}
                 alt={selected.name}
@@ -2369,76 +2113,55 @@ export default function App() {
               </h2>
 
               <p>{selected.description}</p>
-
               <p>Stok: {selected.stock}</p>
 
               <label>Pilih Ukuran</label>
-
               <div className="option-row">
-                {(selected.sizes || []).map(
-                  (size) => (
-                    <button
-                      key={size}
-                      className={
-                        selectedSize === size
-                          ? "chosen"
-                          : ""
-                      }
-                      onClick={() =>
-                        setSelectedSize(size)
-                      }
-                    >
-                      {size}
-                    </button>
-                  )
-                )}
+                {(selected.sizes || []).map((size) => (
+                  <button
+                    key={size}
+                    className={
+                      selectedSize === size ? "chosen" : ""
+                    }
+                    onClick={() => setSelectedSize(size)}
+                  >
+                    {size}
+                  </button>
+                ))}
               </div>
 
               <label>Pilih Warna</label>
-
               <div className="option-row">
-                {(selected.colors || []).map(
-                  (color) => (
-                    <button
-                      key={color}
-                      className={
-                        selectedColor === color
-                          ? "chosen"
-                          : ""
-                      }
-                      onClick={() =>
-                        setSelectedColor(color)
-                      }
-                    >
-                      {color}
-                    </button>
-                  )
-                )}
+                {(selected.colors || []).map((color) => (
+                  <button
+                    key={color}
+                    className={
+                      selectedColor === color ? "chosen" : ""
+                    }
+                    onClick={() => setSelectedColor(color)}
+                  >
+                    {color}
+                  </button>
+                ))}
               </div>
 
               <button
                 className="btn-dark wide"
-                disabled={selected.stock <= 0}
+                disabled={Number(selected.stock) <= 0}
                 onClick={() =>
-                  addToCart(
-                    selected,
-                    selectedSize,
-                    selectedColor
-                  )
+                  addToCart(selected, selectedSize, selectedColor)
                 }
               >
-                + Add to Cart
+                + Tambahkan ke Keranjang
               </button>
 
               <button
                 className="btn-light wide"
-                onClick={() =>
-                  toggleWishlist(selected.id)
-                }
+                onClick={() => toggleWishlist(selected.id)}
               >
                 {wishlist.includes(selected.id)
-                  ? "♥ Hapus dari Wishlist"
-                  : "♡ Simpan ke Wishlist"}
+                  ? "♥ Hapus Wishlist"
+                  : "♡ Tambahkan Wishlist"}
               </button>
             </div>
           </div>
@@ -2454,15 +2177,15 @@ export default function App() {
           </h1>
 
           <ProductGrid
-            products={products.filter(
-              (p) => wishlist.includes(p.id)
+            products={products.filter((product) =>
+              wishlist.includes(product.id)
             )}
             {...gridProps}
           />
         </main>
       )}
 
-      {/* CART */}
+      {/* KERANJANG */}
 
       {page === "cart" && (
         <main className="container section">
@@ -2477,17 +2200,8 @@ export default function App() {
               )}
 
               {validCart.map((item) => (
-                <div
-                  key={item.key}
-                  className="cart-row"
-                >
-                  <div
-                    style={{
-                      width: 95,
-                      height: 115,
-                      flexShrink: 0,
-                    }}
-                  >
+                <div className="cart-row" key={item.key}>
+                  <div className="lum-cart-photo">
                     <ProductImage
                       src={item.image}
                       alt={item.name}
@@ -2496,22 +2210,13 @@ export default function App() {
 
                   <div className="grow">
                     <h3>{item.name}</h3>
-
-                    <p>
-                      {item.size} / {item.color}
-                    </p>
-
-                    <strong>
-                      {rupiah(item.price)}
-                    </strong>
+                    <p>{item.size} / {item.color}</p>
+                    <strong>{rupiah(item.price)}</strong>
 
                     <div className="quantity">
                       <button
                         onClick={() =>
-                          changeQuantity(
-                            item.key,
-                            -1
-                          )
+                          changeQuantity(item.key, -1)
                         }
                       >
                         −
@@ -2521,10 +2226,7 @@ export default function App() {
 
                       <button
                         onClick={() =>
-                          changeQuantity(
-                            item.key,
-                            1
-                          )
+                          changeQuantity(item.key, 1)
                         }
                       >
                         +
@@ -2534,8 +2236,7 @@ export default function App() {
                         onClick={() =>
                           setCart((prev) =>
                             prev.filter(
-                              (p) =>
-                                p.key !== item.key
+                              (entry) => entry.key !== item.key
                             )
                           )
                         }
@@ -2549,7 +2250,7 @@ export default function App() {
             </div>
 
             <div className="panel summary">
-              <h2>Order Summary</h2>
+              <h2>Ringkasan Belanja</h2>
 
               <div className="between">
                 <span>Total Item</span>
@@ -2577,11 +2278,11 @@ export default function App() {
         </main>
       )}
 
-      {/* LOGIN DAN REGISTRASI */}
+      {/* LOGIN */}
 
       {page === "auth" && (
         <AuthPage
-          onSuccess={onAuthSuccess}
+          onSuccess={loginSuccess}
           onBack={() => navigate("home")}
         />
       )}
@@ -2616,7 +2317,6 @@ export default function App() {
               <label>Nomor Telepon</label>
               <input
                 required
-                type="tel"
                 value={checkout.phone}
                 onChange={(e) =>
                   setCheckout({
@@ -2626,7 +2326,7 @@ export default function App() {
                 }
               />
 
-              <label>Alamat</label>
+              <label>Alamat Pengiriman</label>
               <textarea
                 required
                 rows={4}
@@ -2639,7 +2339,7 @@ export default function App() {
                 }
               />
 
-              <label>Pengiriman</label>
+              <label>Metode Pengiriman</label>
               <select
                 value={checkout.shipping}
                 onChange={(e) =>
@@ -2650,23 +2350,20 @@ export default function App() {
                 }
               >
                 <option value="regular">
-                  Regular — Rp12.000
+                  Regular Rp12.000
                 </option>
-
                 <option value="express">
-                  Express — Rp25.000
+                  Express Rp25.000
                 </option>
               </select>
 
               <p className="muted">
-                Checkout simulasi.
-                Gunakan data fiktif.
+                Checkout masih simulasi.
               </p>
 
               <button
                 type="submit"
                 className="btn-dark wide"
-                disabled={!validCart.length}
               >
                 Konfirmasi Pesanan
               </button>
@@ -2677,16 +2374,12 @@ export default function App() {
 
               <div className="between">
                 <span>Subtotal</span>
-                <strong>
-                  {rupiah(subtotal)}
-                </strong>
+                <strong>{rupiah(subtotal)}</strong>
               </div>
 
               <div className="between">
-                <span>Pengiriman</span>
-                <strong>
-                  {rupiah(shippingFee)}
-                </strong>
+                <span>Ongkir</span>
+                <strong>{rupiah(shippingFee)}</strong>
               </div>
 
               <div className="between grand-total">
@@ -2703,12 +2396,11 @@ export default function App() {
       {page === "checkout" && !customer && (
         <main className="container section center">
           <h2>Silakan Login Terlebih Dahulu</h2>
-
           <button
             className="btn-dark"
             onClick={() => openAuth("checkout")}
           >
-            Login / Register
+            Login
           </button>
         </main>
       )}
@@ -2716,38 +2408,12 @@ export default function App() {
       {/* DASHBOARD PELANGGAN */}
 
       {page === "account" && customer && (
-        <main className="container section">
-          <p className="eyebrow center">
-            MY ACCOUNT
-          </p>
-
-          <h1 className="section-title">
-            Dashboard Pelanggan
-          </h1>
-
-          <section className="panel">
-            <h2>Profil Saya</h2>
-
-            <p>Nama: {customer.name}</p>
-            <p>Email: {customer.email}</p>
-
-            <button
-              className="btn-light"
-              onClick={logout}
-            >
-              Logout
-            </button>
-          </section>
-
-          <section
-            className="panel"
-            style={{ marginTop: 28 }}
-          >
-            <h2>Riwayat Pesanan Saya</h2>
-
-            <OrderTable orders={myOrders} />
-          </section>
-        </main>
+        <CustomerDashboard
+          customer={customer}
+          orders={myOrders}
+          onBack={() => selectCategory("All")}
+          onLogout={logout}
+        />
       )}
 
       {/* SUCCESS */}
@@ -2755,29 +2421,31 @@ export default function App() {
       {page === "success" && (
         <main className="container section center">
           <div className="panel success-panel">
-            <div className="success-icon">
-              ✓
-            </div>
-
+            <div className="success-icon">✓</div>
             <h1>Pesanan Berhasil!</h1>
-
             <p>
-              Pesanan simulasi telah tercatat.
+              Pesanan simulasi berhasil dibuat.
+              Cek status pesanan pada Dashboard Pelanggan.
             </p>
 
             <button
               className="btn-dark"
-              onClick={() =>
-                navigate("account")
-              }
+              onClick={() => navigate("account")}
             >
-              Lihat Pesanan Saya
+              Lihat Pesanan Saya →
+            </button>
+
+            <button
+              className="btn-light"
+              onClick={() => selectCategory("All")}
+            >
+              Lanjut Belanja
             </button>
           </div>
         </main>
       )}
 
-      {/* ADMIN */}
+      {/* DASHBOARD ADMIN */}
 
       {page === "admin" && (
         <AdminDashboard
@@ -2788,11 +2456,8 @@ export default function App() {
           onSave={saveProduct}
           onEdit={editProduct}
           onDelete={deleteProduct}
-          onStatus={changeStatus}
+          onStatus={updateStatus}
           onBack={() => navigate("home")}
-          onCancel={() =>
-            setForm({ ...EMPTY_FORM })
-          }
         />
       )}
 
@@ -2804,19 +2469,14 @@ export default function App() {
             <h2>LUMINA.</h2>
             <p>Premium Fashion & Lifestyle</p>
           </div>
-
           <div>
             <p>
               Men • Women • Batik • Shoes • Bags
             </p>
-            <p>
-              React E-Commerce Portfolio
-            </p>
+            <p>React E-Commerce Portfolio</p>
           </div>
-
           <p>
             © {new Date().getFullYear()} LUMINA STORE
-            — Demo Only
           </p>
         </footer>
       )}
@@ -2824,15 +2484,9 @@ export default function App() {
       {/* NOTIFIKASI */}
 
       {message && (
-        <div
-          className="toast"
-          role="status"
-        >
+        <div className="toast" role="status">
           <span>{message}</span>
-
-          <button
-            onClick={() => setMessage("")}
-          >
+          <button onClick={() => setMessage("")}>
             ×
           </button>
         </div>

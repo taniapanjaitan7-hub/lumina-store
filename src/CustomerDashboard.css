@@ -1,0 +1,712 @@
+
+/* =========================================
+   LUMINA STORE — CUSTOMER DASHBOARD
+========================================= */
+
+.lumina .cd-shell {
+  min-height: calc(100vh - 120px);
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  background: #f8f6f3;
+  color: #302720;
+}
+
+.lumina .cd-sidebar {
+  background: #302720;
+  color: #fff;
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.lumina .cd-logo {
+  background: none;
+  border: none;
+  color: #fff;
+  font: 500 27px Georgia, serif;
+  letter-spacing: 3px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.lumina .cd-logo span {
+  color: #d1a47f;
+}
+
+.lumina .cd-member {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+  gap: 8px;
+  padding: 24px 8px;
+  border-bottom: 1px solid #55473c;
+}
+
+.lumina .cd-avatar,
+.lumina .cd-top-avatar,
+.lumina .cd-profile-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #b99274;
+  color: #fff;
+  border-radius: 50%;
+  font-weight: 700;
+}
+
+.lumina .cd-avatar {
+  width: 66px;
+  height: 66px;
+  font-size: 21px;
+  margin-bottom: 10px;
+}
+
+.lumina .cd-member strong {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.lumina .cd-member small {
+  color: #c8b8a9;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.lumina .cd-member-label {
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #e4c7ae;
+  margin-top: 6px;
+}
+
+.lumina .cd-menu-heading {
+  color: #ad9581;
+  font-size: 10px;
+  letter-spacing: 2px;
+  margin: 0 0 -8px 12px;
+}
+
+.lumina .cd-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.lumina .cd-menu button,
+.lumina .cd-sidebar-bottom button {
+  width: 100%;
+  padding: 13px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: 9px;
+  color: #dfd0c3;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.lumina .cd-menu button span {
+  margin-right: 9px;
+}
+
+.lumina .cd-menu button.active,
+.lumina .cd-menu button:hover {
+  background: #a28067;
+  color: white;
+}
+
+.lumina .cd-sidebar-bottom {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid #55473c;
+}
+
+.lumina .cd-sidebar-bottom .cd-logout {
+  color: #f2bcb3;
+}
+
+.lumina .cd-main {
+  padding: 36px;
+  min-width: 0;
+}
+
+.lumina .cd-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.lumina .cd-eyebrow {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #a17c60;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+
+.lumina .cd-topbar h1 {
+  margin: 0;
+  font: 400 34px Georgia, serif;
+  color: #302720;
+}
+
+.lumina .cd-top-subtitle {
+  color: #88796d;
+  font-size: 13px;
+}
+
+.lumina .cd-top-avatar {
+  width: 43px;
+  height: 43px;
+  flex-shrink: 0;
+}
+
+.lumina .cd-welcome {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  overflow: hidden;
+  padding: 35px;
+  border-radius: 17px;
+  background: linear-gradient(
+    120deg,
+    #49372b,
+    #a17b5e
+  );
+  color: white;
+  margin-bottom: 25px;
+}
+
+.lumina .cd-welcome span {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #ead8c8;
+}
+
+.lumina .cd-welcome h2 {
+  font: 400 34px Georgia, serif;
+  color: white;
+  margin: 12px 0;
+}
+
+.lumina .cd-welcome p {
+  max-width: 410px;
+  color: #f4e5d7;
+  line-height: 1.7;
+  font-size: 13px;
+}
+
+.lumina .cd-welcome button,
+.lumina .cd-action {
+  border: none;
+  padding: 13px 22px;
+  background: white;
+  color: #49372b;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.lumina .cd-welcome-decor {
+  font-size: 125px;
+  opacity: .2;
+  padding: 0 25px;
+}
+
+.lumina .cd-stats {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.lumina .cd-stat,
+.lumina .cd-panel {
+  border: 1px solid #eee6df;
+  border-radius: 15px;
+  background: white;
+  box-shadow:
+    0 5px 20px rgba(52, 35, 20, .04);
+}
+
+.lumina .cd-stat {
+  padding: 22px;
+  min-width: 0;
+}
+
+.lumina .cd-stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  color: #926d50;
+  background: #f5ede6;
+  margin-bottom: 15px;
+}
+
+.lumina .cd-stat p {
+  color: #88776a;
+  margin: 0 0 12px;
+  font-size: 12px;
+}
+
+.lumina .cd-stat strong {
+  display: block;
+  font-size: clamp(16px, 2vw, 24px);
+  overflow-wrap: anywhere;
+}
+
+.lumina .cd-stat small {
+  display: block;
+  margin-top: 8px;
+  color: #a3968b;
+  font-size: 10px;
+}
+
+.lumina .cd-panel {
+  padding: 25px;
+  margin-bottom: 25px;
+}
+
+.lumina .cd-panel-heading,
+.lumina .cd-detail-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.lumina .cd-panel-heading h2,
+.lumina .cd-detail-heading h2 {
+  margin: 0 0 7px;
+  color: #302720;
+  font: 400 24px Georgia, serif;
+}
+
+.lumina .cd-panel-heading p,
+.lumina .cd-detail-heading p {
+  margin: 0;
+  color: #8e8074;
+  font-size: 12px;
+}
+
+.lumina .cd-link,
+.lumina .cd-back {
+  border: none;
+  background: none;
+  color: #926d50;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.lumina .cd-filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.lumina .cd-filters input,
+.lumina .cd-filters select {
+  padding: 12px;
+  border: 1px solid #e6dbd0;
+  border-radius: 8px;
+  background: white;
+  color: #302720;
+  font: inherit;
+  font-size: 13px;
+}
+
+.lumina .cd-filters input {
+  flex: 1;
+  min-width: 0;
+}
+
+.lumina .cd-order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.lumina .cd-order-card {
+  padding: 17px;
+  border: 1px solid #eee4da;
+  border-radius: 12px;
+}
+
+.lumina .cd-order-header,
+.lumina .cd-order-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.lumina .cd-order-header {
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid #f0e9e3;
+}
+
+.lumina .cd-order-header strong {
+  display: block;
+  font-size: 13px;
+}
+
+.lumina .cd-order-header small {
+  font-size: 11px;
+  color: #9a8b7d;
+}
+
+.lumina .cd-photo {
+  width: 67px;
+  height: 80px;
+  flex: 0 0 67px;
+  background: #f3ede7;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.lumina .cd-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #9c8068;
+  font-size: 10px;
+}
+
+.lumina .cd-product-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.lumina .cd-product-info strong {
+  color: #302720;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.lumina .cd-product-info p,
+.lumina .cd-product-info small {
+  display: block;
+  color: #8d7e73;
+  font-size: 11px;
+  margin: 5px 0;
+}
+
+.lumina .cd-detail-btn {
+  border: 1px solid #d9c8b8;
+  padding: 10px 14px;
+  background: white;
+  color: #74543c;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.lumina .cd-status {
+  display: inline-block;
+  border-radius: 30px;
+  padding: 7px 12px;
+  background: #f1e8da;
+  color: #8f6745;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.lumina .cd-status.cancelled {
+  background: #fff0ed;
+  color: #bd554a;
+}
+
+.lumina .cd-empty {
+  text-align: center;
+  padding: 45px 16px;
+  color: #8c7d70;
+}
+
+.lumina .cd-empty-icon {
+  font-size: 35px;
+  color: #aa896b;
+}
+
+.lumina .cd-empty h3 {
+  color: #403024;
+}
+
+.lumina .cd-back {
+  margin-bottom: 23px;
+  padding: 0;
+}
+
+.lumina .cd-timeline {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  margin: 35px 0;
+}
+
+.lumina .cd-step {
+  position: relative;
+  text-align: center;
+  color: #a89a8e;
+}
+
+.lumina .cd-step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 16px;
+  left: calc(50% + 20px);
+  width: calc(100% - 40px);
+  height: 2px;
+  background: #e8ddd2;
+}
+
+.lumina .cd-step.completed:not(:last-child)::after {
+  background: #a98569;
+}
+
+.lumina .cd-step-dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: auto auto 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #eee8e2;
+  color: #9d8f82;
+}
+
+.lumina .cd-step.completed .cd-step-dot {
+  background: #a98569;
+  color: white;
+}
+
+.lumina .cd-step-label {
+  font-size: 11px;
+}
+
+.lumina .cd-cancel-notice {
+  padding: 15px;
+  margin: 25px 0;
+  color: #ae5147;
+  background: #fff1ef;
+  border-radius: 10px;
+}
+
+.lumina .cd-subheading {
+  font-size: 17px;
+  margin: 25px 0;
+}
+
+.lumina .cd-order-product {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 15px 0;
+  border-bottom: 1px solid #eee5dd;
+}
+
+.lumina .cd-product-price {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.lumina .cd-detail-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-top: 30px;
+}
+
+.lumina .cd-detail-box {
+  padding: 22px;
+  background: #faf7f4;
+  border-radius: 12px;
+}
+
+.lumina .cd-detail-box h3 {
+  margin-top: 0;
+  font-size: 16px;
+}
+
+.lumina .cd-detail-box p {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.lumina .cd-total-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 15px 0;
+  font-size: 12px;
+}
+
+.lumina .cd-grand {
+  border-top: 1px solid #dfd3c7;
+  padding-top: 15px;
+  font-weight: 700;
+}
+
+.lumina .cd-profile {
+  display: flex;
+  align-items: flex-start;
+  gap: 35px;
+  margin-top: 28px;
+}
+
+.lumina .cd-profile-avatar {
+  width: 95px;
+  height: 95px;
+  flex: 0 0 95px;
+  font-size: 30px;
+}
+
+.lumina .cd-profile-info {
+  flex: 1;
+}
+
+.lumina .cd-profile-info label {
+  display: block;
+  margin: 0 0 8px;
+  font-size: 11px;
+  color: #9c8878;
+}
+
+.lumina .cd-profile-info div {
+  border-bottom: 1px solid #eee5dc;
+  padding-bottom: 15px;
+  margin-bottom: 18px;
+  overflow-wrap: anywhere;
+}
+
+.lumina .cd-demo-note {
+  font-size: 11px;
+  color: #988779;
+  line-height: 1.7;
+  margin-top: 22px;
+}
+
+.lumina .cd-action {
+  color: white;
+  background: #302720;
+  margin-top: 15px;
+}
+
+@media (max-width: 1100px) {
+  .lumina .cd-stats {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 850px) {
+  .lumina .cd-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .lumina .cd-sidebar {
+    gap: 15px;
+    padding: 18px;
+  }
+
+  .lumina .cd-member,
+  .lumina .cd-menu-heading {
+    display: none;
+  }
+
+  .lumina .cd-menu {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .lumina .cd-menu button {
+    width: auto;
+  }
+
+  .lumina .cd-sidebar-bottom {
+    margin-top: 0;
+    padding-top: 10px;
+    display: flex;
+    gap: 10px;
+  }
+
+  .lumina .cd-sidebar-bottom button {
+    width: auto;
+  }
+
+  .lumina .cd-main {
+    padding: 22px;
+  }
+}
+
+@media (max-width: 600px) {
+  .lumina .cd-stats {
+    gap: 10px;
+  }
+
+  .lumina .cd-stat {
+    padding: 15px;
+  }
+
+  .lumina .cd-welcome {
+    padding: 25px;
+  }
+
+  .lumina .cd-welcome h2 {
+    font-size: 25px;
+  }
+
+  .lumina .cd-welcome-decor {
+    display: none;
+  }
+
+  .lumina .cd-panel {
+    padding: 17px;
+  }
+
+  .lumina .cd-detail-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .lumina .cd-filters {
+    flex-direction: column;
+  }
+
+  .lumina .cd-order-body {
+    flex-wrap: wrap;
+  }
+
+  .lumina .cd-detail-btn {
+    margin-left: auto;
+  }
+
+  .lumina .cd-profile {
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .lumina .cd-product-price {
+    white-space: normal;
+  }
+
+  .lumina .cd-step-label {
+    font-size: 9px;
+  }
+}

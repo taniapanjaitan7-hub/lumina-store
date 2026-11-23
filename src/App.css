@@ -2055,3 +2055,379 @@ img {
     flex-direction: column;
   }
 }
+
+
+/* ============================================
+   LUMINA STORE - NEW SHOP DESIGN
+============================================ */
+
+.lumina .lum-shop {
+  max-width: 1250px;
+  margin: 0 auto;
+  padding: 55px 28px 90px;
+  min-height: 75vh;
+}
+
+/* JUDUL SHOP */
+
+.lumina .lum-shop-heading {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.lumina .lum-shop-eyebrow {
+  color: #998576;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+}
+
+.lumina .lum-shop-heading h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  color: #292522;
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 500;
+  margin: 0 0 12px;
+  line-height: 1.2;
+}
+
+.lumina .lum-shop-heading > p:last-child {
+  color: #86796f;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* KATEGORI OVAL */
+
+.lumina .lum-shop-categories {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 27px;
+}
+
+.lumina .lum-shop-pill {
+  border: 1px solid #ded8d2;
+  background: #ffffff;
+  color: #615951;
+  border-radius: 100px;
+  padding: 10px 19px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: 0.2s ease;
+  box-shadow: none;
+}
+
+.lumina .lum-shop-pill:hover {
+  border-color: #3b312b;
+  color: #3b312b;
+  transform: translateY(-1px);
+}
+
+.lumina .lum-shop-pill.active {
+  background: #272321;
+  color: #ffffff;
+  border-color: #272321;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+}
+
+/* FILTER DAN SEARCH */
+
+.lumina .lum-shop-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 215px;
+  gap: 13px;
+  margin-bottom: 23px;
+}
+
+.lumina .lum-shop-search {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #e4dcd4;
+  background: white;
+  border-radius: 30px;
+  padding: 0 17px;
+  height: 49px;
+}
+
+.lumina .lum-shop-search > span {
+  color: #82776f;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.lumina .lum-shop-search input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  padding: 10px 0;
+  background: transparent;
+  border: 0;
+  outline: none;
+  box-shadow: none;
+  color: #302720;
+  font-size: 13px;
+}
+
+.lumina .lum-shop-search input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.lumina .lum-shop-search button {
+  border: 0;
+  background: none;
+  color: #776a60;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.lumina .lum-shop-sort {
+  width: 100%;
+  height: 49px;
+  padding: 0 17px;
+  background: #ffffff;
+  border: 1px solid #e4dcd4;
+  border-radius: 30px;
+  color: #4a413a;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* HASIL PENCARIAN */
+
+.lumina .lum-shop-result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  color: #776c64;
+  font-size: 12px;
+  margin-bottom: 17px;
+}
+
+.lumina .lum-shop-grid-label {
+  color: #82776f;
+  white-space: nowrap;
+}
+
+/* GRID PRODUK DUA KOLOM */
+
+.lumina .lum-shop-products .product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+/* KARTU PRODUK */
+
+.lumina .lum-shop-products .product-card {
+  min-width: 0;
+  background: #ffffff;
+  border: 1px solid #eee5dd;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 18px rgba(48, 39, 32, 0.04);
+  transition: transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.lumina .lum-shop-products .product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 30px rgba(48, 39, 32, 0.1);
+}
+
+.lumina .lum-shop-products .product-picture {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  position: relative;
+  background: #f4efeb;
+  overflow: hidden;
+}
+
+.lumina .lum-shop-products .product-picture .image-button {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.lumina .lum-shop-products .product-picture img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.35s ease;
+}
+
+.lumina .lum-shop-products .product-card:hover .product-picture img {
+  transform: scale(1.03);
+}
+
+/* DETAIL KARTU */
+
+.lumina .lum-shop-products .product-body {
+  padding: 20px;
+}
+
+.lumina .lum-shop-products .product-body small {
+  color: #a1816b;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+.lumina .lum-shop-products .product-body h3 {
+  color: #302720;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.5;
+  margin: 10px 0;
+}
+
+.lumina .lum-shop-products .product-body .price {
+  color: #3e3026;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 10px 0;
+}
+
+.lumina .lum-shop-products .product-body .muted {
+  font-size: 12px;
+  color: #9b8b7d;
+}
+
+.lumina .lum-shop-products .product-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.lumina .lum-shop-products .product-actions button {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 10px;
+  border-radius: 9px;
+  font-size: 12px;
+}
+
+/* EMPTY STATE */
+
+.lumina .lum-shop-empty {
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid #eee6de;
+  border-radius: 15px;
+  padding: 55px 20px;
+}
+
+.lumina .lum-shop-empty > span {
+  font-size: 40px;
+  color: #af8b6f;
+}
+
+.lumina .lum-shop-empty h3 {
+  margin: 13px 0 9px;
+  font-size: 20px;
+  color: #302720;
+}
+
+.lumina .lum-shop-empty p {
+  color: #8f8175;
+  font-size: 13px;
+}
+
+.lumina .lum-shop-empty button {
+  background: #302720;
+  border: 0;
+  border-radius: 9px;
+  padding: 13px 22px;
+  color: white;
+  cursor: pointer;
+  margin-top: 16px;
+}
+
+/* RESPONSIVE TABLET */
+
+@media (max-width: 900px) {
+  .lumina .lum-shop {
+    padding: 35px 20px 65px;
+  }
+
+  .lumina .lum-shop-products .product-grid {
+    gap: 15px;
+  }
+}
+
+/* RESPONSIVE HP */
+
+@media (max-width: 600px) {
+  .lumina .lum-shop {
+    padding: 28px 14px 55px;
+  }
+
+  .lumina .lum-shop-heading {
+    margin-bottom: 25px;
+  }
+
+  .lumina .lum-shop-categories {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding: 5px 0 13px;
+    margin-bottom: 15px;
+    scrollbar-width: thin;
+  }
+
+  .lumina .lum-shop-pill {
+    flex-shrink: 0;
+    font-size: 12px;
+    padding: 9px 15px;
+  }
+
+  .lumina .lum-shop-toolbar {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .lumina .lum-shop-products .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .lumina .lum-shop-products .product-picture {
+    aspect-ratio: 3 / 4;
+  }
+
+  .lumina .lum-shop-products .product-body {
+    padding: 12px;
+  }
+
+  .lumina .lum-shop-products .product-body h3 {
+    font-size: 12px;
+  }
+
+  .lumina .lum-shop-products .product-body .price {
+    font-size: 14px;
+  }
+
+  .lumina .lum-shop-products .product-actions {
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .lumina .lum-shop-products .product-actions button {
+    width: 100%;
+    font-size: 11px;
+  }
+}
