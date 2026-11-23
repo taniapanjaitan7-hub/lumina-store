@@ -1179,3 +1179,42 @@ button:disabled {
     animation-duration: 0.01ms !important;
   }
 }
+
+
+/* PERBAIKAN DASAR LAYOUT LUMINA STORE */
+
+:root {
+  font-family: Arial, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  display: block;
+  min-width: 320px;
+}
+
+#root {
+  max-width: none;
+  padding: 0;
+  text-align: left;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}

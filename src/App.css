@@ -1969,3 +1969,89 @@ img {
     font-size: 11px;
   }
 }
+
+
+/* LUMINA STORE — SHOP FIX */
+
+.lumina .container.section {
+  padding-top: 75px;
+  padding-bottom: 75px;
+}
+
+.lumina .section-title {
+  line-height: 1.2;
+  margin-top: 12px;
+  margin-bottom: 16px;
+}
+
+.lumina .section-description {
+  margin-bottom: 35px;
+}
+
+.lumina .product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.lumina .product-card {
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid #e8ded5;
+  background: #fff;
+}
+
+.lumina .product-picture {
+  position: relative;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: #f3eeea;
+}
+
+.lumina .product-picture img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.lumina .product-body {
+  padding: 17px;
+}
+
+.lumina .product-body h3 {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.lumina .product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(61,43,30,.08);
+}
+
+.lumina .lum-dash-table-wrap {
+  overflow-x: auto;
+}
+
+@media (max-width: 1100px) {
+  .lumina .product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .lumina .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 13px;
+  }
+
+  .lumina .product-body {
+    padding: 12px;
+  }
+
+  .lumina .product-actions {
+    flex-direction: column;
+  }
+}
