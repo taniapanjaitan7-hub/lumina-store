@@ -2,12 +2,25 @@
 import { useMemo, useState } from "react";
 import "./CustomerDashboard.css";
 
+/* =========================================
+   LUMINA STORE — CUSTOMER DASHBOARD
+========================================= */
+
 const ORDER_STEPS = [
   "Pesanan Baru",
   "Diproses",
   "Dikirim",
   "Selesai",
 ];
+
+const ORDER_FILTERS = [
+  ...ORDER_STEPS,
+  "Dibatalkan",
+];
+
+/* =========================================
+   HELPER
+========================================= */
 
 function rupiah(value) {
   return new Intl.NumberFormat("id-ID", {
@@ -34,7 +47,7 @@ function formatDate(value) {
 }
 
 function formatStatus(value) {
-  return value === "Simulasi" || !value
+  return !value || value === "Simulasi"
     ? "Pesanan Baru"
     : value;
 }
@@ -42,7 +55,7 @@ function formatStatus(value) {
 function getImageUrl(src) {
   if (!src) return "";
 
-  if (/^(https?:|data:)/i.test(src)) {
+  if (/^(https?:|data:|blob:)/i.test(src)) {
     return src;
   }
 
@@ -53,6 +66,9 @@ function getImageUrl(src) {
 
   const path = String(src)
     .replace(/\\/g, "/")
+    .replace(/^\/+/, "");
+
+  const encoded = path
     .split("/")
     .map((part) => {
       try {
@@ -65,17 +81,17 @@ function getImageUrl(src) {
     })
     .join("/");
 
-  return (
-    base +
-    (path.startsWith("/") ? "" : "/") +
-    path
-  );
+  return `${base}/${encoded}`;
 }
 
-function OrderPhoto({ src, alt }) {
-  const [failed, setFailed] = useState(false);
+/* =========================================
+   GAMBAR PRODUK
+========================================= */
 
-  if (!src || failed) {
+function OrderPhoto({ src, alt }) {
+  const [failedSrc, setFailedSrc] = useState("");
+
+  if (!src || failedSrc === src) {
     return (
       <div className="cd-photo cd-placeholder">
         <span>▧</span>
@@ -89,12 +105,16 @@ function OrderPhoto({ src, alt }) {
       key={src}
       className="cd-photo"
       src={getImageUrl(src)}
-      alt={alt}
+      alt={alt || "Foto produk"}
       loading="lazy"
-      onError={() => setFailed(true)}
+      onError={() => setFailedSrc(src)}
     />
   );
 }
+
+/* =========================================
+   TIMELINE STATUS PESANAN
+========================================= */
 
 function StatusTimeline({ status }) {
   const currentStatus = formatStatus(status);
@@ -102,7 +122,7 @@ function StatusTimeline({ status }) {
   if (currentStatus === "Dibatalkan") {
     return (
       <div className="cd-cancel-notice">
-        Pesanan dibatalkan. Status pengiriman
+        Pesanan dibatalkan. Proses pengiriman
         tidak dilanjutkan.
       </div>
     );
@@ -116,15 +136,15 @@ function StatusTimeline({ status }) {
     <div className="cd-timeline">
       {ORDER_STEPS.map((step, index) => (
         <div
-          className={
-            `cd-step ${
-              index <= current ? "completed" : ""
-            }`
-          }
           key={step}
+          className={`cd-step ${
+            index <= current ? "completed" : ""
+          }`}
         >
           <span className="cd-step-dot">
-            {index <= current ? "✓" : index + 1}
+            {index <= current
+              ? "✓"
+              : index + 1}
           </span>
 
           <span className="cd-step-label">
@@ -136,27 +156,130 @@ function StatusTimeline({ status }) {
   );
 }
 
+/* =========================================
+   KARTU RIWAYAT PESANAN
+========================================= */
+
+function OrderCards({ orders, onOpen }) {
+  if (!orders.length) {
+    return (
+      <div className="cd-empty">
+        <div className="cd-empty-icon">
+          ▤
+        </div>
+
+        <h3>Belum ada pesanan</h3>
+
+        <p>
+          Pesananmu akan muncul setelah
+          checkout berhasil.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="cd-order-list">
+      {orders.map((order) => {
+        const first = order.items?.[0];
+        const status = formatStatus(
+          order.status
+        );
+
+        return (
+          <article
+            className="cd-order-card"
+            key={order.id}
+          >
+            <div className="cd-order-header">
+              <div>
+                <strong>{order.id}</strong>
+
+                <small>
+                  {formatDate(order.date)}
+                </small>
+              </div>
+
+              <span
+                className={`cd-status ${
+                  status === "Dibatalkan"
+                    ? "cancelled"
+                    : ""
+                }`}
+              >
+                {status}
+              </span>
+            </div>
+
+            <div className="cd-order-body">
+              <OrderPhoto
+                src={first?.image}
+                alt={first?.name}
+              />
+
+              <div className="cd-product-info">
+                <strong>
+                  {first?.name || "Produk"}
+                </strong>
+
+                <p>
+                  {(order.items || []).length}
+                  {" jenis produk"}
+                </p>
+
+                <small>
+                  {rupiah(order.total)}
+                </small>
+              </div>
+
+              <button
+                type="button"
+                className="cd-detail-btn"
+                onClick={() => onOpen(order)}
+              >
+                Detail →
+              </button>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  );
+}
+
+/* =========================================
+   DASHBOARD PELANGGAN UTAMA
+========================================= */
+
 export default function CustomerDashboard({
   customer,
   orders = [],
   onBack,
   onLogout,
 }) {
-  const [section, setSection] =
-    useState("overview");
+  const [section, setSection] = useState(
+    "overview"
+  );
 
   const [search, setSearch] = useState("");
-  const [filter, setFilter] =
-    useState("Semua");
+
+  const [filter, setFilter] = useState(
+    "Semua"
+  );
 
   const [selectedOrderId, setSelectedOrderId] =
     useState(null);
+
+  /* ========================================
+     DATA PESANAN
+  ======================================== */
 
   const sortedOrders = useMemo(
     () =>
       [...orders].sort(
         (a, b) =>
-          new Date(b.date) - new Date(a.date)
+          new Date(b.date || 0) -
+          new Date(a.date || 0)
       ),
     [orders]
   );
@@ -164,7 +287,7 @@ export default function CustomerDashboard({
   const filteredOrders = useMemo(
     () =>
       sortedOrders.filter((order) => {
-        const text = [
+        const searchable = [
           order.id,
           order.customer,
           ...(order.items || []).map(
@@ -174,9 +297,10 @@ export default function CustomerDashboard({
           .join(" ")
           .toLowerCase();
 
-        const matchesSearch = text.includes(
-          search.toLowerCase()
-        );
+        const matchesSearch =
+          searchable.includes(
+            search.trim().toLowerCase()
+          );
 
         const matchesFilter =
           filter === "Semua" ||
@@ -211,6 +335,16 @@ export default function CustomerDashboard({
     0
   );
 
+  const initials = String(
+    customer?.name || "P"
+  )
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((word) => word[0] || "")
+    .join("")
+    .toUpperCase();
+
   const stats = [
     {
       icon: "▣",
@@ -238,26 +372,15 @@ export default function CustomerDashboard({
     },
   ];
 
-  const initials = String(
-    customer?.name || "P"
-  )
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((word) => word[0])
-    .join("")
-    .toUpperCase();
-
   function openDetail(order) {
     setSelectedOrderId(order.id);
     setSection("detail");
     window.scrollTo(0, 0);
   }
 
-  const displayOrders =
-    section === "overview"
-      ? sortedOrders.slice(0, 4)
-      : filteredOrders;
+  /* ========================================
+     TAMPILAN DASHBOARD
+  ======================================== */
 
   return (
     <div className="cd-shell">
@@ -277,8 +400,14 @@ export default function CustomerDashboard({
             {initials}
           </div>
 
-          <strong>{customer?.name}</strong>
-          <small>{customer?.email}</small>
+          <strong>
+            {customer?.name || "Pelanggan"}
+          </strong>
+
+          <small>
+            {customer?.email || "-"}
+          </small>
+
           <span className="cd-member-label">
             LUMINA MEMBER
           </span>
@@ -306,7 +435,9 @@ export default function CustomerDashboard({
           <button
             type="button"
             className={
-              ["orders", "detail"].includes(section)
+              ["orders", "detail"].includes(
+                section
+              )
                 ? "active"
                 : ""
             }
@@ -387,7 +518,9 @@ export default function CustomerDashboard({
           </div>
         </header>
 
-        {/* OVERVIEW */}
+        {/* ====================================
+            OVERVIEW
+        ==================================== */}
 
         {section === "overview" && (
           <>
@@ -398,7 +531,8 @@ export default function CustomerDashboard({
                 </span>
 
                 <h2>
-                  Hello, {customer?.name}!
+                  Hello,{" "}
+                  {customer?.name || "Pelanggan"}!
                 </h2>
 
                 <p>
@@ -415,10 +549,15 @@ export default function CustomerDashboard({
                 </button>
               </div>
 
-              <div className="cd-welcome-decor">
+              <div
+                className="cd-welcome-decor"
+                aria-hidden="true"
+              >
                 ✦
               </div>
             </section>
+
+            {/* STATISTIK */}
 
             <section className="cd-stats">
               {stats.map((stat) => (
@@ -432,12 +571,16 @@ export default function CustomerDashboard({
 
                   <p>{stat.title}</p>
 
-                  <strong>{stat.value}</strong>
+                  <strong>
+                    {stat.value}
+                  </strong>
 
                   <small>{stat.note}</small>
                 </article>
               ))}
             </section>
+
+            {/* PESANAN TERBARU */}
 
             <section className="cd-panel">
               <div className="cd-panel-heading">
@@ -461,14 +604,16 @@ export default function CustomerDashboard({
               </div>
 
               <OrderCards
-                orders={displayOrders}
+                orders={sortedOrders.slice(0, 4)}
                 onOpen={openDetail}
               />
             </section>
           </>
         )}
 
-        {/* ORDER HISTORY */}
+        {/* ====================================
+            RIWAYAT PESANAN
+        ==================================== */}
 
         {section === "orders" && (
           <section className="cd-panel">
@@ -503,10 +648,7 @@ export default function CustomerDashboard({
                   Semua Status
                 </option>
 
-                {[
-                  ...ORDER_STEPS,
-                  "Dibatalkan",
-                ].map((item) => (
+                {ORDER_FILTERS.map((item) => (
                   <option
                     value={item}
                     key={item}
@@ -518,13 +660,15 @@ export default function CustomerDashboard({
             </div>
 
             <OrderCards
-              orders={displayOrders}
+              orders={filteredOrders}
               onOpen={openDetail}
             />
           </section>
         )}
 
-        {/* ORDER DETAIL */}
+        {/* ====================================
+            DETAIL PESANAN
+        ==================================== */}
 
         {section === "detail" && (
           <section className="cd-panel">
@@ -548,7 +692,9 @@ export default function CustomerDashboard({
                       ORDER INFORMATION
                     </p>
 
-                    <h2>{selectedOrder.id}</h2>
+                    <h2>
+                      {selectedOrder.id}
+                    </h2>
 
                     <p>
                       {formatDate(
@@ -558,14 +704,13 @@ export default function CustomerDashboard({
                   </div>
 
                   <span
-                    className={
-                      "cd-status " +
-                      (formatStatus(
+                    className={`cd-status ${
+                      formatStatus(
                         selectedOrder.status
                       ) === "Dibatalkan"
                         ? "cancelled"
-                        : "")
-                    }
+                        : ""
+                    }`}
                   >
                     {formatStatus(
                       selectedOrder.status
@@ -601,9 +746,11 @@ export default function CustomerDashboard({
                         </strong>
 
                         <p>
-                          Ukuran: {item.size || "-"}
+                          Ukuran:{" "}
+                          {item.size || "-"}
                           {" · "}
-                          Warna: {item.color || "-"}
+                          Warna:{" "}
+                          {item.color || "-"}
                         </p>
 
                         <small>
@@ -614,20 +761,25 @@ export default function CustomerDashboard({
                       <strong className="cd-product-price">
                         {rupiah(
                           Number(item.price) *
-                          Number(item.quantity)
+                            Number(item.quantity)
                         )}
                       </strong>
                     </div>
                   )
                 )}
 
+                {/* INFORMASI PENGIRIMAN */}
+
                 <div className="cd-detail-columns">
                   <div className="cd-detail-box">
-                    <h3>Informasi Pengiriman</h3>
+                    <h3>
+                      Informasi Pengiriman
+                    </h3>
 
                     <p>
                       <strong>Penerima</strong>
-                      {selectedOrder.customer || "-"}
+                      {selectedOrder.customer ||
+                        "-"}
                     </p>
 
                     <p>
@@ -637,7 +789,8 @@ export default function CustomerDashboard({
 
                     <p>
                       <strong>Alamat</strong>
-                      {selectedOrder.address || "-"}
+                      {selectedOrder.address ||
+                        "-"}
                     </p>
 
                     <p>
@@ -649,24 +802,33 @@ export default function CustomerDashboard({
                     </p>
                   </div>
 
+                  {/* RINGKASAN PEMBELIAN */}
+
                   <div className="cd-detail-box">
-                    <h3>Ringkasan Pembelian</h3>
+                    <h3>
+                      Ringkasan Pembelian
+                    </h3>
 
                     <div className="cd-total-row">
                       <span>Total Item</span>
+
                       <strong>
-                        {(selectedOrder.items || [])
-                          .reduce(
-                            (sum, item) =>
-                              sum +
-                              Number(item.quantity || 0),
-                            0
-                          )}
+                        {(
+                          selectedOrder.items || []
+                        ).reduce(
+                          (sum, item) =>
+                            sum +
+                            Number(
+                              item.quantity || 0
+                            ),
+                          0
+                        )}
                       </strong>
                     </div>
 
                     <div className="cd-total-row">
                       <span>Status</span>
+
                       <strong>
                         {formatStatus(
                           selectedOrder.status
@@ -675,25 +837,32 @@ export default function CustomerDashboard({
                     </div>
 
                     <div className="cd-total-row cd-grand">
-                      <span>Total Pesanan</span>
+                      <span>
+                        Total Pesanan
+                      </span>
+
                       <strong>
-                        {rupiah(selectedOrder.total)}
+                        {rupiah(
+                          selectedOrder.total
+                        )}
                       </strong>
                     </div>
                   </div>
                 </div>
 
                 <p className="cd-demo-note">
-                  Status pesanan diperbarui melalui
-                  Admin Demo. Belum ada pelacakan
-                  kurir secara langsung.
+                  Status diperbarui melalui Admin
+                  Demo. Belum ada pelacakan kurir
+                  dan pembayaran nyata.
                 </p>
               </>
             )}
           </section>
         )}
 
-        {/* PROFILE */}
+        {/* ====================================
+            PROFIL PELANGGAN
+        ==================================== */}
 
         {section === "profile" && (
           <section className="cd-panel">
@@ -713,22 +882,37 @@ export default function CustomerDashboard({
               </div>
 
               <div className="cd-profile-info">
-                <label>Nama Lengkap</label>
-                <div>{customer?.name || "-"}</div>
+                <label>
+                  Nama Lengkap
+                </label>
 
-                <label>Alamat Email</label>
-                <div>{customer?.email || "-"}</div>
+                <div>
+                  {customer?.name || "-"}
+                </div>
 
-                <label>Jenis Akun</label>
-                <div>Customer · Demo Account</div>
+                <label>
+                  Alamat Email
+                </label>
+
+                <div>
+                  {customer?.email || "-"}
+                </div>
+
+                <label>
+                  Jenis Akun
+                </label>
+
+                <div>
+                  Customer · Demo Account
+                </div>
               </div>
             </div>
 
             <p className="cd-demo-note">
-              Untuk keamanan, halaman ini tidak
-              menampilkan password. Pengubahan
-              data akun memerlukan pengembangan
-              sistem autentikasi lebih lanjut.
+              Halaman ini tidak menampilkan
+              password. Perubahan profil
+              memerlukan fitur autentikasi
+              tambahan.
             </p>
 
             <button
@@ -741,90 +925,6 @@ export default function CustomerDashboard({
           </section>
         )}
       </main>
-    </div>
-  );
-}
-
-function OrderCards({
-  orders,
-  onOpen,
-}) {
-  if (!orders.length) {
-    return (
-      <div className="cd-empty">
-        <div className="cd-empty-icon">▤</div>
-        <h3>Belum ada pesanan</h3>
-        <p>
-          Pesananmu akan muncul di sini
-          setelah menyelesaikan checkout.
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="cd-order-list">
-      {orders.map((order) => {
-        const first = order.items?.[0];
-
-        return (
-          <article
-            className="cd-order-card"
-            key={order.id}
-          >
-            <div className="cd-order-header">
-              <div>
-                <strong>{order.id}</strong>
-                <small>
-                  {formatDate(order.date)}
-                </small>
-              </div>
-
-              <span
-                className={
-                  "cd-status " +
-                  (formatStatus(order.status) ===
-                  "Dibatalkan"
-                    ? "cancelled"
-                    : "")
-                }
-              >
-                {formatStatus(order.status)}
-              </span>
-            </div>
-
-            <div className="cd-order-body">
-              <OrderPhoto
-                src={first?.image}
-                alt={first?.name}
-              />
-
-              <div className="cd-product-info">
-                <strong>
-                  {first?.name || "Produk"}
-                </strong>
-
-                <p>
-                  {(order.items || []).length}
-                  {" jenis produk"}
-                </p>
-
-                <small>
-                  {rupiah(order.total)}
-                </small>
-              </div>
-
-              <button
-                type="button"
-                className="cd-detail-btn"
-                onClick={() => onOpen(order)}
-              >
-                Detail →
-              </button>
-            </div>
-          </article>
-        );
-      })}
     </div>
   );
 }

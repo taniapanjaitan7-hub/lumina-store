@@ -1,38 +1,100 @@
 
 /* =========================================
-   LUMINA STORE — CUSTOMER DASHBOARD
+   LUMINA STORE
+   CUSTOMER DASHBOARD CSS
+   MODERN PREMIUM RESPONSIVE DESIGN
+========================================= */
+
+/* =========================================
+   1. DASHBOARD ROOT
 ========================================= */
 
 .lumina .cd-shell {
+  --cd-primary: #302720;
+  --cd-secondary: #a28067;
+  --cd-accent: #b99274;
+  --cd-background: #f8f6f3;
+  --cd-surface: #ffffff;
+  --cd-border: #eee6df;
+  --cd-text: #302720;
+  --cd-muted: #88796d;
+  --cd-radius: 15px;
+  --cd-shadow: 0 5px 20px rgba(52, 35, 20, 0.05);
+
   min-height: calc(100vh - 120px);
   display: grid;
   grid-template-columns: 250px minmax(0, 1fr);
-  background: #f8f6f3;
-  color: #302720;
+  background: var(--cd-background);
+  color: var(--cd-text);
+  width: 100%;
 }
 
+.lumina .cd-shell *,
+.lumina .cd-shell *::before,
+.lumina .cd-shell *::after {
+  box-sizing: border-box;
+}
+
+.lumina .cd-shell button,
+.lumina .cd-shell input,
+.lumina .cd-shell select {
+  font-family: inherit;
+}
+
+.lumina .cd-shell button {
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.lumina .cd-shell button:focus-visible,
+.lumina .cd-shell input:focus-visible,
+.lumina .cd-shell select:focus-visible {
+  outline: 2px solid #b99274;
+  outline-offset: 3px;
+}
+
+/* =========================================
+   2. SIDEBAR
+========================================= */
+
 .lumina .cd-sidebar {
-  background: #302720;
-  color: #fff;
+  background: var(--cd-primary);
+  color: #ffffff;
   padding: 28px 20px;
   display: flex;
   flex-direction: column;
   gap: 22px;
+  min-width: 0;
 }
 
 .lumina .cd-logo {
-  background: none;
+  background: transparent;
   border: none;
-  color: #fff;
-  font: 500 27px Georgia, serif;
+  color: #ffffff;
+  font-family: Georgia, serif;
+  font-size: 27px;
+  font-weight: 500;
   letter-spacing: 3px;
   text-align: left;
   cursor: pointer;
+  padding: 3px 8px;
 }
 
 .lumina .cd-logo span {
   color: #d1a47f;
 }
+
+.lumina .cd-logo:hover {
+  opacity: 0.85;
+}
+
+/* =========================================
+   3. CUSTOMER PROFILE SIDEBAR
+========================================= */
 
 .lumina .cd-member {
   display: flex;
@@ -50,10 +112,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #b99274;
-  color: #fff;
+  background: var(--cd-accent);
+  color: #ffffff;
   border-radius: 50%;
   font-weight: 700;
+  text-transform: uppercase;
 }
 
 .lumina .cd-avatar {
@@ -61,10 +124,12 @@
   height: 66px;
   font-size: 21px;
   margin-bottom: 10px;
+  border: 3px solid rgba(255,255,255,0.15);
 }
 
 .lumina .cd-member strong {
   font-size: 14px;
+  line-height: 1.5;
   overflow-wrap: anywhere;
 }
 
@@ -80,6 +145,10 @@
   color: #e4c7ae;
   margin-top: 6px;
 }
+
+/* =========================================
+   4. SIDEBAR MENU
+========================================= */
 
 .lumina .cd-menu-heading {
   color: #ad9581;
@@ -103,19 +172,27 @@
   border: none;
   border-radius: 9px;
   color: #dfd0c3;
-  font: inherit;
   font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
 }
 
 .lumina .cd-menu button span {
   margin-right: 9px;
+  font-size: 17px;
+  vertical-align: middle;
 }
 
-.lumina .cd-menu button.active,
 .lumina .cd-menu button:hover {
-  background: #a28067;
-  color: white;
+  background: #594638;
+  color: #ffffff;
+  transform: translateX(3px);
+}
+
+.lumina .cd-menu button.active {
+  background: var(--cd-secondary);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .lumina .cd-sidebar-bottom {
@@ -124,13 +201,28 @@
   border-top: 1px solid #55473c;
 }
 
+.lumina .cd-sidebar-bottom button:hover {
+  background: #594638;
+  color: #ffffff;
+}
+
 .lumina .cd-sidebar-bottom .cd-logout {
   color: #f2bcb3;
 }
 
+.lumina .cd-sidebar-bottom .cd-logout:hover {
+  background: #693a37;
+  color: #ffffff;
+}
+
+/* =========================================
+   5. MAIN CONTENT
+========================================= */
+
 .lumina .cd-main {
   padding: 36px;
   min-width: 0;
+  width: 100%;
 }
 
 .lumina .cd-topbar {
@@ -151,35 +243,52 @@
 
 .lumina .cd-topbar h1 {
   margin: 0;
-  font: 400 34px Georgia, serif;
-  color: #302720;
+  font-family: Georgia, serif;
+  font-size: clamp(25px, 3vw, 34px);
+  font-weight: 400;
+  color: var(--cd-text);
 }
 
 .lumina .cd-top-subtitle {
-  color: #88796d;
+  color: var(--cd-muted);
   font-size: 13px;
+  line-height: 1.6;
+  margin: 10px 0 0;
 }
 
 .lumina .cd-top-avatar {
   width: 43px;
   height: 43px;
   flex-shrink: 0;
+  font-size: 14px;
 }
+
+/* =========================================
+   6. WELCOME BANNER
+========================================= */
 
 .lumina .cd-welcome {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 20px;
   overflow: hidden;
   padding: 35px;
   border-radius: 17px;
   background: linear-gradient(
     120deg,
-    #49372b,
-    #a17b5e
+    #49372b 0%,
+    #765742 52%,
+    #a17b5e 100%
   );
-  color: white;
+  color: #ffffff;
   margin-bottom: 25px;
+  position: relative;
+}
+
+.lumina .cd-welcome > div:first-child {
+  position: relative;
+  z-index: 1;
 }
 
 .lumina .cd-welcome span {
@@ -189,9 +298,12 @@
 }
 
 .lumina .cd-welcome h2 {
-  font: 400 34px Georgia, serif;
-  color: white;
+  font-family: Georgia, serif;
+  font-size: clamp(25px, 3vw, 34px);
+  font-weight: 400;
+  color: #ffffff;
   margin: 12px 0;
+  line-height: 1.3;
 }
 
 .lumina .cd-welcome p {
@@ -201,22 +313,34 @@
   font-size: 13px;
 }
 
-.lumina .cd-welcome button,
-.lumina .cd-action {
+.lumina .cd-welcome button {
   border: none;
   padding: 13px 22px;
-  background: white;
+  background: #ffffff;
   color: #49372b;
   border-radius: 8px;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
+  margin-top: 12px;
+}
+
+.lumina .cd-welcome button:hover {
+  background: #f2e3d5;
+  transform: translateY(-2px);
 }
 
 .lumina .cd-welcome-decor {
   font-size: 125px;
-  opacity: .2;
+  opacity: 0.2;
   padding: 0 25px;
+  user-select: none;
+  flex-shrink: 0;
 }
+
+/* =========================================
+   7. STATISTICS CARDS
+========================================= */
 
 .lumina .cd-stats {
   display: grid;
@@ -228,16 +352,23 @@
 
 .lumina .cd-stat,
 .lumina .cd-panel {
-  border: 1px solid #eee6df;
-  border-radius: 15px;
-  background: white;
-  box-shadow:
-    0 5px 20px rgba(52, 35, 20, .04);
+  border: 1px solid var(--cd-border);
+  border-radius: var(--cd-radius);
+  background: var(--cd-surface);
+  box-shadow: var(--cd-shadow);
 }
 
 .lumina .cd-stat {
   padding: 22px;
   min-width: 0;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.lumina .cd-stat:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 26px rgba(52,35,20,0.1);
 }
 
 .lumina .cd-stat-icon {
@@ -250,6 +381,7 @@
   color: #926d50;
   background: #f5ede6;
   margin-bottom: 15px;
+  font-weight: 700;
 }
 
 .lumina .cd-stat p {
@@ -261,6 +393,7 @@
 .lumina .cd-stat strong {
   display: block;
   font-size: clamp(16px, 2vw, 24px);
+  color: #302720;
   overflow-wrap: anywhere;
 }
 
@@ -269,11 +402,17 @@
   margin-top: 8px;
   color: #a3968b;
   font-size: 10px;
+  line-height: 1.5;
 }
+
+/* =========================================
+   8. CONTENT PANEL
+========================================= */
 
 .lumina .cd-panel {
   padding: 25px;
   margin-bottom: 25px;
+  min-width: 0;
 }
 
 .lumina .cd-panel-heading,
@@ -289,7 +428,9 @@
 .lumina .cd-detail-heading h2 {
   margin: 0 0 7px;
   color: #302720;
-  font: 400 24px Georgia, serif;
+  font-family: Georgia, serif;
+  font-size: 24px;
+  font-weight: 400;
 }
 
 .lumina .cd-panel-heading p,
@@ -297,16 +438,28 @@
   margin: 0;
   color: #8e8074;
   font-size: 12px;
+  line-height: 1.6;
 }
 
 .lumina .cd-link,
 .lumina .cd-back {
   border: none;
-  background: none;
+  background: transparent;
   color: #926d50;
   font-weight: 700;
   cursor: pointer;
+  font-size: 12px;
 }
+
+.lumina .cd-link:hover,
+.lumina .cd-back:hover {
+  color: #49372b;
+  text-decoration: underline;
+}
+
+/* =========================================
+   9. SEARCH AND FILTER
+========================================= */
 
 .lumina .cd-filters {
   display: flex;
@@ -316,19 +469,35 @@
 
 .lumina .cd-filters input,
 .lumina .cd-filters select {
-  padding: 12px;
+  padding: 12px 14px;
   border: 1px solid #e6dbd0;
   border-radius: 8px;
-  background: white;
+  background: #ffffff;
   color: #302720;
-  font: inherit;
   font-size: 13px;
+  min-height: 45px;
 }
 
 .lumina .cd-filters input {
   flex: 1;
   min-width: 0;
 }
+
+.lumina .cd-filters input:focus,
+.lumina .cd-filters select:focus {
+  border-color: #b99274;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(185,146,116,0.12);
+}
+
+.lumina .cd-filters select {
+  min-width: 160px;
+  cursor: pointer;
+}
+
+/* =========================================
+   10. ORDER LIST
+========================================= */
 
 .lumina .cd-order-list {
   display: flex;
@@ -340,6 +509,16 @@
   padding: 17px;
   border: 1px solid #eee4da;
   border-radius: 12px;
+  background: #ffffff;
+  min-width: 0;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.lumina .cd-order-card:hover {
+  border-color: #d6bdab;
+  box-shadow: 0 5px 15px rgba(60,40,25,0.05);
 }
 
 .lumina .cd-order-header,
@@ -348,6 +527,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 15px;
+  min-width: 0;
 }
 
 .lumina .cd-order-header {
@@ -359,12 +539,20 @@
 .lumina .cd-order-header strong {
   display: block;
   font-size: 13px;
+  color: #302720;
+  overflow-wrap: anywhere;
 }
 
 .lumina .cd-order-header small {
+  display: block;
+  margin-top: 5px;
   font-size: 11px;
   color: #9a8b7d;
 }
+
+/* =========================================
+   11. PRODUCT PHOTOS
+========================================= */
 
 .lumina .cd-photo {
   width: 67px;
@@ -373,6 +561,7 @@
   background: #f3ede7;
   border-radius: 8px;
   object-fit: contain;
+  overflow: hidden;
 }
 
 .lumina .cd-placeholder {
@@ -382,6 +571,11 @@
   justify-content: center;
   color: #9c8068;
   font-size: 10px;
+  gap: 5px;
+}
+
+.lumina .cd-placeholder span {
+  font-size: 24px;
 }
 
 .lumina .cd-product-info {
@@ -392,6 +586,7 @@
 .lumina .cd-product-info strong {
   color: #302720;
   font-size: 13px;
+  line-height: 1.5;
   overflow-wrap: anywhere;
 }
 
@@ -401,18 +596,30 @@
   color: #8d7e73;
   font-size: 11px;
   margin: 5px 0;
+  line-height: 1.6;
 }
 
 .lumina .cd-detail-btn {
   border: 1px solid #d9c8b8;
   padding: 10px 14px;
-  background: white;
+  background: #ffffff;
   color: #74543c;
   border-radius: 8px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
 }
+
+.lumina .cd-detail-btn:hover {
+  background: #302720;
+  color: #ffffff;
+  border-color: #302720;
+}
+
+/* =========================================
+   12. STATUS BADGES
+========================================= */
 
 .lumina .cd-status {
   display: inline-block;
@@ -423,6 +630,7 @@
   font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
+  text-align: center;
 }
 
 .lumina .cd-status.cancelled {
@@ -430,37 +638,77 @@
   color: #bd554a;
 }
 
+/* =========================================
+   13. EMPTY STATE
+========================================= */
+
 .lumina .cd-empty {
   text-align: center;
   padding: 45px 16px;
   color: #8c7d70;
+  background: #fcfaf8;
+  border-radius: 12px;
 }
 
 .lumina .cd-empty-icon {
   font-size: 35px;
   color: #aa896b;
+  margin-bottom: 10px;
 }
 
 .lumina .cd-empty h3 {
   color: #403024;
+  font-size: 18px;
+  margin: 10px 0;
 }
+
+.lumina .cd-empty p {
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+/* =========================================
+   14. ORDER DETAIL
+========================================= */
 
 .lumina .cd-back {
   margin-bottom: 23px;
   padding: 0;
 }
 
+.lumina .cd-detail-heading {
+  padding-bottom: 18px;
+  border-bottom: 1px solid #eee6df;
+}
+
+.lumina .cd-detail-heading h2 {
+  overflow-wrap: anywhere;
+}
+
+.lumina .cd-subheading {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 25px 0 15px;
+  color: #302720;
+}
+
+/* =========================================
+   15. ORDER STATUS TIMELINE
+========================================= */
+
 .lumina .cd-timeline {
   display: grid;
   grid-template-columns:
     repeat(4, minmax(0, 1fr));
   margin: 35px 0;
+  gap: 0;
 }
 
 .lumina .cd-step {
   position: relative;
   text-align: center;
   color: #a89a8e;
+  min-width: 0;
 }
 
 .lumina .cd-step:not(:last-child)::after {
@@ -481,35 +729,49 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: auto auto 10px;
+  margin: 0 auto 10px;
   width: 34px;
   height: 34px;
   border-radius: 50%;
   background: #eee8e2;
   color: #9d8f82;
+  font-size: 13px;
+  font-weight: 700;
+  position: relative;
+  z-index: 1;
 }
 
 .lumina .cd-step.completed .cd-step-dot {
   background: #a98569;
-  color: white;
+  color: #ffffff;
 }
 
 .lumina .cd-step-label {
+  display: block;
   font-size: 11px;
+  line-height: 1.5;
+  padding: 0 4px;
+}
+
+.lumina .cd-step.completed .cd-step-label {
+  color: #74543c;
+  font-weight: 700;
 }
 
 .lumina .cd-cancel-notice {
-  padding: 15px;
+  padding: 15px 18px;
   margin: 25px 0;
   color: #ae5147;
   background: #fff1ef;
+  border: 1px solid #f5d2ce;
   border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.6;
 }
 
-.lumina .cd-subheading {
-  font-size: 17px;
-  margin: 25px 0;
-}
+/* =========================================
+   16. ORDER PRODUCT DETAIL
+========================================= */
 
 .lumina .cd-order-product {
   display: flex;
@@ -517,16 +779,28 @@
   gap: 18px;
   padding: 15px 0;
   border-bottom: 1px solid #eee5dd;
+  min-width: 0;
+}
+
+.lumina .cd-order-product:last-of-type {
+  border-bottom-color: transparent;
 }
 
 .lumina .cd-product-price {
   font-size: 13px;
+  color: #49372b;
+  font-weight: 700;
   white-space: nowrap;
+  text-align: right;
 }
+
+/* =========================================
+   17. SHIPPING AND PURCHASE SUMMARY
+========================================= */
 
 .lumina .cd-detail-columns {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
   margin-top: 30px;
 }
@@ -534,12 +808,16 @@
 .lumina .cd-detail-box {
   padding: 22px;
   background: #faf7f4;
+  border: 1px solid #f0e6dc;
   border-radius: 12px;
+  min-width: 0;
 }
 
 .lumina .cd-detail-box h3 {
-  margin-top: 0;
+  margin: 0 0 18px;
   font-size: 16px;
+  font-weight: 700;
+  color: #302720;
 }
 
 .lumina .cd-detail-box p {
@@ -547,22 +825,52 @@
   flex-direction: column;
   gap: 6px;
   font-size: 13px;
+  line-height: 1.6;
+  margin: 15px 0;
+  color: #66564a;
   overflow-wrap: anywhere;
+}
+
+.lumina .cd-detail-box p strong {
+  color: #967b66;
+  font-size: 11px;
+  font-weight: 600;
 }
 
 .lumina .cd-total-row {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   gap: 12px;
   margin: 15px 0;
   font-size: 12px;
+  line-height: 1.6;
+}
+
+.lumina .cd-total-row span {
+  color: #88796d;
+}
+
+.lumina .cd-total-row strong {
+  color: #302720;
+  text-align: right;
+  overflow-wrap: anywhere;
 }
 
 .lumina .cd-grand {
   border-top: 1px solid #dfd3c7;
   padding-top: 15px;
+  margin-top: 20px;
   font-weight: 700;
 }
+
+.lumina .cd-grand strong {
+  font-size: 16px;
+}
+
+/* =========================================
+   18. CUSTOMER PROFILE PAGE
+========================================= */
 
 .lumina .cd-profile {
   display: flex;
@@ -576,10 +884,12 @@
   height: 95px;
   flex: 0 0 95px;
   font-size: 30px;
+  box-shadow: 0 6px 18px rgba(185,146,116,0.2);
 }
 
 .lumina .cd-profile-info {
   flex: 1;
+  min-width: 0;
 }
 
 .lumina .cd-profile-info label {
@@ -587,12 +897,15 @@
   margin: 0 0 8px;
   font-size: 11px;
   color: #9c8878;
+  font-weight: 600;
 }
 
 .lumina .cd-profile-info div {
   border-bottom: 1px solid #eee5dc;
   padding-bottom: 15px;
   margin-bottom: 18px;
+  font-size: 14px;
+  color: #302720;
   overflow-wrap: anywhere;
 }
 
@@ -604,26 +917,69 @@
 }
 
 .lumina .cd-action {
-  color: white;
+  border: none;
+  padding: 13px 22px;
+  color: #ffffff;
   background: #302720;
+  border-radius: 8px;
   margin-top: 15px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
 }
 
+.lumina .cd-action:hover {
+  background: #725540;
+  transform: translateY(-2px);
+}
+
+/* =========================================
+   19. TABLET AND SMALL LAPTOP
+========================================= */
+
 @media (max-width: 1100px) {
+  .lumina .cd-shell {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+
+  .lumina .cd-main {
+    padding: 28px;
+  }
+
   .lumina .cd-stats {
     grid-template-columns:
       repeat(2, minmax(0, 1fr));
   }
+
+  .lumina .cd-detail-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .lumina .cd-welcome {
+    padding: 28px;
+  }
+
+  .lumina .cd-welcome-decor {
+    font-size: 95px;
+  }
 }
+
+/* =========================================
+   20. MOBILE NAVIGATION LAYOUT
+========================================= */
 
 @media (max-width: 850px) {
   .lumina .cd-shell {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .lumina .cd-sidebar {
     gap: 15px;
     padding: 18px;
+  }
+
+  .lumina .cd-logo {
+    font-size: 23px;
   }
 
   .lumina .cd-member,
@@ -634,16 +990,24 @@
   .lumina .cd-menu {
     flex-direction: row;
     flex-wrap: wrap;
+    gap: 8px;
   }
 
   .lumina .cd-menu button {
     width: auto;
+    padding: 11px 14px;
+    font-size: 12px;
+  }
+
+  .lumina .cd-menu button:hover {
+    transform: none;
   }
 
   .lumina .cd-sidebar-bottom {
     margin-top: 0;
     padding-top: 10px;
     display: flex;
+    flex-wrap: wrap;
     gap: 10px;
   }
 
@@ -656,8 +1020,54 @@
   }
 }
 
+/* =========================================
+   21. SMARTPHONE
+========================================= */
+
 @media (max-width: 600px) {
+  .lumina .cd-main {
+    padding: 16px;
+  }
+
+  .lumina .cd-topbar {
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .lumina .cd-topbar h1 {
+    font-size: 25px;
+  }
+
+  .lumina .cd-top-subtitle {
+    font-size: 11px;
+  }
+
+  .lumina .cd-top-avatar {
+    width: 38px;
+    height: 38px;
+    font-size: 12px;
+  }
+
+  .lumina .cd-welcome {
+    padding: 25px;
+    border-radius: 14px;
+  }
+
+  .lumina .cd-welcome h2 {
+    font-size: 25px;
+  }
+
+  .lumina .cd-welcome p {
+    font-size: 12px;
+  }
+
+  .lumina .cd-welcome-decor {
+    display: none;
+  }
+
   .lumina .cd-stats {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
     gap: 10px;
   }
 
@@ -665,36 +1075,73 @@
     padding: 15px;
   }
 
-  .lumina .cd-welcome {
-    padding: 25px;
+  .lumina .cd-stat strong {
+    font-size: 18px;
   }
 
-  .lumina .cd-welcome h2 {
-    font-size: 25px;
-  }
-
-  .lumina .cd-welcome-decor {
-    display: none;
+  .lumina .cd-stat p {
+    font-size: 11px;
   }
 
   .lumina .cd-panel {
     padding: 17px;
+    border-radius: 12px;
   }
 
-  .lumina .cd-detail-columns {
-    grid-template-columns: 1fr;
+  .lumina .cd-panel-heading,
+  .lumina .cd-detail-heading {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .lumina .cd-panel-heading h2,
+  .lumina .cd-detail-heading h2 {
+    font-size: 21px;
   }
 
   .lumina .cd-filters {
     flex-direction: column;
   }
 
+  .lumina .cd-filters select {
+    width: 100%;
+  }
+
+  .lumina .cd-order-header {
+    flex-wrap: wrap;
+  }
+
   .lumina .cd-order-body {
     flex-wrap: wrap;
+    gap: 12px;
   }
 
   .lumina .cd-detail-btn {
     margin-left: auto;
+  }
+
+  .lumina .cd-order-product {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .lumina .cd-product-info {
+    flex-basis: calc(100% - 85px);
+  }
+
+  .lumina .cd-product-price {
+    white-space: normal;
+    margin-left: auto;
+  }
+
+  .lumina .cd-detail-columns {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .lumina .cd-detail-box {
+    padding: 17px;
   }
 
   .lumina .cd-profile {
@@ -702,11 +1149,109 @@
     gap: 18px;
   }
 
-  .lumina .cd-product-price {
-    white-space: normal;
+  .lumina .cd-profile-avatar {
+    width: 75px;
+    height: 75px;
+    flex-basis: 75px;
+    font-size: 23px;
+  }
+
+  .lumina .cd-profile-info {
+    width: 100%;
+  }
+
+  .lumina .cd-timeline {
+    margin: 28px 0;
+  }
+
+  .lumina .cd-step-dot {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+
+  .lumina .cd-step:not(:last-child)::after {
+    top: 13px;
+    left: calc(50% + 17px);
+    width: calc(100% - 34px);
   }
 
   .lumina .cd-step-label {
     font-size: 9px;
+    overflow-wrap: anywhere;
   }
 }
+
+/* =========================================
+   22. EXTRA SMALL DEVICES
+========================================= */
+
+@media (max-width: 380px) {
+  .lumina .cd-main {
+    padding: 12px;
+  }
+
+  .lumina .cd-sidebar {
+    padding: 14px;
+  }
+
+  .lumina .cd-menu button {
+    padding: 9px 11px;
+    font-size: 11px;
+  }
+
+  .lumina .cd-stat {
+    padding: 12px;
+  }
+
+  .lumina .cd-stat strong {
+    font-size: 16px;
+  }
+
+  .lumina .cd-welcome {
+    padding: 20px;
+  }
+
+  .lumina .cd-welcome h2 {
+    font-size: 22px;
+  }
+
+  .lumina .cd-panel {
+    padding: 13px;
+  }
+
+  .lumina .cd-order-card {
+    padding: 12px;
+  }
+
+  .lumina .cd-status {
+    font-size: 10px;
+    padding: 6px 9px;
+  }
+
+  .lumina .cd-step-label {
+    font-size: 8px;
+  }
+}
+
+/* =========================================
+   23. ACCESSIBILITY
+========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .lumina .cd-shell button,
+  .lumina .cd-stat,
+  .lumina .cd-order-card {
+    transition: none;
+  }
+
+  .lumina .cd-stat:hover,
+  .lumina .cd-welcome button:hover,
+  .lumina .cd-action:hover {
+    transform: none;
+  }
+}
+
+/* =========================================
+   END CUSTOMER DASHBOARD CSS
+========================================= */
