@@ -1,0 +1,172 @@
+
+/* =========================================
+   LUMINA STORE - RIWAYAT STATUS PESANAN
+========================================= */
+
+.lumina .lum-history {
+  background: #ffffff;
+  border: 1px solid #e8ddd2;
+  border-radius: 16px;
+  padding: 24px;
+  margin: 24px 0;
+  box-shadow: 0 4px 18px rgba(48, 39, 32, 0.05);
+}
+
+.lumina .lum-history-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.lumina .lum-history-header h3 {
+  margin: 0 0 8px;
+  color: #302720;
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.lumina .lum-history-header p {
+  margin: 0;
+  color: #938578;
+  font-size: 13px;
+}
+
+.lumina .lum-history-header span {
+  background: #f2e9df;
+  color: #76553c;
+  padding: 8px 14px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.lumina .lum-history-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.lumina .lum-history-item {
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+  gap: 16px;
+  padding-bottom: 26px;
+}
+
+.lumina .lum-history-item:last-child {
+  padding-bottom: 0;
+}
+
+.lumina .lum-history-item:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  top: 34px;
+  bottom: 0;
+  left: 15px;
+  width: 2px;
+  background: #e6d9cc;
+}
+
+.lumina .lum-history-dot {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #a98569;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  font-weight: bold;
+}
+
+.lumina .lum-history-item.cancelled .lum-history-dot {
+  background: #ca4942;
+}
+
+.lumina .lum-history-content {
+  flex: 1;
+  min-width: 0;
+  background: #faf7f4;
+  padding: 16px 18px;
+  border-radius: 12px;
+}
+
+.lumina .lum-history-item.cancelled .lum-history-content {
+  background: #fff1ef;
+}
+
+.lumina .lum-history-content strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #302720;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.lumina .lum-history-content p {
+  margin: 0 0 10px;
+  color: #887568;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.lumina .lum-history-content small {
+  display: block;
+  margin-top: 5px;
+  color: #9e8a79;
+  font-size: 11px;
+}
+
+.lumina .lum-history-empty {
+  background: #faf7f4;
+  padding: 20px;
+  border-radius: 12px;
+  color: #765f4d;
+}
+
+.lumina .lum-history-empty strong {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.lumina .lum-history-empty p {
+  color: #938578;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.lumina .lum-history-empty small {
+  color: #8c7768;
+  font-size: 11px;
+}
+
+@media (max-width: 600px) {
+  .lumina .lum-history {
+    padding: 16px 12px;
+  }
+
+  .lumina .lum-history-header {
+    flex-direction: column;
+  }
+
+  .lumina .lum-history-item {
+    gap: 10px;
+  }
+
+  .lumina .lum-history-content {
+    padding: 12px;
+  }
+
+  .lumina .lum-history-content strong {
+    font-size: 12px;
+  }
+}
