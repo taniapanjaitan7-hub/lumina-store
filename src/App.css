@@ -1815,3 +1815,578 @@ textarea:focus-visible {
     height: 380px;
   }
 }
+
+
+/* ==========================================
+   LUMINA STORE
+   TAHAP 2 - PREMIUM DASHBOARD CARDS
+========================================== */
+
+/* Kartu statistik utama */
+
+.lumina.admin-mode
+.lum-analytics-cards .lum-dash-card {
+  position: relative;
+  overflow: hidden;
+
+  background: linear-gradient(
+    145deg,
+    #ffffff 0%,
+    #fffaf6 100%
+  );
+
+  border: 1px solid #eaded3;
+  border-radius: 18px;
+
+  padding: 24px;
+
+  box-shadow:
+    0 6px 20px rgba(65, 43, 28, 0.05),
+    0 1px 3px rgba(65, 43, 28, 0.03);
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+/* Aksen cokelat di bagian atas kartu */
+
+.lumina.admin-mode
+.lum-analytics-cards .lum-dash-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+
+  background: linear-gradient(
+    90deg,
+    #8e6b55,
+    #c8aa92,
+    #e5d2c0
+  );
+}
+
+/* Efek hover */
+
+.lumina.admin-mode
+.lum-analytics-cards .lum-dash-card:hover {
+  transform: translateY(-5px);
+
+  border-color: #d6baa3;
+
+  box-shadow:
+    0 14px 30px rgba(65, 43, 28, 0.10);
+}
+
+/* Label kartu statistik */
+
+.lumina.admin-mode
+.lum-analytics-cards .lum-dash-card small {
+  display: block;
+  color: #8e6b55;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+/* Angka statistik */
+
+.lumina.admin-mode
+.lum-analytics-cards .lum-dash-card h2 {
+  margin: 16px 0 4px;
+
+  color: #30251f;
+
+  font-size: clamp(20px, 2vw, 28px);
+  font-weight: 700;
+  letter-spacing: -0.6px;
+}
+
+/* ==========================================
+   KARTU GRAFIK ANALYTICS
+========================================== */
+
+.lumina.admin-mode
+.lum-analytics-panels .lum-dash-card {
+  background: #ffffff;
+
+  border: 1px solid #eaded3;
+  border-radius: 20px;
+
+  padding: 26px;
+
+  box-shadow:
+    0 8px 26px rgba(65, 43, 28, 0.05);
+
+  transition:
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.lumina.admin-mode
+.lum-analytics-panels .lum-dash-card:hover {
+  border-color: #d6baa3;
+
+  box-shadow:
+    0 12px 32px rgba(65, 43, 28, 0.08);
+}
+
+/* Judul grafik */
+
+.lumina.admin-mode
+.lum-analytics-panels h3 {
+  color: #30251f;
+
+  font-size: 17px;
+  font-weight: 700;
+
+  margin-bottom: 24px;
+}
+
+/* Latar setiap kolom grafik */
+
+.lumina.admin-mode
+.lum-chart-track {
+  background: #f5eee8;
+
+  border-radius: 10px;
+
+  overflow: hidden;
+}
+
+/* Batang grafik dengan gradasi mocha */
+
+.lumina.admin-mode
+.lum-chart-track > div {
+  background: linear-gradient(
+    180deg,
+    #d8b79a 0%,
+    #b58b6d 55%,
+    #8e6b55 100%
+  );
+
+  border-radius: 8px 8px 0 0;
+
+  transition:
+    filter 0.25s ease;
+}
+
+.lumina.admin-mode
+.lum-chart-track > div:hover {
+  filter: brightness(1.08);
+}
+
+/* Label bulan */
+
+.lumina.admin-mode
+.lum-mini-chart small {
+  display: block;
+
+  margin-top: 10px;
+
+  color: #907766;
+  font-size: 11px;
+}
+
+/* ==========================================
+   STATUS PESANAN DAN KARTU LAIN
+========================================== */
+
+.lumina.admin-mode
+.lum-analytics-panels .lum-between {
+  padding: 10px 0;
+
+  border-bottom:
+    1px solid #f0e8e1;
+}
+
+.lumina.admin-mode
+.lum-analytics-panels .lum-between:last-child {
+  border-bottom: none;
+}
+
+/* Kartu monitoring inventory dan overview */
+
+.lumina.admin-mode
+.lum-dash-main > .lum-dash-card {
+  background: #ffffff;
+
+  border: 1px solid #eaded3;
+  border-radius: 18px;
+
+  box-shadow:
+    0 7px 25px rgba(65, 43, 28, 0.05);
+}
+
+/* Tampilan responsive */
+
+@media (max-width: 768px) {
+  .lumina.admin-mode
+  .lum-analytics-cards {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .lumina.admin-mode
+  .lum-analytics-cards .lum-dash-card {
+    padding: 17px;
+  }
+
+  .lumina.admin-mode
+  .lum-analytics-panels {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  .lumina.admin-mode
+  .lum-analytics-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lumina.admin-mode
+  .lum-analytics-cards .lum-dash-card,
+  .lumina.admin-mode
+  .lum-analytics-panels .lum-dash-card {
+    transition: none;
+  }
+}
+
+/* =============================================
+   LUMINA STORE
+   DASHBOARD ADMIN — WARM LUXURY BACKGROUND
+   TAHAP 1
+============================================= */
+
+/* Background keseluruhan Dashboard Admin */
+
+.lumina.admin-mode {
+  background: #f8f3ee;
+}
+
+/* Gradasi krem pada area dashboard */
+
+.lumina.admin-mode .lum-dash {
+  min-height: 100vh;
+
+  background:
+    linear-gradient(
+      135deg,
+      #fcfaf8 0%,
+      #f6ede5 45%,
+      #eee0d3 100%
+    );
+}
+
+/* Background utama di tengah */
+
+.lumina.admin-mode .lum-dash-main {
+  min-width: 0;
+  min-height: 100vh;
+
+  background-color: #f8f2ec;
+
+  background-image:
+    radial-gradient(
+      circle at 90% 5%,
+      rgba(194, 151, 117, 0.16),
+      transparent 36%
+    ),
+    radial-gradient(
+      circle at 5% 80%,
+      rgba(223, 191, 163, 0.20),
+      transparent 38%
+    ),
+    linear-gradient(
+      145deg,
+      #fcfaf8 0%,
+      #f7f0e9 50%,
+      #f0e5da 100%
+    );
+
+  background-repeat: no-repeat;
+}
+
+/* Area kanan tetap terang dan bersih */
+
+.lumina.admin-mode .lum-dash-right {
+  background:
+    linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #faf5ef 100%
+    );
+
+  border-left: 1px solid #e8dace;
+}
+
+/* Penyesuaian tampilan saat layar kecil */
+
+@media (max-width: 768px) {
+  .lumina.admin-mode .lum-dash-main {
+    min-height: 100vh;
+
+    background:
+      linear-gradient(
+        180deg,
+        #fcfaf8 0%,
+        #f3e8de 100%
+      );
+  }
+}
+
+
+
+/* ==============================================
+   LUMINA STORE
+   TAHAP 3 — CUSTOMER DASHBOARD WARM LUXURY
+   Tambahkan paling bawah src/App.css
+============================================== */
+
+/* Background khusus halaman pelanggan */
+
+.lumina:has(> .lum-customer-track) {
+  background:
+    radial-gradient(
+      circle at 85% 12%,
+      rgba(193, 153, 121, 0.16),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at 10% 75%,
+      rgba(224, 194, 170, 0.19),
+      transparent 38%
+    ),
+    linear-gradient(
+      145deg,
+      #fcfaf8 0%,
+      #f7f0e9 55%,
+      #efe3d8 100%
+    );
+}
+
+/* Bagian Tracking & Pembayaran Pelanggan */
+
+.lumina:has(> .lum-customer-track)
+.lum-customer-track {
+  background: transparent;
+  padding-top: 55px;
+  padding-bottom: 55px;
+}
+
+/* Judul tracking */
+
+.lumina:has(> .lum-customer-track)
+.lum-customer-track .section-title {
+  color: #30251f;
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.5px;
+}
+
+/* Kartu riwayat dan tracking pesanan */
+
+.lumina:has(> .lum-customer-track)
+.lum-customer-track .lum-track-card {
+  background: linear-gradient(
+    145deg,
+    #ffffff 0%,
+    #fffaf6 100%
+  );
+
+  border: 1px solid #e8d9cc;
+  border-radius: 19px;
+
+  padding: 28px;
+
+  box-shadow:
+    0 8px 25px rgba(63, 43, 28, 0.06),
+    0 2px 5px rgba(63, 43, 28, 0.02);
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+/* Efek hover kartu tracking */
+
+.lumina:has(> .lum-customer-track)
+.lum-customer-track .lum-track-card:hover {
+  transform: translateY(-4px);
+
+  border-color: #d5b89f;
+
+  box-shadow:
+    0 16px 35px rgba(63, 43, 28, 0.10);
+}
+
+/* Informasi nomor pesanan */
+
+.lumina:has(> .lum-customer-track)
+.lum-track-card strong {
+  color: #49362a;
+}
+
+/* Badge status */
+
+.lumina:has(> .lum-customer-track)
+.lum-status-badge,
+.lumina:has(> .lum-customer-track)
+.lum-payment-badge {
+  background: #f2e6db;
+  color: #805c43;
+
+  border: 1px solid #e5d2c2;
+  border-radius: 30px;
+
+  padding: 9px 14px;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+/* Garis tahapan pesanan */
+
+.lumina:has(> .lum-customer-track)
+.lum-track-steps {
+  gap: 12px;
+  margin: 28px 0;
+}
+
+/* Lingkaran status pesanan */
+
+.lumina:has(> .lum-customer-track)
+.lum-track-steps > div > span {
+  width: 42px;
+  height: 42px;
+
+  background: #f0e4d9;
+  color: #98765e;
+
+  border: 1px solid #e6d5c7;
+  border-radius: 50%;
+
+  font-weight: 700;
+  transition: background 0.2s ease;
+}
+
+/* Status yang sudah selesai dilewati */
+
+.lumina:has(> .lum-customer-track)
+.lum-track-steps > div.complete > span {
+  background: #e5f1e7;
+  color: #3f7951;
+  border-color: #cce3d1;
+}
+
+/* Pesan pembayaran berhasil */
+
+.lumina:has(> .lum-customer-track)
+.lum-paid-note {
+  background: #edf7ee;
+  color: #337147;
+
+  padding: 12px 15px;
+  border: 1px solid #d6ead9;
+  border-radius: 10px;
+}
+
+/* Pesanan dibatalkan */
+
+.lumina:has(> .lum-customer-track)
+.lum-cancel-note {
+  background: #fff0ef;
+  color: #a6403b;
+
+  padding: 12px 15px;
+  border-radius: 10px;
+}
+
+/* ==============================================
+   AREA CUSTOMER DASHBOARD
+   Component CustomerDashboard.jsx ditampilkan
+   tepat setelah CustomerTracking.
+============================================== */
+
+/* Background area dashboard pelanggan */
+
+.lumina > .lum-customer-track + * {
+  background-color: transparent;
+}
+
+/* Kartu-kartu yang memakai class card/panel
+   dalam komponen Dashboard Pelanggan */
+
+.lumina > .lum-customer-track + *
+:is([class*="card"], [class*="panel"]) {
+  border-radius: 16px;
+  border-color: #e9dcd0;
+
+  box-shadow:
+    0 8px 25px rgba(63, 43, 28, 0.055);
+
+  transition:
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+/* Hover kartu pelanggan */
+
+.lumina > .lum-customer-track + *
+:is([class*="card"], [class*="panel"]):hover {
+  border-color: #d8bda8;
+
+  box-shadow:
+    0 13px 30px rgba(63, 43, 28, 0.085);
+}
+
+/* Background profil bila komponen memakai
+   nama class profile atau welcome */
+
+.lumina > .lum-customer-track + *
+:is([class*="profile"], [class*="welcome"]) {
+  background-image: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(197, 159, 127, 0.10)
+  );
+  border-radius: 18px;
+}
+
+/* Tampilan smartphone */
+
+@media (max-width: 768px) {
+  .lumina:has(> .lum-customer-track)
+  .lum-customer-track {
+    padding-top: 35px;
+    padding-bottom: 35px;
+  }
+
+  .lumina:has(> .lum-customer-track)
+  .lum-track-card {
+    padding: 18px;
+    border-radius: 14px;
+  }
+
+  .lumina:has(> .lum-customer-track)
+  .lum-track-steps > div > span {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+/* Aksesibilitas: kurangi animasi bila diperlukan */
+
+@media (prefers-reduced-motion: reduce) {
+  .lumina:has(> .lum-customer-track)
+  .lum-track-card,
+  .lumina > .lum-customer-track + *
+  :is([class*="card"], [class*="panel"]) {
+    transition: none;
+  }
+}
