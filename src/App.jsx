@@ -8,62 +8,17 @@ import { downloadTransactionsPDF } from "./utils/reportPdf.js";
 import productImages from "./product-images.json";
 import "./App.css";
 
-/* ==========================================
-   LUMINA STORE
-   FULL APPLICATION
-   PAYMENT CONFIRMATION + ORDER TRACKING
-========================================== */
+// LUMINA STORE — Product Card Premium
+// Data localStorage dan fitur transaksi lama dipertahankan.
 
 const CATEGORIES = [
-  {
-    folder: "baju pria",
-    name: "Pria",
-    label: "Baju Pria",
-    price: 179000,
-    sizes: ["S", "M", "L", "XL", "XXL"],
-  },
-  {
-    folder: "baju wanita",
-    name: "Wanita",
-    label: "Baju Wanita",
-    price: 199000,
-    sizes: ["S", "M", "L", "XL", "XXL"],
-  },
-  {
-    folder: "batik wanita",
-    name: "Batik Wanita",
-    label: "Batik",
-    price: 235000,
-    sizes: ["S", "M", "L", "XL", "XXL"],
-  },
-  {
-    folder: "sepatu pria",
-    name: "Sepatu Pria",
-    label: "Sepatu Pria",
-    price: 295000,
-    sizes: ["39", "40", "41", "42", "43", "44"],
-  },
-  {
-    folder: "sepatu wanita",
-    name: "Sepatu Wanita",
-    label: "Sepatu Wanita",
-    price: 245000,
-    sizes: ["35", "36", "37", "38", "39", "40"],
-  },
-  {
-    folder: "tas wanita",
-    name: "Tas Wanita",
-    label: "Tas",
-    price: 249000,
-    sizes: ["All Size"],
-  },
-  {
-    folder: "aksesoris wanita",
-    name: "Accessories",
-    label: "Aksesori",
-    price: 129000,
-    sizes: ["All Size"],
-  },
+  { folder: "baju pria", name: "Pria", label: "Baju Pria", price: 179000, sizes: ["S", "M", "L", "XL", "XXL"] },
+  { folder: "baju wanita", name: "Wanita", label: "Baju Wanita", price: 199000, sizes: ["S", "M", "L", "XL", "XXL"] },
+  { folder: "batik wanita", name: "Batik Wanita", label: "Batik", price: 235000, sizes: ["S", "M", "L", "XL", "XXL"] },
+  { folder: "sepatu pria", name: "Sepatu Pria", label: "Sepatu Pria", price: 295000, sizes: ["39", "40", "41", "42", "43", "44"] },
+  { folder: "sepatu wanita", name: "Sepatu Wanita", label: "Sepatu Wanita", price: 245000, sizes: ["35", "36", "37", "38", "39", "40"] },
+  { folder: "tas wanita", name: "Tas Wanita", label: "Tas", price: 249000, sizes: ["All Size"] },
+  { folder: "aksesoris wanita", name: "Accessories", label: "Aksesori", price: 129000, sizes: ["All Size"] },
 ];
 
 const STATUSES = [
@@ -74,19 +29,16 @@ const STATUSES = [
   "Dibatalkan",
 ];
 
-const PAYMENT_METHODS = [
-  {
-    value: "cod",
-    label: "COD - Bayar di Tempat",
-  },
-  {
-    value: "transfer",
-    label: "Transfer Bank (Simulasi)",
-  },
-  {
-    value: "qris",
-    label: "QRIS (Simulasi)",
-  },
+const METHODS = [
+  { value: "cod", label: "COD — Bayar di Tempat" },
+  { value: "transfer", label: "Transfer Bank (Simulasi)" },
+  { value: "qris", label: "QRIS (Simulasi)" },
+];
+
+const VOUCHERS = [
+  { code: "LUMINA10", min: 100000, percent: 10 },
+  { code: "FASHION20", min: 300000, percent: 20 },
+  { code: "WELCOME15", min: 150000, amount: 15000 },
 ];
 
 const KEY = {
@@ -100,7 +52,7 @@ const KEY = {
   reviews: "lumina_product_reviews_v1",
 };
 
-const DEFAULT_FORM = {
+const EMPTY_PRODUCT = {
   id: null,
   name: "",
   collection: "Pria",
@@ -113,7 +65,7 @@ const DEFAULT_FORM = {
   colors: "Sesuai foto",
 };
 
-const DEFAULT_CHECKOUT = {
+const EMPTY_CHECKOUT = {
   name: "",
   phone: "",
   address: "",
@@ -121,62 +73,46 @@ const DEFAULT_CHECKOUT = {
   payment: "cod",
 };
 
-/* ==========================================
+/* =====================================
    HELPER
-========================================== */
+===================================== */
 
 function read(key, fallback) {
   try {
-    const raw = localStorage.getItem(key);
-
-    return raw === null
-      ? fallback
-      : JSON.parse(raw);
+    const value = localStorage.getItem(key);
+    return value === null ? fallback : JSON.parse(value);
   } catch {
     return fallback;
   }
 }
 
-function readArray(key) {
-  const data = read(key, []);
-
-  return Array.isArray(data)
-    ? data
-    : [];
+function arr(key) {
+  const value = read(key, []);
+  return Array.isArray(value) ? value : [];
 }
 
-function save(key, value) {
+function store(key, value) {
   try {
-    localStorage.setItem(
-      key,
-      JSON.stringify(value)
-    );
-
+    localStorage.setItem(key, JSON.stringify(value));
     return true;
   } catch (error) {
-    console.error(
-      "Gagal menyimpan:",
-      error
-    );
-
+    console.error("Penyimpanan gagal", error);
     return false;
   }
 }
 
-function normalize(value) {
-  return String(value ?? "")
-    .trim()
-    .toLowerCase();
+function text(value) {
+  return String(value ?? "").trim().toLowerCase();
 }
 
-function splitText(value) {
+function values(value) {
   return String(value || "")
     .split(",")
-    .map((item) => item.trim())
+    .map((v) => v.trim())
     .filter(Boolean);
 }
 
-function money(value) {
+function rp(value) {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
@@ -184,370 +120,298 @@ function money(value) {
   }).format(Number(value) || 0);
 }
 
-function dateText(value) {
-  const date = new Date(value || "");
-
-  if (Number.isNaN(date.getTime())) {
-    return "-";
-  }
-
-  return date.toLocaleString("id-ID", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+function date(value) {
+  const d = new Date(value || "");
+  return Number.isNaN(d.getTime())
+    ? "-"
+    : d.toLocaleString("id-ID", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      });
 }
 
-function statusOf(value) {
-  return STATUSES.includes(value)
-    ? value
-    : "Pesanan Baru";
-}
-
-function paymentName(value) {
-  return PAYMENT_METHODS.find(
-    (item) => item.value === value
-  )?.label || "Belum tercatat";
-}
-
-function paymentStatus(order) {
-  if (order.paymentStatus) {
-    return order.paymentStatus;
-  }
-
-  if (order.paymentMethod === "cod") {
-    return "Bayar di Tempat";
-  }
-
-  if (
-    ["transfer", "qris"].includes(
-      order.paymentMethod
-    )
-  ) {
-    return "Menunggu Pembayaran";
-  }
-
-  return "Belum tercatat";
-}
-
-function validNextStatus(current, next) {
-  if (
-    !STATUSES.includes(next) ||
-    ["Selesai", "Dibatalkan"].includes(current)
-  ) {
-    return false;
-  }
-
-  return (
-    next === "Dibatalkan" ||
-    STATUSES.indexOf(next) ===
-      STATUSES.indexOf(current) + 1
+function prettyName(value) {
+  return String(value || "").replace(
+    /\bgambar\s*(\d+)\b/gi,
+    "Koleksi $1"
   );
 }
 
-function canConfirmPayment(order) {
-  if (
-    !order ||
-    !["cod", "transfer", "qris"].includes(
-      order.paymentMethod
-    )
-  ) {
-    return false;
-  }
-
-  if (
-    statusOf(order.status) === "Dibatalkan" ||
-    paymentStatus(order) === "Lunas"
-  ) {
-    return false;
-  }
-
-  if (
-    order.paymentMethod === "cod" &&
-    statusOf(order.status) !== "Selesai"
-  ) {
-    return false;
-  }
-
-  return true;
+function status(value) {
+  return STATUSES.includes(value) ? value : "Pesanan Baru";
 }
 
-/* ==========================================
-   FOTO PRODUK
-========================================== */
+function paymentLabel(value) {
+  return (
+    METHODS.find((m) => m.value === value)?.label ||
+    "Belum tercatat"
+  );
+}
 
-function folderName(value) {
-  const oldNames = {
-    pria: "baju pria",
-    wanita: "baju wanita",
-    aksesoris: "aksesoris wanita",
+function payStatus(order) {
+  return (
+    order.paymentStatus ||
+    (order.paymentMethod === "cod"
+      ? "Bayar di Tempat"
+      : ["transfer", "qris"].includes(order.paymentMethod)
+        ? "Menunggu Pembayaran"
+        : "Belum tercatat")
+  );
+}
+
+function canPay(order) {
+  return (
+    order &&
+    ["cod", "transfer", "qris"].includes(
+      order.paymentMethod
+    ) &&
+    status(order.status) !== "Dibatalkan" &&
+    payStatus(order) !== "Lunas" &&
+    (order.paymentMethod !== "cod" ||
+      status(order.status) === "Selesai")
+  );
+}
+
+function canMove(from, to) {
+  return (
+    STATUSES.includes(to) &&
+    !["Selesai", "Dibatalkan"].includes(from) &&
+    (to === "Dibatalkan" ||
+      STATUSES.indexOf(to) === STATUSES.indexOf(from) + 1)
+  );
+}
+
+function voucherValue(code, subtotal) {
+  const item = VOUCHERS.find(
+    (v) =>
+      v.code === String(code || "").trim().toUpperCase()
+  );
+
+  if (!item) {
+    return {
+      ok: false,
+      amount: 0,
+      message: "Kode voucher tidak ditemukan.",
+    };
+  }
+
+  if (subtotal < item.min) {
+    return {
+      ok: false,
+      amount: 0,
+      message:
+        `Minimal belanja ${rp(item.min)} ` +
+        `untuk voucher ${item.code}.`,
+    };
+  }
+
+  return {
+    ok: true,
+    code: item.code,
+    amount: Math.min(
+      subtotal,
+      item.percent
+        ? Math.round((subtotal * item.percent) / 100)
+        : item.amount
+    ),
+    message: `Voucher ${item.code} berhasil dipakai.`,
   };
+}
 
-  const name = normalize(value);
+/* =====================================
+   GAMBAR PRODUK
+===================================== */
 
-  return oldNames[name] || name;
+function folder(value) {
+  const f = text(value);
+
+  return (
+    {
+      pria: "baju pria",
+      wanita: "baju wanita",
+      aksesoris: "aksesoris wanita",
+    }[f] || f
+  );
 }
 
 function imagePath(value) {
   if (!value) return "";
 
   const raw = String(value)
-    .replace(/\\/g, "/")
-    .trim();
+    .trim()
+    .replace(/\\/g, "/");
 
   if (/^(https?:|data:|blob:)/i.test(raw)) {
     return raw;
   }
 
-  const segments = raw
-    .replace(/^(?:\.\/)?public\//i, "")
+  const parts = raw
+    .replace(/^(\.\/)?public\//i, "")
     .replace(/^\/+/, "")
     .split("/")
     .filter(Boolean);
 
-  if (
-    normalize(segments[0]) === "images" &&
-    segments[1]
-  ) {
+  if (text(parts[0]) === "images" && parts[1]) {
     try {
-      segments[1] = folderName(
-        decodeURIComponent(segments[1])
-      );
+      parts[1] = folder(decodeURIComponent(parts[1]));
     } catch {
-      segments[1] = folderName(segments[1]);
+      parts[1] = folder(parts[1]);
     }
   } else if (
     CATEGORIES.some(
-      (category) =>
-        category.folder ===
-        folderName(segments[0])
+      (c) => c.folder === folder(parts[0])
     )
   ) {
-    segments[0] = folderName(segments[0]);
-    segments.unshift("images");
+    parts[0] = folder(parts[0]);
+    parts.unshift("images");
   }
 
-  return "/" + segments.join("/");
+  return "/" + parts.join("/");
 }
 
-function photoUrl(value) {
+function imageUrl(value) {
   const path = imagePath(value);
 
-  if (
-    !path ||
-    /^(https?:|data:|blob:)/i.test(path)
-  ) {
+  if (!path || /^(https?:|data:|blob:)/i.test(path)) {
     return path;
   }
 
-  const base = import.meta.env.BASE_URL.replace(
-    /\/$/,
-    ""
-  );
+  const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 
-  return (
-    base +
-    "/" +
-    path
-      .replace(/^\/+/, "")
-      .split("/")
-      .map((part) => {
-        try {
-          return encodeURIComponent(
-            decodeURIComponent(part)
-          );
-        } catch {
-          return encodeURIComponent(part);
-        }
-      })
-      .join("/")
-  );
+  const encoded = path
+    .replace(/^\/+/, "")
+    .split("/")
+    .map((s) => {
+      try {
+        return encodeURIComponent(decodeURIComponent(s));
+      } catch {
+        return encodeURIComponent(s);
+      }
+    })
+    .join("/");
+
+  return base + "/" + encoded;
 }
 
 const PHOTOS = [
   ...new Map(
-    (Array.isArray(productImages)
-      ? productImages
-      : []
-    )
-      .filter((photo) => photo?.url)
-      .map((photo) => {
-        const url = imagePath(photo.url);
+    (Array.isArray(productImages) ? productImages : [])
+      .filter((p) => p?.url)
+      .map((p) => {
+        const url = imagePath(p.url);
+        const parts = url.replace(/^\/+/, "").split("/");
+        const pos = parts.indexOf("images");
 
-        const parts = url
-          .replace(/^\/+/, "")
-          .split("/");
-
-        const index = parts.findIndex(
-          (part) =>
-            normalize(part) === "images"
-        );
-
-        let pathFolder =
-          index >= 0
-            ? parts[index + 1]
-            : "";
+        let dirname = pos >= 0 ? parts[pos + 1] : "";
 
         try {
-          pathFolder = decodeURIComponent(
-            pathFolder
-          );
+          dirname = decodeURIComponent(dirname);
         } catch {
-          // Pertahankan nama asli.
+          // Nama folder tetap digunakan.
         }
 
         return {
-          ...photo,
-          folder: folderName(
-            photo.folder || pathFolder
-          ),
+          ...p,
           url,
-          name:
-            photo.name ||
-            parts[parts.length - 1],
+          folder: folder(p.folder || dirname),
+          name: p.name || parts.at(-1),
         };
       })
-      .filter((photo) =>
-        CATEGORIES.some(
-          (category) =>
-            category.folder === photo.folder
-        )
+      .filter((p) =>
+        CATEGORIES.some((c) => c.folder === p.folder)
       )
-      .map((photo) => [
-        photo.url,
-        photo,
-      ])
+      .map((p) => [p.url, p])
   ).values(),
 ];
 
-const INITIAL_PRODUCTS = PHOTOS.map(
-  (photo) => {
-    const category = CATEGORIES.find(
-      (item) =>
-        item.folder === photo.folder
-    );
-
-    return {
-      id: `local:${photo.url}`,
-      name: `${category.label} — ${photo.name}`,
-      collection: category.name,
-      image: photo.url,
-      gallery: [],
-      price: category.price,
-      stock: 20,
-      sizes: [...category.sizes],
-      colors: ["Sesuai foto"],
-      description:
-        `Koleksi ${category.label} dari LUMINA STORE.`,
-    };
-  }
-);
-
-function loadProducts() {
-  const existing =
-    localStorage.getItem(KEY.products) !== null
-      ? readArray(KEY.products)
-      : readArray(KEY.oldProducts);
-
-  const deleted = new Set(
-    readArray(KEY.deleted).map(String)
+const DEFAULT_PRODUCTS = PHOTOS.map((p) => {
+  const c = CATEGORIES.find(
+    (v) => v.folder === p.folder
   );
 
-  const savedProducts = existing
-    .filter(
-      (product) =>
-        product &&
-        product.id != null &&
-        product.name &&
-        !deleted.has(String(product.id))
-    )
-    .map((product) => {
-      const image = imagePath(product.image);
+  return {
+    id: `local:${p.url}`,
+    name: `${c.label} — ${p.name}`,
+    collection: c.name,
+    image: p.url,
+    gallery: [],
+    price: c.price,
+    stock: 20,
+    sizes: c.sizes,
+    colors: ["Sesuai foto"],
+    description: `Koleksi ${c.label} dari LUMINA STORE.`,
+  };
+});
 
-      const category =
+function loadProducts() {
+  const old =
+    localStorage.getItem(KEY.products) !== null
+      ? arr(KEY.products)
+      : arr(KEY.oldProducts);
+
+  const deleted = new Set(
+    arr(KEY.deleted).map(String)
+  );
+
+  const saved = old
+    .filter(
+      (p) =>
+        p &&
+        p.id != null &&
+        p.name &&
+        !deleted.has(String(p.id))
+    )
+    .map((p) => {
+      const photo = imagePath(p.image);
+
+      const c =
         CATEGORIES.find(
-          (item) =>
-            item.name === product.collection
+          (x) => x.name === p.collection
         ) ||
-        CATEGORIES.find(
-          (item) =>
-            PHOTOS.some(
-              (photo) =>
-                photo.folder === item.folder &&
-                photo.url === image
-            )
+        CATEGORIES.find((x) =>
+          PHOTOS.some(
+            (a) =>
+              a.url === photo &&
+              a.folder === x.folder
+          )
         ) ||
         CATEGORIES[0];
 
       return {
-        ...product,
-        image,
-        collection: category.name,
-        price: Number(product.price) || 0,
-        stock: Math.max(
-          0,
-          Number(product.stock) || 0
-        ),
-        sizes: Array.isArray(product.sizes)
-          ? product.sizes
-          : category.sizes,
-        colors: Array.isArray(product.colors)
-          ? product.colors
+        ...p,
+        image: photo,
+        collection: c.name,
+        price: Number(p.price) || 0,
+        stock: Math.max(0, Number(p.stock) || 0),
+        sizes: Array.isArray(p.sizes) ? p.sizes : c.sizes,
+        colors: Array.isArray(p.colors)
+          ? p.colors
           : ["Sesuai foto"],
-        gallery: Array.isArray(product.gallery)
-          ? product.gallery.map(imagePath)
+        gallery: Array.isArray(p.gallery)
+          ? p.gallery.map(imagePath)
           : [],
       };
     });
 
-  const usedPhotos = new Set(
-    savedProducts.map(
-      (product) => product.image
-    )
+  const seen = new Set(saved.map((p) => p.image));
+
+  const fresh = DEFAULT_PRODUCTS.filter(
+    (p) =>
+      !seen.has(p.image) &&
+      !deleted.has(String(p.id))
   );
 
-  const additional = INITIAL_PRODUCTS.filter(
-    (product) => {
-      const oldImage = product.image
-        .replace(
-          "/images/baju pria/",
-          "/images/pria/"
-        )
-        .replace(
-          "/images/baju wanita/",
-          "/images/wanita/"
-        )
-        .replace(
-          "/images/aksesoris wanita/",
-          "/images/aksesoris/"
-        );
-
-      return (
-        !usedPhotos.has(product.image) &&
-        !deleted.has(String(product.id)) &&
-        !deleted.has(`local:${oldImage}`)
-      );
-    }
-  );
-
-  return [
-    ...savedProducts,
-    ...additional,
-  ];
+  return [...saved, ...fresh];
 }
 
-function ProductImage({
-  src,
-  alt,
-  style,
-}) {
-  const [failed, setFailed] = useState("");
+function Photo({ src, alt, className = "", style }) {
+  const [bad, setBad] = useState("");
+  const url = imageUrl(src);
 
-  const url = photoUrl(src);
-
-  if (!url || failed === url) {
+  if (!url || bad === url) {
     return (
       <div
-        className="lum-photo-placeholder"
+        className={`lum-photo-placeholder ${className}`}
         style={style}
       >
         Foto belum tersedia
@@ -557,88 +421,149 @@ function ProductImage({
 
   return (
     <img
+      className={className}
       src={url}
       alt={alt || "Produk LUMINA"}
       style={style}
       loading="lazy"
-      onError={() => setFailed(url)}
+      onError={() => setBad(url)}
     />
   );
 }
 
-/* ==========================================
-   KARTU PRODUK
-========================================== */
+/* =====================================
+   PRODUCT CARD PREMIUM
+===================================== */
 
 function ProductCard({
   product,
-  wishlist,
+  favorite,
+  reviewList = [],
   onDetail,
-  onWishlist,
+  onFavorite,
   onCart,
 }) {
-  const available = Number(product.stock) > 0;
+  const stock = Math.max(
+    0,
+    Number(product.stock) || 0
+  );
+
+  const ratings = reviewList
+    .map((v) => Number(v.rating))
+    .filter((v) => v >= 1 && v <= 5);
+
+  const avg = ratings.length
+    ? (
+        ratings.reduce((a, b) => a + b, 0) /
+        ratings.length
+      ).toFixed(1)
+    : null;
 
   return (
-    <article className="product-card">
+    <article className="product-card lum-premium-card">
       <div className="product-picture">
         <button
           type="button"
           className="image-button"
           onClick={() => onDetail(product)}
+          aria-label={`Lihat detail ${prettyName(product.name)}`}
         >
-          <ProductImage
+          <Photo
             src={product.image}
-            alt={product.name}
+            alt={prettyName(product.name)}
           />
         </button>
 
-        <span className="stock-label">
-          {available
-            ? "LUMINA COLLECTION"
-            : "SOLD OUT"}
+        <span
+          className={`stock-label ${
+            stock === 0
+              ? "is-empty"
+              : stock <= 5
+                ? "is-low"
+                : ""
+          }`}
+        >
+          {stock === 0
+            ? "STOK HABIS"
+            : stock <= 5
+              ? `TERSISA ${stock}`
+              : "LUMINA EDITION"}
         </span>
 
         <button
           type="button"
-          className="heart"
-          onClick={() =>
-            onWishlist(product.id)
+          className={`heart ${
+            favorite ? "is-saved" : ""
+          }`}
+          aria-label={
+            favorite
+              ? "Hapus dari wishlist"
+              : "Tambahkan ke wishlist"
           }
+          aria-pressed={favorite}
+          title={
+            favorite
+              ? "Hapus wishlist"
+              : "Simpan wishlist"
+          }
+          onClick={() => onFavorite(product.id)}
         >
-          {wishlist.includes(product.id)
-            ? "♥"
-            : "♡"}
+          {favorite ? "♥" : "♡"}
+        </button>
+
+        <button
+          type="button"
+          className="lum-image-quickview"
+          onClick={() => onDetail(product)}
+        >
+          Lihat Detail
+          <span aria-hidden="true">↗</span>
         </button>
       </div>
 
       <div className="product-body">
-        <small>{product.collection}</small>
+        <div className="lum-product-topline">
+          <small>{product.collection}</small>
 
-        <h3>{product.name}</h3>
+          <span>
+            {avg
+              ? `★ ${avg} (${ratings.length})`
+              : "New arrival"}
+          </span>
+        </div>
+
+        <h3 title={product.name}>
+          {prettyName(product.name)}
+        </h3>
 
         <p className="price">
-          {money(product.price)}
+          {rp(product.price)}
         </p>
 
-        <p className="muted">
-          Stok: {product.stock}
+        <p className="muted lum-availability">
+          {stock > 5
+            ? `✓ Ready stock · ${stock} tersedia`
+            : stock > 0
+              ? `Stok terbatas: ${stock}`
+              : "Sedang tidak tersedia"}
         </p>
 
         <div className="product-actions">
           <button
+            type="button"
             className="btn-light"
             onClick={() => onDetail(product)}
           >
-            Lihat Detail
+            Detail
           </button>
 
           <button
+            type="button"
             className="btn-dark"
-            disabled={!available}
+            disabled={!stock}
             onClick={() => onCart(product)}
           >
-            + Keranjang
+            {stock ? "+ Keranjang" : "Habis"}
           </button>
         </div>
       </div>
@@ -648,46 +573,61 @@ function ProductCard({
 
 function ProductGrid({
   products,
-  ...props
+  favorites,
+  reviews,
+  onDetail,
+  onFavorite,
+  onCart,
 }) {
   if (!products.length) {
     return (
-      <div className="lum-empty">
+      <div className="panel lum-empty">
         <h3>Produk tidak ditemukan</h3>
+        <p>Coba kategori atau kata kunci lainnya.</p>
       </div>
     );
   }
 
   return (
     <div className="product-grid">
-      {products.map((product) => (
+      {products.map((p) => (
         <ProductCard
-          key={product.id}
-          product={product}
-          {...props}
+          key={p.id}
+          product={p}
+          favorite={favorites.includes(p.id)}
+          reviewList={
+            Array.isArray(reviews[String(p.id)])
+              ? reviews[String(p.id)]
+              : []
+          }
+          onDetail={onDetail}
+          onFavorite={onFavorite}
+          onCart={onCart}
         />
       ))}
     </div>
   );
 }
 
-/* ==========================================
-   DETAIL PRODUK PREMIUM
-========================================== */
+/* =====================================
+   DETAIL PRODUK
+===================================== */
 
-function PremiumDetail({
+function ProductDetail({
   product,
   customer,
   size,
   color,
-  setSize,
-  setColor,
+  onSize,
+  onColor,
   onCart,
-  onWishlist,
-  isWishlisted,
+  onFavorite,
+  favorite,
+  reviews,
+  onReview,
   onBack,
 }) {
-  const pictures = [
+  const images = [
     ...new Set(
       [
         product.image,
@@ -698,121 +638,85 @@ function PremiumDetail({
     ),
   ];
 
-  const [photo, setPhoto] = useState(
-    product.image
-  );
-
-  const [reviews, setReviews] = useState(
-    () => read(KEY.reviews, {})
-  );
-
+  const [active, setActive] = useState(product.image);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [notice, setNotice] = useState("");
 
-  const key = String(product.id);
-
-  const list = Array.isArray(reviews?.[key])
-    ? reviews[key]
+  const list = Array.isArray(reviews[String(product.id)])
+    ? reviews[String(product.id)]
     : [];
 
   const userId = customer
     ? String(
         customer.id ??
-          customer.email ??
-          ""
+        customer.email ??
+        ""
       )
     : "";
 
-  const myReview = userId
-    ? list.find(
-        (review) =>
-          review.userId === userId
-      )
-    : null;
+  const mine = list.find(
+    (r) => String(r.userId) === userId
+  );
 
   useEffect(() => {
-    setPhoto(product.image);
-  }, [
-    product.id,
-    product.image,
-  ]);
+    setActive(product.image);
+  }, [product.id, product.image]);
 
   useEffect(() => {
-    setRating(myReview?.rating || 5);
-    setComment(myReview?.comment || "");
-  }, [
-    key,
-    userId,
-  ]);
+    setRating(mine?.rating || 5);
+    setComment(mine?.comment || "");
+  }, [product.id, userId]);
 
   const average = list.length
-    ? list.reduce(
-        (sum, review) =>
-          sum + Number(review.rating || 0),
-        0
-      ) / list.length
-    : 0;
+    ? (
+        list.reduce(
+          (s, r) =>
+            s + Number(r.rating || 0),
+          0
+        ) / list.length
+      ).toFixed(1)
+    : null;
 
-  function submitReview(event) {
-    event.preventDefault();
+  function submit(e) {
+    e.preventDefault();
 
     if (!userId) {
-      setNotice(
-        "Login dahulu untuk mengulas."
-      );
+      setNotice("Login untuk memberikan ulasan.");
       return;
     }
 
     if (comment.trim().length < 5) {
-      setNotice(
-        "Ulasan minimal 5 karakter."
-      );
+      setNotice("Ulasan minimal 5 karakter.");
       return;
     }
 
     const record = {
-      id:
-        myReview?.id ||
-        `review-${Date.now()}`,
+      id: mine?.id || `review-${Date.now()}`,
       userId,
-      name:
-        customer.name ||
-        "Pelanggan",
+      name: customer.name || "Pelanggan",
       rating,
-      comment:
-        comment.trim().slice(0, 500),
+      comment: comment.trim().slice(0, 500),
       at: new Date().toISOString(),
     };
 
-    const updated = myReview
-      ? list.map((review) =>
-          review.id === myReview.id
-            ? record
-            : review
+    const updated = mine
+      ? list.map((v) =>
+          v.id === mine.id ? record : v
         )
       : [record, ...list];
 
-    const next = {
-      ...reviews,
-      [key]: updated,
-    };
+    onReview(product.id, updated);
 
-    if (save(KEY.reviews, next)) {
-      setReviews(next);
-      setNotice(
-        "Ulasan tersimpan pada browser ini."
-      );
-    } else {
-      setNotice(
-        "Gagal menyimpan ulasan."
-      );
-    }
+    setNotice(
+      "Ulasan tersimpan di browser ini."
+    );
   }
 
   return (
     <main className="container section lum-new-detail">
       <button
+        type="button"
         className="back"
         onClick={onBack}
       >
@@ -822,111 +726,107 @@ function PremiumDetail({
       <div className="lum-detail-grid">
         <div>
           <div className="lum-detail-main">
-            <ProductImage
-              src={photo}
-              alt={product.name}
+            <Photo
+              src={active}
+              alt={prettyName(product.name)}
             />
           </div>
 
           <div className="lum-detail-thumbs">
-            {pictures.map((url, index) => (
+            {images.map((url, i) => (
               <button
-                type="button"
                 key={url}
+                type="button"
                 className={
-                  photo === url
-                    ? "active"
-                    : ""
+                  active === url ? "active" : ""
                 }
-                onClick={() =>
-                  setPhoto(url)
-                }
+                onClick={() => setActive(url)}
               >
-                <ProductImage
+                <Photo
                   src={url}
-                  alt={`Foto ${index + 1}`}
+                  alt={`Foto ${i + 1}`}
                 />
               </button>
             ))}
           </div>
 
-          <small className="muted">
-            {pictures.length} foto tersedia
-          </small>
+          <p className="muted">
+            {images.length} foto produk
+          </p>
         </div>
 
-        <section className="lum-detail-data">
+        <div className="lum-detail-data">
           <p className="eyebrow">
             {product.collection}
           </p>
 
-          <h1>{product.name}</h1>
+          <h1>
+            {prettyName(product.name)}
+          </h1>
 
           <p className="lum-stars">
-            {list.length
-              ? `★ ${average.toFixed(1)} (${list.length} ulasan)`
+            {average
+              ? `★ ${average} / 5 · ${list.length} ulasan`
               : "☆ Belum ada ulasan"}
           </p>
 
           <h2 className="price">
-            {money(product.price)}
+            {rp(product.price)}
           </h2>
 
-          <p>{product.description}</p>
+          <p>
+            {product.description ||
+              "Fashion pilihan LUMINA STORE."}
+          </p>
 
-          <p>Stok: {product.stock}</p>
+          <p>
+            Stok: <strong>{product.stock}</strong>
+          </p>
 
-          <label>Pilih Ukuran</label>
+          <label>Ukuran</label>
 
           <div className="option-row">
-            {(product.sizes || [
-              "All Size",
-            ]).map((item) => (
-              <button
-                key={item}
-                className={
-                  size === item
-                    ? "chosen"
-                    : ""
-                }
-                onClick={() => setSize(item)}
-              >
-                {item}
-              </button>
-            ))}
+            {(product.sizes || ["All Size"]).map(
+              (v) => (
+                <button
+                  type="button"
+                  key={v}
+                  className={
+                    size === v ? "chosen" : ""
+                  }
+                  onClick={() => onSize(v)}
+                >
+                  {v}
+                </button>
+              )
+            )}
           </div>
 
-          <label>Pilih Warna</label>
+          <label>Warna</label>
 
           <div className="option-row">
             {(product.colors || [
               "Sesuai foto",
-            ]).map((item) => (
+            ]).map((v) => (
               <button
-                key={item}
+                type="button"
+                key={v}
                 className={
-                  color === item
-                    ? "chosen"
-                    : ""
+                  color === v ? "chosen" : ""
                 }
-                onClick={() => setColor(item)}
+                onClick={() => onColor(v)}
               >
-                {item}
+                {v}
               </button>
             ))}
           </div>
 
           <button
             className="btn-dark wide"
-            disabled={
-              Number(product.stock) <= 0
-            }
+            type="button"
+            disabled={Number(product.stock) <= 0}
             onClick={() =>
-              onCart(
-                product,
-                size,
-                color
-              )
+              onCart(product, size, color)
             }
           >
             + Tambahkan ke Keranjang
@@ -934,15 +834,14 @@ function PremiumDetail({
 
           <button
             className="btn-light wide"
-            onClick={() =>
-              onWishlist(product.id)
-            }
+            type="button"
+            onClick={() => onFavorite(product.id)}
           >
-            {isWishlisted
-              ? "♥ Hapus Wishlist"
-              : "♡ Tambah Wishlist"}
+            {favorite
+              ? "♥ Hapus dari Wishlist"
+              : "♡ Tambahkan ke Wishlist"}
           </button>
-        </section>
+        </div>
       </div>
 
       <section className="lum-review-box">
@@ -951,12 +850,12 @@ function PremiumDetail({
         <div className="lum-review-grid">
           <div>
             {list.length ? (
-              list.map((review) => (
+              list.map((r) => (
                 <article
-                  key={review.id}
+                  key={r.id}
                   className="panel"
                 >
-                  <strong>{review.name}</strong>
+                  <strong>{r.name}</strong>
 
                   <p className="lum-stars">
                     {"★".repeat(
@@ -964,75 +863,61 @@ function PremiumDetail({
                         5,
                         Math.max(
                           0,
-                          Number(review.rating) || 0
+                          Number(r.rating) || 0
                         )
                       )
                     )}
                   </p>
 
-                  <p>{review.comment}</p>
-
-                  <small>
-                    {dateText(review.at)}
-                  </small>
+                  <p>{r.comment}</p>
+                  <small>{date(r.at)}</small>
                 </article>
               ))
             ) : (
-              <p>Belum ada ulasan.</p>
+              <p className="muted">
+                Belum ada ulasan.
+              </p>
             )}
           </div>
 
           <form
-            className="panel"
-            onSubmit={submitReview}
+            className="panel form-stack"
+            onSubmit={submit}
           >
             <h3>
-              {myReview
+              {mine
                 ? "Edit Ulasan"
                 : "Tulis Ulasan"}
             </h3>
 
             <div className="lum-rating-buttons">
-              {[1, 2, 3, 4, 5].map(
-                (number) => (
-                  <button
-                    key={number}
-                    type="button"
-                    className={
-                      number <= rating
-                        ? "active"
-                        : ""
-                    }
-                    onClick={() =>
-                      setRating(number)
-                    }
-                  >
-                    ★
-                  </button>
-                )
-              )}
+              {[1, 2, 3, 4, 5].map((n) => (
+                <button
+                  type="button"
+                  key={n}
+                  className={
+                    n <= rating ? "active" : ""
+                  }
+                  onClick={() => setRating(n)}
+                >
+                  ★
+                </button>
+              ))}
             </div>
 
             <textarea
               rows={4}
               maxLength={500}
               value={comment}
-              placeholder="Tulis ulasan..."
-              onChange={(event) =>
-                setComment(event.target.value)
+              onChange={(e) =>
+                setComment(e.target.value)
               }
+              placeholder="Bagikan pengalamanmu..."
             />
 
-            <button
-              type="submit"
-              className="btn-dark"
-            >
+            <button className="btn-dark">
               Simpan Ulasan
             </button>
-
-            <p className="muted">
-              Ulasan simulasi disimpan di browser.
-            </p>
 
             {notice && (
               <p role="status">{notice}</p>
@@ -1044,9 +929,9 @@ function PremiumDetail({
   );
 }
 
-/* ==========================================
-   TRACKING PESANAN PELANGGAN
-========================================== */
+/* =====================================
+   CUSTOMER TRACKING
+===================================== */
 
 function CustomerTracking({ orders }) {
   const stages = STATUSES.slice(0, 4);
@@ -1054,136 +939,94 @@ function CustomerTracking({ orders }) {
   return (
     <section className="container section lum-customer-track">
       <h2 className="section-title">
-        Tracking & Pembayaran Pesanan Saya
+        Tracking & Pembayaran Saya
       </h2>
 
       {!orders.length && (
         <p className="panel">
-          Belum ada pesanan yang dapat dilacak.
+          Belum ada pesanan.
         </p>
       )}
 
-      {orders.map((order) => {
-        const status = statusOf(order.status);
-
-        const paid =
-          paymentStatus(order) === "Lunas";
-
-        const index = stages.indexOf(status);
+      {orders.map((o) => {
+        const current = status(o.status);
+        const index = stages.indexOf(current);
+        const paid = payStatus(o) === "Lunas";
 
         return (
           <article
             className="panel lum-track-card"
-            key={order.id}
+            key={o.id}
           >
-            <div className="lum-track-head">
+            <div className="lum-between">
               <div>
-                <strong>{order.id}</strong>
+                <strong>{o.id}</strong>
 
                 <p className="muted">
-                  {dateText(order.date)}
-                  {" · "}
-                  {money(order.total)}
+                  {date(o.date)} · {rp(o.total)}
                 </p>
               </div>
 
-              <span className="lum-payment-badge">
-                {status}
+              <span className="lum-status-badge">
+                {current}
               </span>
             </div>
 
-            <div className="lum-track-meta">
-              <span>
-                Metode:{" "}
-                <b>
-                  {paymentName(
-                    order.paymentMethod
-                  )}
-                </b>
-              </span>
+            <p>
+              Metode:{" "}
+              <b>{paymentLabel(o.paymentMethod)}</b>
+            </p>
 
-              <span>
-                Pembayaran:{" "}
-                <b>{paymentStatus(order)}</b>
-              </span>
-            </div>
+            <p>
+              Status bayar:{" "}
+              <b>{payStatus(o)}</b>
+            </p>
 
-            {status === "Dibatalkan" ? (
+            {o.voucherCode && (
+              <p className="muted">
+                Voucher {o.voucherCode} · Hemat{" "}
+                {rp(o.discount)}
+              </p>
+            )}
+
+            {current === "Dibatalkan" ? (
               <p className="lum-cancel-note">
-                Pesanan dibatalkan.
+                Pesanan ini dibatalkan.
               </p>
             ) : (
               <div className="lum-track-steps">
-                {stages.map(
-                  (stage, stepIndex) => (
-                    <div
-                      key={stage}
-                      className={
-                        stepIndex <= index
-                          ? "complete"
-                          : ""
-                      }
-                    >
-                      <span>
-                        {stepIndex < index
-                          ? "✓"
-                          : stepIndex + 1}
-                      </span>
+                {stages.map((s, i) => (
+                  <div
+                    key={s}
+                    className={
+                      i <= index ? "complete" : ""
+                    }
+                  >
+                    <span>
+                      {i < index ? "✓" : i + 1}
+                    </span>
 
-                      <small>{stage}</small>
-                    </div>
-                  )
-                )}
+                    <small>{s}</small>
+                  </div>
+                ))}
               </div>
             )}
 
-            {paid && (
+            {paid ? (
               <p className="lum-paid-note">
                 ✓ Pembayaran dikonfirmasi Admin{" "}
-                {order.paidAt
-                  ? `pada ${dateText(
-                      order.paidAt
-                    )}`
-                  : ""}
-                .
+                {o.paidAt &&
+                  `pada ${date(o.paidAt)}`}
               </p>
+            ) : (
+              current !== "Dibatalkan" && (
+                <p className="muted">
+                  {o.paymentMethod === "cod"
+                    ? "COD dibayar saat paket diterima."
+                    : "Menunggu konfirmasi pembayaran simulasi Admin."}
+                </p>
+              )
             )}
-
-            {status !== "Dibatalkan" &&
-              !paid &&
-              order.paymentMethod === "cod" && (
-                <p className="muted">
-                  COD dibayar saat paket diterima.
-                  Admin mencatatnya setelah
-                  pesanan selesai.
-                </p>
-              )}
-
-            {status !== "Dibatalkan" &&
-              !paid &&
-              ["transfer", "qris"].includes(
-                order.paymentMethod
-              ) && (
-                <p className="muted">
-                  Menunggu Admin melakukan
-                  konfirmasi pembayaran simulasi.
-                </p>
-              )}
-
-            {Array.isArray(order.paymentHistory) &&
-              order.paymentHistory.length > 0 && (
-                <small>
-                  Riwayat konfirmasi:{" "}
-                  {order.paymentHistory
-                    .map(
-                      (item) =>
-                        `${item.status} (${dateText(
-                          item.at
-                        )})`
-                    )
-                    .join(", ")}
-                </small>
-              )}
           </article>
         );
       })}
@@ -1191,136 +1034,98 @@ function CustomerTracking({ orders }) {
   );
 }
 
-/* ==========================================
+/* =====================================
    ADMIN ANALYTICS
-========================================== */
+===================================== */
 
-function AdminAnalytics({
-  orders,
-  products,
-}) {
-  const completed = orders.filter(
-    (order) =>
-      statusOf(order.status) === "Selesai"
+function AdminAnalytics({ orders, products }) {
+  const done = orders.filter(
+    (o) => status(o.status) === "Selesai"
   );
 
-  const revenue = completed.reduce(
-    (sum, order) =>
-      sum + Number(order.total || 0),
+  const revenue = done.reduce(
+    (n, o) => n + Number(o.total || 0),
     0
   );
 
-  const quantity = completed.reduce(
-    (sum, order) =>
-      sum +
-      (order.items || []).reduce(
-        (total, item) =>
-          total + Number(item.quantity || 0),
-        0
-      ),
-    0
-  );
+  const qty = done
+    .flatMap((o) => o.items || [])
+    .reduce(
+      (n, i) => n + Number(i.quantity || 0),
+      0
+    );
 
   const now = new Date();
 
   const months = Array.from(
     { length: 6 },
-    (_, index) => {
-      const date = new Date(
+    (_, i) => {
+      const d = new Date(
         now.getFullYear(),
-        now.getMonth() - 5 + index,
+        now.getMonth() - 5 + i,
         1
       );
 
-      const key =
-        `${date.getFullYear()}-${String(
-          date.getMonth() + 1
-        ).padStart(2, "0")}`;
-
       return {
-        key,
-        label: date.toLocaleDateString(
-          "id-ID",
-          {
-            month: "short",
-            year: "2-digit",
-          }
-        ),
-        sum: 0,
+        key:
+          `${d.getFullYear()}-${String(
+            d.getMonth() + 1
+          ).padStart(2, "0")}`,
+        label: d.toLocaleDateString("id-ID", {
+          month: "short",
+          year: "2-digit",
+        }),
+        total: 0,
       };
     }
-  );
-
-  completed.forEach((order) => {
-    const history = Array.isArray(
-      order.history
-    )
-      ? order.history
-      : [];
-
-    const last = [...history]
-      .reverse()
-      .find(
-        (item) =>
-          item.status === "Selesai"
-      );
-
-    const date = new Date(
-      last?.at ||
-      order.updatedAt ||
-      order.date ||
-      ""
-    );
-
-    if (Number.isNaN(date.getTime())) {
-      return;
-    }
-
-    const key =
-      `${date.getFullYear()}-${String(
-        date.getMonth() + 1
-      ).padStart(2, "0")}`;
-
-    const month = months.find(
-      (item) => item.key === key
-    );
-
-    if (month) {
-      month.sum += Number(order.total || 0);
-    }
-  });
-
-  const maxRevenue = Math.max(
-    1,
-    ...months.map((month) => month.sum)
   );
 
   const sold = new Map();
 
-  completed.forEach((order) => {
-    (order.items || []).forEach((item) => {
-      const key = String(
-        item.id ?? item.name
-      );
+  done.forEach((o) => {
+    const entry = [...(o.history || [])]
+      .reverse()
+      .find((h) => h.status === "Selesai");
 
-      const previous = sold.get(key) || {
-        name: item.name,
-        quantity: 0,
+    const d = new Date(
+      entry?.at ||
+      o.updatedAt ||
+      o.date ||
+      ""
+    );
+
+    const key =
+      `${d.getFullYear()}-${String(
+        d.getMonth() + 1
+      ).padStart(2, "0")}`;
+
+    const month = months.find(
+      (m) => m.key === key
+    );
+
+    if (month) {
+      month.total += Number(o.total || 0);
+    }
+
+    (o.items || []).forEach((i) => {
+      const k = String(i.id ?? i.name);
+      const current = sold.get(k) || {
+        name: i.name,
+        qty: 0,
       };
 
-      previous.quantity += Number(
-        item.quantity || 0
-      );
-
-      sold.set(key, previous);
+      current.qty += Number(i.quantity || 0);
+      sold.set(k, current);
     });
   });
 
+  const max = Math.max(
+    1,
+    ...months.map((m) => m.total)
+  );
+
   const best = [...sold.values()]
-    .sort(
-      (a, b) =>
-        b.quantity - a.quantity
-    )
+    .sort((a, b) => b.qty - a.qty)
     .slice(0, 5);
 
   return (
@@ -1328,69 +1133,49 @@ function AdminAnalytics({
       <h2>Advanced Sales Analytics</h2>
 
       <p className="muted">
-        Data transaksi simulasi yang
-        tersimpan di browser.
+        Berdasarkan transaksi simulasi di browser.
       </p>
 
       <div className="lum-analytics-cards">
         {[
-          [
-            "Pendapatan Selesai",
-            money(revenue),
-          ],
-          [
-            "Pesanan Selesai",
-            completed.length,
-          ],
-          [
-            "Unit Terjual",
-            quantity,
-          ],
+          ["Pendapatan Selesai", rp(revenue)],
+          ["Pesanan Selesai", done.length],
+          ["Unit Terjual", qty],
           [
             "Stok ≤ 5",
             products.filter(
-              (item) =>
-                Number(item.stock) <= 5
+              (p) => Number(p.stock) <= 5
             ).length,
           ],
-        ].map(([name, value]) => (
+        ].map(([label, value]) => (
           <article
             className="lum-dash-card"
-            key={name}
+            key={label}
           >
-            <small>{name}</small>
-
+            <small>{label}</small>
             <h2>{value}</h2>
           </article>
         ))}
       </div>
 
       <div className="lum-analytics-panels">
-        <section className="lum-dash-card">
-          <h3>
-            Pendapatan 6 Bulan Terakhir
-          </h3>
+        <article className="lum-dash-card">
+          <h3>Pendapatan 6 Bulan</h3>
 
           <div className="lum-mini-chart">
-            {months.map((month) => (
+            {months.map((m) => (
               <div
-                key={month.key}
-                title={
-                  `${month.label}: ${money(
-                    month.sum
-                  )}`
-                }
+                key={m.key}
+                title={`${m.label}: ${rp(m.total)}`}
               >
                 <div className="lum-chart-track">
                   <div
                     style={{
                       height: `${
-                        month.sum
+                        m.total
                           ? Math.max(
                               3,
-                              month.sum /
-                                maxRevenue *
-                                100
+                              (m.total / max) * 100
                             )
                           : 0
                       }%`,
@@ -1398,146 +1183,145 @@ function AdminAnalytics({
                   />
                 </div>
 
-                <small>{month.label}</small>
+                <small>{m.label}</small>
               </div>
             ))}
           </div>
-        </section>
+        </article>
 
-        <section className="lum-dash-card">
+        <article className="lum-dash-card">
           <h3>Status Pesanan</h3>
 
-          {STATUSES.map((status) => (
+          {STATUSES.map((s) => (
             <p
               className="lum-between"
-              key={status}
+              key={s}
             >
-              <span>{status}</span>
-
-              <strong>
+              <span>{s}</span>
+              <b>
                 {
                   orders.filter(
-                    (order) =>
-                      statusOf(order.status) ===
-                      status
+                    (o) => status(o.status) === s
                   ).length
                 }
-              </strong>
+              </b>
             </p>
           ))}
-        </section>
+        </article>
       </div>
 
-      <section className="lum-dash-card">
+      <article className="lum-dash-card">
         <h3>5 Produk Terlaris</h3>
 
         {best.length ? (
-          best.map((product, index) => (
+          best.map((p, i) => (
             <p
               className="lum-between"
-              key={index}
+              key={i}
             >
               <span>
-                {index + 1}. {product.name}
+                {i + 1}. {prettyName(p.name)}
               </span>
-
-              <strong>
-                {product.quantity} unit
-              </strong>
+              <b>{p.qty} unit</b>
             </p>
           ))
         ) : (
           <p>Belum ada transaksi selesai.</p>
         )}
-      </section>
+      </article>
     </section>
   );
 }
 
-/* ==========================================
-   TABEL PESANAN ADMIN
-========================================== */
+/* =====================================
+   ORDER TABLE
+===================================== */
 
 function OrderTable({
   orders,
-  editable = false,
+  edit = false,
   onStatus,
-  onPayment,
+  onPay,
 }) {
   return (
     <div className="lum-dash-table-wrap">
       <table className="lum-dash-table">
         <thead>
           <tr>
-            <th>ID</th>
+            <th>ID Pesanan</th>
             <th>Tanggal</th>
             <th>Pelanggan</th>
             <th>Produk</th>
+            <th>Subtotal</th>
+            <th>Voucher</th>
+            <th>Diskon</th>
             <th>Total</th>
-            <th>Pembayaran</th>
+            <th>Metode Bayar</th>
             <th>Status Bayar</th>
             <th>Status Pesanan</th>
-            {editable && <th>Aksi</th>}
+            {edit && <th>Aksi</th>}
           </tr>
         </thead>
 
         <tbody>
-          {orders.map((order) => {
-            const status = statusOf(
-              order.status
-            );
-
-            const canPay =
-              canConfirmPayment(order);
-
+          {orders.map((o) => {
+            const s = status(o.status);
             const paid =
-              paymentStatus(order) === "Lunas";
+              payStatus(o) === "Lunas";
 
             return (
-              <tr key={order.id}>
-                <td>{order.id}</td>
-
-                <td>{dateText(order.date)}</td>
-
-                <td>
-                  {order.customer || "-"}
-                </td>
+              <tr key={o.id}>
+                <td>{o.id}</td>
+                <td>{date(o.date)}</td>
+                <td>{o.customer}</td>
 
                 <td>
-                  {(order.items || [])
+                  {(o.items || [])
                     .map(
-                      (item) =>
-                        `${item.name} (${item.quantity})`
+                      (i) =>
+                        `${prettyName(i.name)} (${i.quantity})`
                     )
-                    .join(", ") || "-"}
+                    .join(", ")}
                 </td>
 
                 <td>
-                  {money(order.total)}
+                  {o.subtotal != null
+                    ? rp(o.subtotal)
+                    : "-"}
                 </td>
 
                 <td>
-                  {paymentName(
-                    order.paymentMethod
-                  )}
+                  {o.voucherCode || "-"}
                 </td>
 
                 <td>
-                  {paymentStatus(order)}
+                  {o.discount
+                    ? `−${rp(o.discount)}`
+                    : "-"}
                 </td>
 
                 <td>
-                  {editable ? (
+                  <b>{rp(o.total)}</b>
+                </td>
+
+                <td>
+                  {paymentLabel(o.paymentMethod)}
+                </td>
+
+                <td>{payStatus(o)}</td>
+
+                <td>
+                  {edit ? (
                     <select
-                      value={status}
+                      value={s}
                       disabled={[
                         "Selesai",
                         "Dibatalkan",
-                      ].includes(status)}
-                      onChange={(event) =>
+                      ].includes(s)}
+                      onChange={(e) =>
                         onStatus(
-                          order.id,
-                          event.target.value
+                          o.id,
+                          e.target.value
                         )
                       }
                     >
@@ -1546,17 +1330,13 @@ function OrderTable({
                           key={next}
                           value={next}
                           disabled={
-                            (next !== status &&
-                              !validNextStatus(
-                                status,
-                                next
-                              )) ||
-                            (next !== status &&
-                              next !== "Dibatalkan" &&
-                              ["transfer", "qris"].includes(
-                                order.paymentMethod
-                              ) &&
-                              !paid)
+                            next !== s &&
+                            (!canMove(s, next) ||
+                              (next !== "Dibatalkan" &&
+                                ["transfer", "qris"].includes(
+                                  o.paymentMethod
+                                ) &&
+                                !paid))
                           }
                         >
                           {next}
@@ -1564,34 +1344,24 @@ function OrderTable({
                       ))}
                     </select>
                   ) : (
-                    status
+                    s
                   )}
                 </td>
 
-                {editable && (
+                {edit && (
                   <td>
                     <button
                       type="button"
                       className="btn-dark"
-                      disabled={!canPay}
-                      onClick={() =>
-                        onPayment(order.id)
-                      }
+                      disabled={!canPay(o)}
+                      onClick={() => onPay(o.id)}
                     >
                       {paid
                         ? "✓ Lunas"
-                        : order.paymentMethod === "cod"
+                        : o.paymentMethod === "cod"
                           ? "Konfirmasi COD"
                           : "Tandai Lunas"}
                     </button>
-
-                    {order.paymentMethod === "cod" &&
-                      status !== "Selesai" &&
-                      !paid && (
-                        <small className="lum-hint">
-                          COD setelah selesai
-                        </small>
-                      )}
                   </td>
                 )}
               </tr>
@@ -1600,7 +1370,7 @@ function OrderTable({
 
           {!orders.length && (
             <tr>
-              <td colSpan={editable ? 9 : 8}>
+              <td colSpan={edit ? 12 : 11}>
                 Belum ada pesanan.
               </td>
             </tr>
@@ -1611,9 +1381,9 @@ function OrderTable({
   );
 }
 
-/* ==========================================
+/* =====================================
    DASHBOARD ADMIN
-========================================== */
+===================================== */
 
 function AdminDashboard({
   products,
@@ -1624,68 +1394,59 @@ function AdminDashboard({
   onEdit,
   onDelete,
   onStatus,
-  onPayment,
+  onPay,
   onBack,
 }) {
   const [tab, setTab] = useState("overview");
-
   const [search, setSearch] = useState("");
+  const [folderFilter, setFolderFilter] =
+    useState("Semua");
+  const [chosenId, setChosenId] = useState("");
 
-  const [folder, setFolder] = useState("Semua");
-
-  const [previewId, setPreviewId] = useState("");
-
-  const filteredOrders = orders.filter(
-    (order) =>
-      normalize(
-        `${order.id} ${order.customer} ${order.status} ${order.paymentMethod}`
-      ).includes(normalize(search))
+  const filteredProducts = products.filter((p) =>
+    text(`${p.name} ${p.collection}`).includes(
+      text(search)
+    )
   );
 
-  const filteredProducts = products.filter(
-    (product) =>
-      normalize(
-        `${product.name} ${product.collection}`
-      ).includes(normalize(search))
+  const filteredOrders = orders.filter((o) =>
+    text(
+      `${o.id} ${o.customer} ${o.status} ${o.voucherCode || ""}`
+    ).includes(text(search))
   );
 
   const filteredPhotos = PHOTOS.filter(
-    (photo) =>
-      (folder === "Semua" ||
-        photo.folder === folder) &&
-      normalize(
-        `${photo.name} ${photo.folder}`
-      ).includes(normalize(search))
+    (p) =>
+      (folderFilter === "Semua" ||
+        p.folder === folderFilter) &&
+      text(`${p.name} ${p.folder}`).includes(
+        text(search)
+      )
   );
 
-  const preview =
+  const chosen =
     filteredOrders.find(
-      (order) =>
-        String(order.id) === previewId
+      (o) => String(o.id) === chosenId
     ) || filteredOrders[0];
 
-  const completed = orders.filter(
-    (order) =>
-      statusOf(order.status) === "Selesai"
+  const done = orders.filter(
+    (o) => status(o.status) === "Selesai"
   );
 
-  const revenue = completed.reduce(
-    (sum, order) =>
-      sum + Number(order.total || 0),
+  const revenue = done.reduce(
+    (n, o) => n + Number(o.total || 0),
     0
   );
 
-  const lowStock = products.filter(
-    (product) =>
-      Number(product.stock) <= 5
+  const currentCat = CATEGORIES.find(
+    (c) => c.name === form.collection
   );
 
-  function change(name, value) {
-    setForm((previous) => ({
-      ...previous,
-      [name]: value,
+  const field = (key, value) =>
+    setForm((prev) => ({
+      ...prev,
+      [key]: value,
     }));
-  }
 
   function exportCSV() {
     const rows = [
@@ -1693,20 +1454,27 @@ function AdminDashboard({
         "ID",
         "Tanggal",
         "Pelanggan",
+        "Subtotal",
+        "Ongkir",
+        "Voucher",
+        "Diskon",
         "Total",
         "Metode",
         "Status Bayar",
         "Status Pesanan",
       ],
-
-      ...filteredOrders.map((order) => [
-        order.id,
-        order.date,
-        order.customer,
-        order.total,
-        paymentName(order.paymentMethod),
-        paymentStatus(order),
-        statusOf(order.status),
+      ...filteredOrders.map((o) => [
+        o.id,
+        o.date,
+        o.customer,
+        o.subtotal ?? "",
+        o.shippingFee ?? "",
+        o.voucherCode || "",
+        o.discount || 0,
+        o.total,
+        paymentLabel(o.paymentMethod),
+        payStatus(o),
+        status(o.status),
       ]),
     ];
 
@@ -1714,37 +1482,31 @@ function AdminDashboard({
       .map((row) =>
         row
           .map((value) => {
-            let text = String(value ?? "");
+            let s = String(value ?? "");
 
-            if (/^[=+\-@\t\r]/.test(text)) {
-              text = "'" + text;
+            if (/^[=+\-@\t\r]/.test(s)) {
+              s = "'" + s;
             }
 
-            return (
-              '"' +
-              text.replaceAll('"', '""') +
-              '"'
-            );
+            return `"${s.replaceAll(
+              '"',
+              '""'
+            )}"`;
           })
           .join(",")
       )
       .join("\r\n");
 
-    const link =
-      document.createElement("a");
-
     const url = URL.createObjectURL(
-      new Blob(
-        ["\uFEFF" + csv],
-        {
-          type: "text/csv;charset=utf-8",
-        }
-      )
+      new Blob(["\uFEFF" + csv], {
+        type: "text/csv;charset=utf-8",
+      })
     );
 
+    const link = document.createElement("a");
+
     link.href = url;
-    link.download =
-      "laporan-lumina.csv";
+    link.download = "laporan-lumina.csv";
     link.click();
 
     setTimeout(
@@ -1752,11 +1514,6 @@ function AdminDashboard({
       1000
     );
   }
-
-  const currentCategory = CATEGORIES.find(
-    (category) =>
-      category.name === form.collection
-  );
 
   return (
     <div className="lum-dash">
@@ -1774,20 +1531,18 @@ function AdminDashboard({
             ["orders", "Orders"],
             ["reports", "Sales Report"],
             ["gallery", "Photo Gallery"],
-          ].map(([value, label]) => (
+          ].map(([v, l]) => (
             <button
-              key={value}
+              key={v}
               className={
-                tab === value
-                  ? "active"
-                  : ""
+                tab === v ? "active" : ""
               }
               onClick={() => {
-                setTab(value);
+                setTab(v);
                 setSearch("");
               }}
             >
-              {label}
+              {l}
             </button>
           ))}
         </nav>
@@ -1803,36 +1558,29 @@ function AdminDashboard({
       <main className="lum-dash-main">
         <header className="lum-dash-topbar">
           <div>
-            <p className="lum-dash-eyebrow">
+            <small className="lum-dash-eyebrow">
               LUMINA BUSINESS CENTER
-            </p>
+            </small>
 
             <h1>
               {{
-                overview:
-                  "Dashboard Overview",
-                products:
-                  "Product Management",
-                orders:
-                  "Order Management",
-                reports:
-                  "Sales Report",
-                gallery:
-                  "Photo Gallery",
+                overview: "Dashboard Overview",
+                products: "Product Management",
+                orders: "Order Management",
+                reports: "Sales Report",
+                gallery: "Photo Gallery",
               }[tab]}
             </h1>
           </div>
 
           <input
-            placeholder="Cari produk / pesanan..."
             value={search}
-            onChange={(event) =>
-              setSearch(event.target.value)
+            onChange={(e) =>
+              setSearch(e.target.value)
             }
+            placeholder="Cari produk atau pesanan..."
           />
         </header>
-
-        {/* OVERVIEW */}
 
         {tab === "overview" && (
           <>
@@ -1844,23 +1592,24 @@ function AdminDashboard({
             <section className="lum-dash-card">
               <h2>Inventory Monitoring</h2>
 
-              {lowStock.length ? (
-                lowStock.map((product) => (
-                  <p
-                    className="lum-between"
-                    key={product.id}
-                  >
-                    <span>
-                      {product.name}
-                    </span>
-
-                    <strong>
-                      {Number(product.stock) === 0
-                        ? "Habis"
-                        : `Sisa ${product.stock}`}
-                    </strong>
-                  </p>
-                ))
+              {products.some(
+                (p) => Number(p.stock) <= 5
+              ) ? (
+                products
+                  .filter(
+                    (p) => Number(p.stock) <= 5
+                  )
+                  .map((p) => (
+                    <p
+                      className="lum-between"
+                      key={p.id}
+                    >
+                      <span>
+                        {prettyName(p.name)}
+                      </span>
+                      <b>Stok {p.stock}</b>
+                    </p>
+                  ))
               ) : (
                 <p>✓ Semua stok aman.</p>
               )}
@@ -1870,25 +1619,20 @@ function AdminDashboard({
               <h2>Collection Overview</h2>
 
               <div className="lum-category-stats">
-                {CATEGORIES.map((category) => (
+                {CATEGORIES.map((c) => (
                   <button
-                    key={category.name}
                     className="btn-light"
+                    key={c.name}
                     onClick={() => {
-                      setFolder(
-                        category.folder
-                      );
+                      setFolderFilter(c.folder);
                       setTab("gallery");
                     }}
                   >
-                    {category.label}
-                    {" "}
-                    (
+                    {c.label} (
                     {
                       products.filter(
-                        (product) =>
-                          product.collection ===
-                          category.name
+                        (p) =>
+                          p.collection === c.name
                       ).length
                     }
                     )
@@ -1907,12 +1651,10 @@ function AdminDashboard({
           </>
         )}
 
-        {/* PRODUCTS */}
-
         {tab === "products" && (
           <div className="lum-dash-products">
             <form
-              className="lum-dash-card lum-dash-product-form"
+              className="lum-dash-card lum-product-form"
               onSubmit={onSave}
             >
               <h2>
@@ -1921,177 +1663,161 @@ function AdminDashboard({
                   : "Edit Produk"}
               </h2>
 
-              <label>Nama Produk</label>
+              <label>
+                Nama Produk
+                <input
+                  required
+                  value={form.name}
+                  onChange={(e) =>
+                    field("name", e.target.value)
+                  }
+                />
+              </label>
 
-              <input
-                required
-                value={form.name}
-                onChange={(event) =>
-                  change(
-                    "name",
-                    event.target.value
-                  )
-                }
-              />
-
-              <label>Kategori</label>
-
-              <select
-                value={form.collection}
-                onChange={(event) => {
-                  const category =
-                    CATEGORIES.find(
-                      (item) =>
-                        item.name ===
-                        event.target.value
+              <label>
+                Kategori
+                <select
+                  value={form.collection}
+                  onChange={(e) => {
+                    const cat = CATEGORIES.find(
+                      (c) =>
+                        c.name === e.target.value
                     );
 
-                  if (category) {
-                    setForm((previous) => ({
-                      ...previous,
-                      collection:
-                        category.name,
-                      image: "",
-                      gallery: "",
-                      sizes:
-                        category.sizes.join(","),
-                    }));
+                    if (cat) {
+                      setForm((p) => ({
+                        ...p,
+                        collection: cat.name,
+                        image: "",
+                        gallery: "",
+                        sizes: cat.sizes.join(","),
+                      }));
+                    }
+                  }}
+                >
+                  {CATEGORIES.map((c) => (
+                    <option
+                      key={c.name}
+                      value={c.name}
+                    >
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label>
+                Harga
+                <input
+                  type="number"
+                  min="1"
+                  required
+                  value={form.price}
+                  onChange={(e) =>
+                    field("price", e.target.value)
                   }
-                }}
-              >
-                {CATEGORIES.map((category) => (
-                  <option
-                    key={category.name}
-                    value={category.name}
-                  >
-                    {category.label}
+                />
+              </label>
+
+              <label>
+                Stok
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  required
+                  value={form.stock}
+                  onChange={(e) =>
+                    field("stock", e.target.value)
+                  }
+                />
+              </label>
+
+              <label>
+                Foto Utama
+                <select
+                  value={form.image}
+                  onChange={(e) =>
+                    field("image", e.target.value)
+                  }
+                >
+                  <option value="">
+                    Pilih gambar
                   </option>
-                ))}
-              </select>
 
-              <label>Harga</label>
-
-              <input
-                type="number"
-                min="1"
-                required
-                value={form.price}
-                onChange={(event) =>
-                  change(
-                    "price",
-                    event.target.value
-                  )
-                }
-              />
-
-              <label>Stok</label>
-
-              <input
-                type="number"
-                min="0"
-                step="1"
-                required
-                value={form.stock}
-                onChange={(event) =>
-                  change(
-                    "stock",
-                    event.target.value
-                  )
-                }
-              />
-
-              <label>Gambar Utama</label>
-
-              <select
-                value={form.image}
-                onChange={(event) =>
-                  change(
-                    "image",
-                    event.target.value
-                  )
-                }
-              >
-                <option value="">
-                  Pilih gambar
-                </option>
-
-                {PHOTOS.filter(
-                  (photo) =>
-                    photo.folder ===
-                    currentCategory?.folder
-                ).map((photo) => (
-                  <option
-                    key={photo.url}
-                    value={photo.url}
-                  >
-                    {photo.name}
-                  </option>
-                ))}
-              </select>
+                  {PHOTOS.filter(
+                    (p) =>
+                      p.folder ===
+                      currentCat?.folder
+                  ).map((p) => (
+                    <option
+                      key={p.url}
+                      value={p.url}
+                    >
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
               <div className="lum-admin-preview">
-                <ProductImage
+                <Photo
                   src={form.image}
                   alt="Preview"
                 />
               </div>
 
-              <label>Foto Tambahan</label>
-
-              <select
-                value=""
-                onChange={(event) => {
-                  const url =
-                    event.target.value;
-
-                  if (!url) return;
-
-                  setForm((previous) => ({
-                    ...previous,
-                    gallery: [
-                      ...new Set([
-                        ...splitText(
-                          previous.gallery
-                        ),
-                        url,
-                      ]),
-                    ]
-                      .filter(
-                        (item) =>
-                          item !== previous.image
-                      )
-                      .join(","),
-                  }));
-                }}
-              >
-                <option value="">
-                  + Pilih Foto Tambahan
-                </option>
-
-                {PHOTOS.filter(
-                  (photo) =>
-                    photo.folder ===
-                      currentCategory?.folder &&
-                    photo.url !== form.image &&
-                    !splitText(
-                      form.gallery
-                    ).includes(photo.url)
-                ).map((photo) => (
-                  <option
-                    key={photo.url}
-                    value={photo.url}
-                  >
-                    {photo.name}
+              <label>
+                Foto Tambahan
+                <select
+                  value=""
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      setForm((p) => ({
+                        ...p,
+                        gallery: [
+                          ...new Set([
+                            ...values(p.gallery),
+                            e.target.value,
+                          ]),
+                        ]
+                          .filter(
+                            (x) => x !== p.image
+                          )
+                          .join(","),
+                      }));
+                    }
+                  }}
+                >
+                  <option value="">
+                    + Pilih foto tambahan
                   </option>
-                ))}
-              </select>
+
+                  {PHOTOS.filter(
+                    (p) =>
+                      p.folder ===
+                        currentCat?.folder &&
+                      p.url !== form.image &&
+                      !values(form.gallery).includes(
+                        p.url
+                      )
+                  ).map((p) => (
+                    <option
+                      key={p.url}
+                      value={p.url}
+                    >
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
               <div className="lum-extra-gallery">
-                {splitText(form.gallery).map(
+                {values(form.gallery).map(
                   (url) => (
                     <div key={url}>
                       <div className="lum-admin-thumb">
-                        <ProductImage
+                        <Photo
                           src={url}
                           alt="Foto tambahan"
                         />
@@ -2101,68 +1827,60 @@ function AdminDashboard({
                         type="button"
                         className="btn-light"
                         onClick={() =>
-                          setForm(
-                            (previous) => ({
-                              ...previous,
-                              gallery: splitText(
-                                previous.gallery
+                          field(
+                            "gallery",
+                            values(form.gallery)
+                              .filter(
+                                (x) => x !== url
                               )
-                                .filter(
-                                  (item) =>
-                                    item !== url
-                                )
-                                .join(","),
-                            })
+                              .join(",")
                           )
                         }
                       >
-                        Hapus dari galeri
+                        Hapus
                       </button>
                     </div>
                   )
                 )}
               </div>
 
-              <label>Deskripsi Produk</label>
+              <label>
+                Deskripsi
+                <textarea
+                  rows="3"
+                  value={form.description}
+                  onChange={(e) =>
+                    field(
+                      "description",
+                      e.target.value
+                    )
+                  }
+                />
+              </label>
 
-              <textarea
-                rows={3}
-                value={form.description}
-                onChange={(event) =>
-                  change(
-                    "description",
-                    event.target.value
-                  )
-                }
-              />
+              <label>
+                Ukuran (pisahkan dengan koma)
+                <input
+                  value={form.sizes}
+                  onChange={(e) =>
+                    field("sizes", e.target.value)
+                  }
+                />
+              </label>
 
-              <label>Ukuran</label>
-
-              <input
-                value={form.sizes}
-                onChange={(event) =>
-                  change(
-                    "sizes",
-                    event.target.value
-                  )
-                }
-              />
-
-              <label>Warna</label>
-
-              <input
-                value={form.colors}
-                onChange={(event) =>
-                  change(
-                    "colors",
-                    event.target.value
-                  )
-                }
-              />
+              <label>
+                Warna (pisahkan dengan koma)
+                <input
+                  value={form.colors}
+                  onChange={(e) =>
+                    field("colors", e.target.value)
+                  }
+                />
+              </label>
 
               <button
-                type="submit"
                 className="btn-dark"
+                type="submit"
               >
                 Simpan Produk
               </button>
@@ -2173,7 +1891,7 @@ function AdminDashboard({
                   className="btn-light"
                   onClick={() =>
                     setForm({
-                      ...DEFAULT_FORM,
+                      ...EMPTY_PRODUCT,
                     })
                   }
                 >
@@ -2187,156 +1905,143 @@ function AdminDashboard({
                 Daftar Produk ({products.length})
               </h2>
 
-              {filteredProducts.map(
-                (product) => (
-                  <div
-                    className="lum-dash-product-row"
-                    key={product.id}
-                  >
-                    <div className="lum-admin-thumb">
-                      <ProductImage
-                        src={product.image}
-                        alt={product.name}
-                      />
-                    </div>
-
-                    <div className="lum-admin-product-info">
-                      <strong>
-                        {product.name}
-                      </strong>
-
-                      <p>
-                        {money(product.price)}
-                        {" · "}
-                        Stok {product.stock}
-                      </p>
-                    </div>
-
-                    <button
-                      className="btn-light"
-                      onClick={() =>
-                        onEdit(product)
-                      }
-                    >
-                      Edit
-                    </button>
-
-                    <button
-                      className="delete-btn"
-                      onClick={() =>
-                        onDelete(product.id)
-                      }
-                    >
-                      Hapus
-                    </button>
+              {filteredProducts.map((p) => (
+                <div
+                  className="lum-dash-product-row"
+                  key={p.id}
+                >
+                  <div className="lum-admin-thumb">
+                    <Photo
+                      src={p.image}
+                      alt={p.name}
+                    />
                   </div>
-                )
-              )}
+
+                  <div className="lum-admin-product-info">
+                    <strong>
+                      {prettyName(p.name)}
+                    </strong>
+
+                    <p>
+                      {rp(p.price)} · Stok{" "}
+                      {p.stock}
+                    </p>
+                  </div>
+
+                  <button
+                    className="btn-light"
+                    onClick={() => onEdit(p)}
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    className="btn-light"
+                    onClick={() =>
+                      onDelete(p.id)
+                    }
+                  >
+                    Hapus
+                  </button>
+                </div>
+              ))}
             </section>
           </div>
         )}
 
-        {/* ORDER MANAGEMENT + PAYMENT */}
-
         {tab === "orders" && (
           <section className="lum-dash-card">
             <h2>
-              Manajemen Pesanan &
-              Konfirmasi Pembayaran
+              Manajemen Pesanan & Pembayaran
             </h2>
 
             <p className="muted">
-              Transfer dan QRIS harus
-              dikonfirmasi lunas sebelum
-              pesanan diproses. COD dikonfirmasi
-              setelah pesanan selesai.
-              Semua pembayaran adalah simulasi.
+              Transfer/QRIS wajib dikonfirmasi
+              sebelum diproses; COD dikonfirmasi
+              setelah Selesai. Semua pembayaran
+              hanya simulasi.
             </p>
 
-            {preview && (
+            {chosen && (
               <>
-                <label htmlFor="order-select">
-                  Pilih pesanan
+                <label>
+                  Pilih Pesanan
+                  <select
+                    value={String(chosen.id)}
+                    onChange={(e) =>
+                      setChosenId(
+                        e.target.value
+                      )
+                    }
+                  >
+                    {filteredOrders.map((o) => (
+                      <option
+                        key={o.id}
+                        value={String(o.id)}
+                      >
+                        {o.id} — {o.customer}
+                      </option>
+                    ))}
+                  </select>
                 </label>
-
-                <select
-                  id="order-select"
-                  value={String(preview.id)}
-                  onChange={(event) =>
-                    setPreviewId(
-                      event.target.value
-                    )
-                  }
-                >
-                  {filteredOrders.map((order) => (
-                    <option
-                      key={order.id}
-                      value={String(order.id)}
-                    >
-                      {order.id}
-                      {" — "}
-                      {order.customer}
-                    </option>
-                  ))}
-                </select>
 
                 <div className="lum-payment-detail">
                   <p>
-                    <strong>Metode:</strong>{" "}
-                    {paymentName(
-                      preview.paymentMethod
+                    <b>Metode:</b>{" "}
+                    {paymentLabel(
+                      chosen.paymentMethod
                     )}
                   </p>
 
                   <p>
-                    <strong>Status bayar:</strong>{" "}
-                    {paymentStatus(preview)}
+                    <b>Status pembayaran:</b>{" "}
+                    {payStatus(chosen)}
                   </p>
 
-                  {preview.paidAt && (
+                  <p>
+                    <b>Voucher:</b>{" "}
+                    {chosen.voucherCode || "-"}
+                    {" · "}
+                    <b>Diskon:</b>{" "}
+                    {rp(chosen.discount || 0)}
+                  </p>
+
+                  <p>
+                    <b>Total:</b>{" "}
+                    {rp(chosen.total)}
+                  </p>
+
+                  {chosen.paidAt && (
                     <p>
-                      <strong>Dikonfirmasi:</strong>{" "}
-                      {dateText(preview.paidAt)}
+                      Dikonfirmasi:{" "}
+                      {date(chosen.paidAt)}
                     </p>
                   )}
 
                   <button
                     className="btn-dark"
-                    disabled={
-                      !canConfirmPayment(preview)
-                    }
+                    disabled={!canPay(chosen)}
                     onClick={() =>
-                      onPayment(preview.id)
+                      onPay(chosen.id)
                     }
                   >
-                    {paymentStatus(preview) ===
-                    "Lunas"
-                      ? "✓ Sudah Lunas"
-                      : preview.paymentMethod ===
+                    {payStatus(chosen) === "Lunas"
+                      ? "✓ Lunas"
+                      : chosen.paymentMethod ===
                           "cod"
-                        ? "Konfirmasi COD Diterima"
-                        : "Konfirmasi Pembayaran / Tandai Lunas"}
+                        ? "Konfirmasi COD"
+                        : "Tandai Lunas"}
                   </button>
-
-                  {preview.paymentMethod === "cod" &&
-                    statusOf(preview.status) !==
-                      "Selesai" && (
-                      <p className="muted">
-                        Untuk COD, ubah status
-                        pesanan sampai Selesai
-                        terlebih dahulu.
-                      </p>
-                    )}
                 </div>
 
                 <OrderStatusFlow
-                  status={statusOf(
-                    preview.status
+                  status={status(
+                    chosen.status
                   )}
                 />
 
                 <OrderHistory
-                  order={preview}
+                  order={chosen}
                 />
               </>
             )}
@@ -2345,25 +2050,23 @@ function AdminDashboard({
 
             <OrderTable
               orders={filteredOrders}
-              editable
+              edit
               onStatus={onStatus}
-              onPayment={onPayment}
+              onPay={onPay}
             />
           </section>
         )}
 
-        {/* REPORTS */}
-
         {tab === "reports" && (
           <section className="lum-dash-card">
-            <h2>Laporan Transaksi</h2>
+            <h2>Sales Report</h2>
 
             <p>
-              Total pesanan: {orders.length}
+              Total Pesanan: {orders.length}
               {" · "}
-              Selesai: {completed.length}
+              Selesai: {done.length}
               {" · "}
-              Pendapatan selesai: {money(revenue)}
+              Pendapatan Selesai: {rp(revenue)}
             </p>
 
             <OrderTable
@@ -2373,48 +2076,42 @@ function AdminDashboard({
             <div className="lum-report-actions">
               <button
                 className="btn-dark"
-                disabled={
-                  !filteredOrders.length
-                }
+                disabled={!filteredOrders.length}
                 onClick={() =>
                   downloadTransactionsPDF(
                     filteredOrders
                   )
                 }
               >
-                Download Laporan PDF
+                Download PDF
               </button>
 
               <button
                 className="btn-light"
-                disabled={
-                  !filteredOrders.length
-                }
+                disabled={!filteredOrders.length}
                 onClick={exportCSV}
               >
-                Download Laporan CSV
+                Download CSV
               </button>
             </div>
 
-            <small>
-              CSV memuat status pembayaran.
-              Format PDF lama diatur oleh
-              reportPdf.js.
+            <small className="muted">
+              Kolom voucher pada PDF mengikuti
+              format di utils/reportPdf.js;
+              CSV sudah memuat voucher.
             </small>
           </section>
         )}
 
-        {/* PHOTO GALLERY */}
-
         {tab === "gallery" && (
           <section className="lum-dash-card">
-            <h2>Galeri Foto Lokal</h2>
+            <h2>Photo Gallery</h2>
 
             <select
-              value={folder}
-              onChange={(event) =>
-                setFolder(
-                  event.target.value
+              value={folderFilter}
+              onChange={(e) =>
+                setFolderFilter(
+                  e.target.value
                 )
               }
             >
@@ -2422,12 +2119,12 @@ function AdminDashboard({
                 Semua
               </option>
 
-              {CATEGORIES.map((category) => (
+              {CATEGORIES.map((c) => (
                 <option
-                  key={category.folder}
-                  value={category.folder}
+                  key={c.folder}
+                  value={c.folder}
                 >
-                  {category.label}
+                  {c.label}
                 </option>
               ))}
             </select>
@@ -2437,18 +2134,16 @@ function AdminDashboard({
             </p>
 
             <div className="lum-gallery">
-              {filteredPhotos.map((photo) => (
-                <article key={photo.url}>
-                  <ProductImage
-                    src={photo.url}
-                    alt={photo.name}
+              {filteredPhotos.map((p) => (
+                <article key={p.url}>
+                  <Photo
+                    src={p.url}
+                    alt={p.name}
                   />
 
-                  <p>
-                    {photo.folder}
-                    {" / "}
-                    {photo.name}
-                  </p>
+                  <small>
+                    {p.folder} / {p.name}
+                  </small>
                 </article>
               ))}
             </div>
@@ -2458,38 +2153,31 @@ function AdminDashboard({
 
       <aside className="lum-dash-right">
         <h3>Store Summary</h3>
-
+        <p>Total Produk: {products.length}</p>
+        <p>Foto Lokal: {PHOTOS.length}</p>
+        <p>Total Pesanan: {orders.length}</p>
         <p>
-          Total Produk: {products.length}
-        </p>
-
-        <p>
-          Foto Lokal: {PHOTOS.length}
-        </p>
-
-        <p>
-          Total Pesanan: {orders.length}
-        </p>
-
-        <p>
-          Stok Menipis: {lowStock.length}
+          Stok Menipis:{" "}
+          {
+            products.filter(
+              (p) => Number(p.stock) <= 5
+            ).length
+          }
         </p>
       </aside>
     </div>
   );
 }
 
-/* ==========================================
+/* =====================================
    MAIN APP
-========================================== */
+===================================== */
 
 export default function App() {
-  const [products, setProducts] = useState(
-    loadProducts
-  );
+  const [products, setProducts] = useState(loadProducts);
 
   const [orders, setOrders] = useState(
-    () => readArray(KEY.orders)
+    () => arr(KEY.orders)
   );
 
   const [customer, setCustomer] = useState(
@@ -2497,90 +2185,96 @@ export default function App() {
   );
 
   const [cart, setCart] = useState(
-    () => readArray(KEY.cart)
+    () => arr(KEY.cart)
   );
 
   const [wishlist, setWishlist] = useState(
-    () => readArray(KEY.wishlist)
+    () => arr(KEY.wishlist)
+  );
+
+  const [reviews, setReviews] = useState(
+    () => read(KEY.reviews, {})
   );
 
   const [page, setPage] = useState(
     () =>
-      window.location.hash === "#admin"
+      location.hash === "#admin"
         ? "admin"
         : "home"
   );
 
-  const [authReturn, setAuthReturn] =
+  const [returnPage, setReturnPage] =
     useState("home");
 
   const [category, setCategory] =
     useState("All");
 
-  const [search, setSearch] =
-    useState("");
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState("default");
 
-  const [sort, setSort] =
-    useState("default");
+  const [shownCount, setShownCount] =
+    useState(12);
 
   const [selectedId, setSelectedId] =
     useState(null);
 
-  const [size, setSize] =
-    useState("");
-
-  const [color, setColor] =
-    useState("");
+  const [size, setSize] = useState("");
+  const [color, setColor] = useState("");
 
   const [form, setForm] = useState({
-    ...DEFAULT_FORM,
+    ...EMPTY_PRODUCT,
   });
 
   const [checkout, setCheckout] = useState({
-    ...DEFAULT_CHECKOUT,
+    ...EMPTY_CHECKOUT,
   });
+
+  const [voucherInput, setVoucherInput] =
+    useState("");
+
+  const [appliedVoucher, setAppliedVoucher] =
+    useState("");
+
+  const [voucherMessage, setVoucherMessage] =
+    useState("");
 
   const [message, setMessage] =
     useState("");
 
+  const [lastId, setLastId] =
+    useState("");
+
   const checkoutLock = useRef(false);
-
-  const statusLocks = useRef(
-    new Set()
-  );
-
-  const paymentLocks = useRef(
-    new Set()
-  );
-
-  /* PENYIMPANAN DATA */
+  const statusLock = useRef(new Set());
+  const paymentLock = useRef(new Set());
 
   useEffect(() => {
-    save(KEY.products, products);
+    store(KEY.products, products);
   }, [products]);
 
   useEffect(() => {
-    save(KEY.orders, orders);
-
-    statusLocks.current.clear();
-    paymentLocks.current.clear();
+    store(KEY.orders, orders);
+    statusLock.current.clear();
+    paymentLock.current.clear();
   }, [orders]);
 
   useEffect(() => {
-    save(KEY.cart, cart);
+    store(KEY.cart, cart);
   }, [cart]);
 
   useEffect(() => {
-    save(KEY.wishlist, wishlist);
+    store(KEY.wishlist, wishlist);
   }, [wishlist]);
 
   useEffect(() => {
+    store(KEY.reviews, reviews);
+  }, [reviews]);
+
+  useEffect(() => {
     if (customer) {
-      save(KEY.session, customer);
+      store(KEY.session, customer);
     } else {
-      localStorage.removeItem(
-        KEY.session
-      );
+      localStorage.removeItem(KEY.session);
     }
   }, [customer]);
 
@@ -2595,19 +2289,20 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [message]);
 
-  /* FILTER PRODUK */
+  useEffect(() => {
+    setShownCount(12);
+  }, [category, search, sort]);
 
-  const shown = useMemo(
+  const visible = useMemo(
     () =>
       products
         .filter(
-          (product) =>
+          (p) =>
             (category === "All" ||
-              product.collection ===
-                category) &&
-            normalize(
-              `${product.name} ${product.collection} ${product.description}`
-            ).includes(normalize(search))
+              p.collection === category) &&
+            text(
+              `${p.name} ${p.collection} ${p.description}`
+            ).includes(text(search))
         )
         .sort((a, b) => {
           if (sort === "low") {
@@ -2632,44 +2327,23 @@ export default function App() {
 
           return 0;
         }),
-    [
-      products,
-      category,
-      search,
-      sort,
-    ]
+    [products, category, search, sort]
   );
-
-  const featured = products.filter(
-    (product) => product.image
-  );
-
-  const hero =
-    PHOTOS.find(
-      (photo) =>
-        photo.folder === "baju wanita"
-    )?.url ||
-    PHOTOS[0]?.url ||
-    featured[0]?.image;
 
   const selected = products.find(
-    (product) =>
-      product.id === selectedId
+    (p) => p.id === selectedId
   );
-
-  /* KERANJANG */
 
   const validCart = cart
     .map((item) => {
-      const product = products.find(
-        (entry) =>
-          entry.id === item.id
+      const p = products.find(
+        (x) => x.id === item.id
       );
 
-      if (!product) return null;
+      if (!p) return null;
 
       return {
-        ...product,
+        ...p,
         key:
           item.key ||
           JSON.stringify([
@@ -2689,97 +2363,107 @@ export default function App() {
     })
     .filter(Boolean);
 
-  const cartCount = validCart.reduce(
-    (sum, item) =>
-      sum + item.quantity,
+  const count = validCart.reduce(
+    (n, i) => n + i.quantity,
     0
   );
 
   const subtotal = validCart.reduce(
-    (sum, item) =>
-      sum +
-      Number(item.price) *
-        item.quantity,
+    (n, i) =>
+      n + Number(i.price) * i.quantity,
     0
   );
 
-  const delivery =
+  const shipping =
     checkout.shipping === "express"
       ? 25000
       : 12000;
 
-  const myOrders = customer
+  const applied = appliedVoucher
+    ? voucherValue(appliedVoucher, subtotal)
+    : null;
+
+  const discount = applied?.ok
+    ? applied.amount
+    : 0;
+
+  const total =
+    subtotal - discount + shipping;
+
+  const mine = customer
     ? orders.filter(
-        (order) =>
-          order.customerId ===
-          customer.id
+        (o) =>
+          String(o.customerId) ===
+          String(customer.id)
       )
     : [];
 
-  /* NAVIGASI */
+  const hero =
+    PHOTOS.find(
+      (p) => p.folder === "baju wanita"
+    )?.url ||
+    PHOTOS[0]?.url ||
+    products.find((p) => p.image)?.image;
 
-  function navigate(nextPage) {
-    if (
-      ["home", "shop", "cart"].includes(
-        nextPage
-      )
-    ) {
+  const currentOrder =
+    orders.find((o) => o.id === lastId) ||
+    orders[0];
+
+  const gridProps = {
+    favorites: wishlist,
+    reviews,
+    onDetail: openProduct,
+    onFavorite: toggleFavorite,
+    onCart: addToCart,
+  };
+
+  function go(next) {
+    if (["home", "shop", "cart"].includes(next)) {
       checkoutLock.current = false;
     }
 
-    setPage(nextPage);
+    setPage(next);
 
     window.history.replaceState(
       null,
       "",
       window.location.pathname +
         window.location.search +
-        (nextPage === "admin"
-          ? "#admin"
-          : "")
+        (next === "admin" ? "#admin" : "")
     );
 
     window.scrollTo(0, 0);
   }
 
-  function chooseCategory(nextCategory) {
-    setCategory(nextCategory);
+  function choose(next) {
+    setCategory(next);
     setSearch("");
-    navigate("shop");
+    go("shop");
   }
 
-  function openDetail(product) {
-    setSelectedId(product.id);
-
-    setSize(
-      product.sizes?.[0] || "All Size"
-    );
-
+  function openProduct(p) {
+    setSelectedId(p.id);
+    setSize(p.sizes?.[0] || "All Size");
     setColor(
-      product.colors?.[0] || "Sesuai foto"
+      p.colors?.[0] || "Sesuai foto"
     );
-
-    navigate("detail");
+    go("detail");
   }
 
-  /* AUTH */
-
-  function openAuth(nextPage = "home") {
-    setAuthReturn(nextPage);
-    navigate("auth");
+  function auth(next = "home") {
+    setReturnPage(next);
+    go("auth");
   }
 
-  function loggedIn(user) {
+  function login(user) {
     setCustomer(user);
 
-    setCheckout((previous) => ({
-      ...previous,
-      name:
-        previous.name ||
-        user.name,
+    setCheckout((p) => ({
+      ...p,
+      name: p.name || user.name,
     }));
 
-    navigate(authReturn);
+    go(returnPage);
 
     setMessage(
       `Selamat datang, ${user.name}!`
@@ -2788,146 +2472,130 @@ export default function App() {
 
   function logout() {
     setCustomer(null);
-    navigate("home");
+    go("home");
     setMessage("Berhasil logout.");
   }
 
-  /* WISHLIST */
-
-  function toggleWishlist(id) {
-    setWishlist((previous) =>
-      previous.includes(id)
-        ? previous.filter(
-            (item) => item !== id
-          )
-        : [...previous, id]
+  function toggleFavorite(id) {
+    setWishlist((prev) =>
+      prev.includes(id)
+        ? prev.filter((v) => v !== id)
+        : [...prev, id]
     );
   }
 
-  /* TAMBAH KE KERANJANG */
+  function reviewProduct(id, list) {
+    setReviews((prev) => ({
+      ...prev,
+      [String(id)]: list,
+    }));
+  }
+
+  /* KERANJANG */
 
   function addToCart(
     product,
     chosenSize,
     chosenColor
   ) {
-    const current = products.find(
-      (item) =>
-        item.id === product.id
+    const p = products.find(
+      (v) => v.id === product.id
     );
 
-    if (!current) {
-      setMessage(
-        "Produk tidak ditemukan."
-      );
-      return;
-    }
-
-    const selectedSize =
-      chosenSize ||
-      current.sizes?.[0] ||
-      "All Size";
-
-    const selectedColor =
-      chosenColor ||
-      current.colors?.[0] ||
-      "Sesuai foto";
-
-    const key = JSON.stringify([
-      current.id,
-      selectedSize,
-      selectedColor,
-    ]);
+    if (!p) return;
 
     const used = cart
-      .filter(
-        (item) =>
-          item.id === current.id
-      )
+      .filter((v) => v.id === p.id)
       .reduce(
-        (sum, item) =>
-          sum + Number(item.quantity),
+        (n, v) =>
+          n + Number(v.quantity),
         0
       );
 
-    if (
-      used >= Number(current.stock)
-    ) {
+    if (used >= Number(p.stock)) {
       setMessage(
         "Stok tidak mencukupi."
       );
       return;
     }
 
-    setCart((previous) => {
-      const existing = previous.find(
-        (item) =>
-          (item.key ||
+    const s =
+      chosenSize ||
+      p.sizes?.[0] ||
+      "All Size";
+
+    const c =
+      chosenColor ||
+      p.colors?.[0] ||
+      "Sesuai foto";
+
+    const key = JSON.stringify([
+      p.id,
+      s,
+      c,
+    ]);
+
+    setCart((prev) => {
+      const old = prev.find(
+        (v) =>
+          (v.key ||
             JSON.stringify([
-              item.id,
-              item.size,
-              item.color,
+              v.id,
+              v.size,
+              v.color,
             ])) === key
       );
 
-      if (existing) {
-        return previous.map((item) =>
-          (item.key ||
-            JSON.stringify([
-              item.id,
-              item.size,
-              item.color,
-            ])) === key
-            ? {
-                ...item,
-                key,
-                quantity:
-                  Number(item.quantity) + 1,
-              }
-            : item
-        );
-      }
-
-      return [
-        ...previous,
-        {
-          id: current.id,
-          key,
-          size: selectedSize,
-          color: selectedColor,
-          quantity: 1,
-        },
-      ];
+      return old
+        ? prev.map((v) =>
+            (v.key ||
+              JSON.stringify([
+                v.id,
+                v.size,
+                v.color,
+              ])) === key
+              ? {
+                  ...v,
+                  key,
+                  quantity:
+                    Number(v.quantity) + 1,
+                }
+              : v
+          )
+        : [
+            ...prev,
+            {
+              id: p.id,
+              key,
+              size: s,
+              color: c,
+              quantity: 1,
+            },
+          ];
     });
 
     setMessage(
-      "Produk ditambahkan ke keranjang."
+      "Produk masuk ke keranjang."
     );
   }
 
-  /* UBAH JUMLAH KERANJANG */
-
-  function changeQty(key, delta) {
+  function changeQty(key, step) {
     const item = validCart.find(
-      (entry) =>
-        entry.key === key
+      (v) => v.key === key
     );
 
     if (!item) return;
 
     const used = cart
-      .filter(
-        (entry) =>
-          entry.id === item.id
-      )
+      .filter((v) => v.id === item.id)
       .reduce(
-        (sum, entry) =>
-          sum + Number(entry.quantity),
+        (n, v) =>
+          n + Number(v.quantity),
         0
       );
 
     if (
-      delta > 0 &&
+      step > 0 &&
       used >= Number(item.stock)
     ) {
       setMessage(
@@ -2936,44 +2604,60 @@ export default function App() {
       return;
     }
 
-    setCart((previous) =>
-      previous
-        .map((entry) =>
-          (entry.key ||
+    setCart((prev) =>
+      prev
+        .map((v) => {
+          const k =
+            v.key ||
             JSON.stringify([
-              entry.id,
-              entry.size,
-              entry.color,
-            ])) === key
+              v.id,
+              v.size,
+              v.color,
+            ]);
+
+          return k === key
             ? {
-                ...entry,
+                ...v,
                 key,
                 quantity:
-                  Number(entry.quantity) +
-                  delta,
+                  Number(v.quantity) + step,
               }
-            : entry
-        )
-        .filter(
-          (entry) =>
-            entry.quantity > 0
-        )
+            : v;
+        })
+        .filter((v) => v.quantity > 0)
     );
   }
 
-  /* ==========================================
-     CHECKOUT
-  ========================================== */
+  /* VOUCHER */
 
-  function checkoutOrder(event) {
-    event.preventDefault();
+  function applyVoucher() {
+    const result = voucherValue(
+      voucherInput,
+      subtotal
+    );
 
-    if (checkoutLock.current) {
-      return;
-    }
+    setAppliedVoucher(
+      result.ok ? result.code : ""
+    );
+
+    setVoucherMessage(result.message);
+  }
+
+  function clearVoucher() {
+    setVoucherInput("");
+    setAppliedVoucher("");
+    setVoucherMessage("");
+  }
+
+  /* CHECKOUT */
+
+  function placeOrder(e) {
+    e.preventDefault();
+
+    if (checkoutLock.current) return;
 
     if (!customer) {
-      openAuth("checkout");
+      auth("checkout");
       return;
     }
 
@@ -2990,31 +2674,27 @@ export default function App() {
       )
     ) {
       setMessage(
-        "Periksa data nama, HP, dan alamat."
+        "Periksa nama, nomor telepon, dan alamat."
       );
       return;
     }
 
-    const quantities = new Map();
+    const qty = new Map();
 
-    validCart.forEach((item) =>
-      quantities.set(
-        item.id,
-        (quantities.get(item.id) || 0) +
-          item.quantity
+    validCart.forEach((i) =>
+      qty.set(
+        i.id,
+        (qty.get(i.id) || 0) +
+          i.quantity
       )
     );
 
-    for (const [id, quantity] of quantities) {
-      const product = products.find(
-        (item) =>
-          item.id === id
+    for (const [id, n] of qty) {
+      const p = products.find(
+        (v) => v.id === id
       );
 
-      if (
-        !product ||
-        Number(product.stock) < quantity
-      ) {
+      if (!p || Number(p.stock) < n) {
         setMessage(
           "Stok tidak mencukupi."
         );
@@ -3022,18 +2702,27 @@ export default function App() {
       }
     }
 
-    const method = PAYMENT_METHODS.some(
-      (item) =>
-        item.value === checkout.payment
+    checkoutLock.current = true;
+
+    const now = new Date().toISOString();
+    const id = `LM-${Date.now()}`;
+
+    const method = METHODS.some(
+      (m) => m.value === checkout.payment
     )
       ? checkout.payment
       : "cod";
 
-    checkoutLock.current = true;
+    const promo = appliedVoucher
+      ? voucherValue(
+          appliedVoucher,
+          subtotal
+        )
+      : null;
 
-    const now = new Date().toISOString();
-
-    const id = `LM-${Date.now()}`;
+    const cut = promo?.ok
+      ? promo.amount
+      : 0;
 
     const order = {
       id,
@@ -3044,30 +2733,26 @@ export default function App() {
       phone: checkout.phone.trim(),
       address: checkout.address.trim(),
       shipping: checkout.shipping,
-
+      shippingFee: shipping,
       paymentMethod: method,
-
       paymentStatus:
         method === "cod"
           ? "Bayar di Tempat"
           : "Menunggu Pembayaran",
-
       paidAt: null,
-
       paymentHistory: [],
-
-      items: validCart.map(
-        (item) => ({
-          ...item,
-        })
-      ),
-
-      total: subtotal + delivery,
-
+      items: validCart.map((i) => ({
+        ...i,
+      })),
+      subtotal,
+      voucherCode:
+        promo?.ok
+          ? promo.code
+          : null,
+      discount: cut,
+      total: subtotal - cut + shipping,
       status: "Pesanan Baru",
-
       stockRestored: false,
-
       history: [
         {
           id: `${id}-created`,
@@ -3076,105 +2761,83 @@ export default function App() {
           at: now,
           by: "Sistem",
           note:
-            `Checkout menggunakan ${paymentName(
-              method
-            )} (simulasi).`,
+            `Checkout ${paymentLabel(method)}; ` +
+            `Voucher: ${
+              promo?.ok
+                ? promo.code
+                : "Tidak ada"
+            }.`,
         },
       ],
     };
 
-    setOrders((previous) => [
+    setOrders((prev) => [
       order,
-      ...previous,
+      ...prev,
     ]);
 
-    setProducts((previous) =>
-      previous.map((product) => ({
-        ...product,
+    setProducts((prev) =>
+      prev.map((p) => ({
+        ...p,
         stock:
-          Number(product.stock) -
-          (quantities.get(product.id) || 0),
+          Number(p.stock) -
+          (qty.get(p.id) || 0),
       }))
     );
 
     setCart([]);
+    setCheckout({ ...EMPTY_CHECKOUT });
+    clearVoucher();
 
-    setCheckout({
-      ...DEFAULT_CHECKOUT,
-    });
-
-    navigate("success");
+    setLastId(id);
+    go("success");
 
     setMessage(
-      "Pesanan simulasi berhasil dibuat."
+      "Pesanan berhasil dibuat."
     );
   }
 
-  /* ==========================================
-     KONFIRMASI PEMBAYARAN ADMIN
-  ========================================== */
+  /* PEMBAYARAN ADMIN */
 
   function confirmPayment(id) {
     const order = orders.find(
-      (item) =>
-        item.id === id
+      (o) => o.id === id
     );
 
-    if (!order) {
-      setMessage(
-        "Pesanan tidak ditemukan."
-      );
-      return;
-    }
-
     if (
-      paymentLocks.current.has(id)
+      !canPay(order) ||
+      paymentLock.current.has(id)
     ) {
-      return;
-    }
-
-    if (!canConfirmPayment(order)) {
-      setMessage(
-        order.paymentMethod === "cod"
-          ? "COD baru dapat dikonfirmasi saat pesanan Selesai."
-          : "Pembayaran tidak dapat dikonfirmasi."
-      );
-
       return;
     }
 
     if (
       !window.confirm(
-        `Tandai pembayaran pesanan ${id} sebagai LUNAS? Ini hanya simulasi.`
+        `Tandai pembayaran pesanan ${id} ` +
+        `sebagai LUNAS? (Simulasi)`
       )
     ) {
       return;
     }
 
-    paymentLocks.current.add(id);
+    paymentLock.current.add(id);
 
     const now = new Date().toISOString();
 
-    setOrders((previous) =>
-      previous.map((item) =>
-        item.id === id
+    setOrders((prev) =>
+      prev.map((o) =>
+        o.id === id
           ? {
-              ...item,
-
+              ...o,
               paymentStatus: "Lunas",
-
               paidAt: now,
-
-              paymentConfirmedBy:
-                "Admin Demo",
-
+              paymentConfirmedBy: "Admin Demo",
               paymentHistory: [
                 ...(Array.isArray(
-                  item.paymentHistory
+                  o.paymentHistory
                 )
-                  ? item.paymentHistory
+                  ? o.paymentHistory
                   : []),
-
                 {
                   id:
                     `${id}-paid-${Date.now()}`,
@@ -3182,157 +2845,143 @@ export default function App() {
                   status: "Lunas",
                   by: "Admin Demo",
                   note:
-                    `Konfirmasi ${paymentName(
-                      item.paymentMethod
-                    )} (simulasi)`,
+                    "Pembayaran simulasi dikonfirmasi.",
                 },
               ],
             }
-          : item
+          : o
       )
     );
 
     setMessage(
-      "Pembayaran simulasi berhasil dikonfirmasi menjadi Lunas."
+      "Pembayaran ditandai Lunas."
     );
   }
 
-  /* ==========================================
-     UPDATE STATUS PESANAN
-  ========================================== */
+  /* STATUS PESANAN */
 
-  function changeStatus(id, nextStatus) {
+  function changeStatus(id, next) {
     const order = orders.find(
-      (item) =>
-        item.id === id
+      (o) => o.id === id
     );
 
-    if (!order) {
-      setMessage(
-        "Pesanan tidak ditemukan."
-      );
-      return;
-    }
-
     if (
-      statusLocks.current.has(id)
+      !order ||
+      statusLock.current.has(id)
     ) {
       return;
     }
 
-    const current = statusOf(
+    const current = status(
       order.status
     );
 
-    if (
-      !validNextStatus(
-        current,
-        nextStatus
-      )
-    ) {
+    if (!canMove(current, next)) {
       setMessage(
-        "Status harus berurutan; status final tidak dapat diubah."
+        "Status harus berubah berurutan."
       );
       return;
     }
 
     if (
-      nextStatus !== "Dibatalkan" &&
+      next !== "Dibatalkan" &&
       ["transfer", "qris"].includes(
         order.paymentMethod
       ) &&
-      paymentStatus(order) !== "Lunas"
+      payStatus(order) !== "Lunas"
     ) {
       setMessage(
-        "Konfirmasi pembayaran transfer/QRIS dahulu sebelum memproses pesanan."
+        "Konfirmasi pembayaran sebelum memproses pesanan."
       );
       return;
     }
 
-    statusLocks.current.add(id);
+    // Pengaman agar pesanan tidak terbatalkan
+    // karena salah klik dropdown.
+    if (
+      next === "Dibatalkan" &&
+      !window.confirm(
+        `Yakin ingin MEMBATALKAN pesanan ${id}? ` +
+        "Status ini tidak bisa dikembalikan."
+      )
+    ) {
+      return;
+    }
+
+    statusLock.current.add(id);
 
     const now = new Date().toISOString();
 
     if (
-      nextStatus === "Dibatalkan" &&
+      next === "Dibatalkan" &&
       !order.stockRestored
     ) {
-      const quantities = new Map();
+      const qty = new Map();
 
-      (order.items || []).forEach(
-        (item) =>
-          quantities.set(
-            item.id,
-            (quantities.get(item.id) || 0) +
-              Math.max(
-                0,
-                Number(item.quantity) || 0
-              )
-          )
+      (order.items || []).forEach((i) =>
+        qty.set(
+          i.id,
+          (qty.get(i.id) || 0) +
+            Number(i.quantity || 0)
+        )
       );
 
-      setProducts((previous) =>
-        previous.map((product) => ({
-          ...product,
+      setProducts((prev) =>
+        prev.map((p) => ({
+          ...p,
           stock:
-            Number(product.stock) +
-            (quantities.get(product.id) || 0),
+            Number(p.stock) +
+            (qty.get(p.id) || 0),
         }))
       );
     }
 
-    setOrders((previous) =>
-      previous.map((item) =>
-        item.id === id
+    setOrders((prev) =>
+      prev.map((o) =>
+        o.id === id
           ? {
-              ...item,
-
-              status: nextStatus,
-
+              ...o,
+              status: next,
               updatedAt: now,
-
               stockRestored:
-                Boolean(item.stockRestored) ||
-                nextStatus === "Dibatalkan",
-
+                !!o.stockRestored ||
+                next === "Dibatalkan",
               history: [
-                ...(Array.isArray(item.history)
-                  ? item.history
+                ...(Array.isArray(
+                  o.history
+                )
+                  ? o.history
                   : []),
-
                 {
                   id:
-                    `${id}-${Date.now()}-${nextStatus}`,
+                    `${id}-${Date.now()}-${next}`,
                   from: current,
-                  status: nextStatus,
+                  status: next,
                   at: now,
                   by: "Admin Demo",
                   note:
-                    nextStatus === "Dibatalkan"
+                    next === "Dibatalkan"
                       ? "Pesanan dibatalkan."
-                      : `Status diubah menjadi ${nextStatus}.`,
+                      : `Status menjadi ${next}.`,
                 },
               ],
             }
-          : item
+          : o
       )
     );
 
     setMessage(
-      `Status diubah menjadi ${nextStatus}.`
+      `Status pesanan: ${next}`
     );
   }
 
-  /* ==========================================
-     CRUD PRODUK
-  ========================================== */
+  /* CRUD PRODUK */
 
-  function saveProduct(event) {
-    event.preventDefault();
+  function saveProduct(e) {
+    e.preventDefault();
 
-    const category = CATEGORIES.find(
-      (item) =>
-        item.name === form.collection
+    const c = CATEGORIES.find(
+      (x) => x.name === form.collection
     );
 
     const price = Number(form.price);
@@ -3340,14 +2989,14 @@ export default function App() {
 
     if (
       !form.name.trim() ||
-      !category ||
+      !c ||
       !Number.isFinite(price) ||
       price <= 0 ||
       !Number.isInteger(stock) ||
       stock < 0
     ) {
       setMessage(
-        "Periksa data produk."
+        "Periksa nama, harga, dan stok."
       );
       return;
     }
@@ -3355,9 +3004,9 @@ export default function App() {
     if (
       form.image &&
       !PHOTOS.some(
-        (photo) =>
-          photo.url === form.image &&
-          photo.folder === category.folder
+        (p) =>
+          p.url === form.image &&
+          p.folder === c.folder
       )
     ) {
       setMessage(
@@ -3367,21 +3016,21 @@ export default function App() {
     }
 
     if (
+      form.image &&
       products.some(
-        (product) =>
-          product.id !== form.id &&
-          form.image &&
-          product.image === form.image
+        (p) =>
+          p.id !== form.id &&
+          p.image === form.image
       )
     ) {
       setMessage(
-        "Foto utama sudah dipakai produk lain."
+        "Foto utama sudah digunakan produk lain."
       );
       return;
     }
 
-    const sizes = splitText(form.sizes);
-    const colors = splitText(form.colors);
+    const sizes = values(form.sizes);
+    const colors = values(form.colors);
 
     if (
       !sizes.length ||
@@ -3395,13 +3044,13 @@ export default function App() {
 
     const gallery = [
       ...new Set(
-        splitText(form.gallery).filter(
+        values(form.gallery).filter(
           (url) =>
             url !== form.image &&
             PHOTOS.some(
-              (photo) =>
-                photo.url === url &&
-                photo.folder === category.folder
+              (p) =>
+                p.url === url &&
+                p.folder === c.folder
             )
         )
       ),
@@ -3412,106 +3061,65 @@ export default function App() {
         form.id ??
         `custom:${Date.now()}`,
       name: form.name.trim(),
-      collection: category.name,
+      collection: c.name,
       image: form.image,
       gallery,
       price,
       stock,
-      description:
-        form.description.trim(),
+      description: form.description.trim(),
       sizes,
       colors,
     };
 
-    if (form.id !== null) {
-      const previousProduct = products.find(
-        (item) =>
-          item.id === form.id
-      );
+    setProducts((prev) =>
+      form.id === null
+        ? [...prev, product]
+        : prev.map((p) =>
+            p.id === form.id
+              ? product
+              : p
+          )
+    );
 
-      if (
-        previousProduct?.image &&
-        previousProduct.image !==
-          product.image
-      ) {
-        const deleted = new Set(
-          readArray(KEY.deleted).map(String)
-        );
-
-        deleted.add(
-          `local:${previousProduct.image}`
-        );
-
-        save(
-          KEY.deleted,
-          [...deleted]
-        );
-      }
-
-      setProducts((previous) =>
-        previous.map((item) =>
-          item.id === form.id
-            ? product
-            : item
-        )
-      );
-    } else {
-      setProducts((previous) => [
-        ...previous,
-        product,
-      ]);
-    }
-
-    setForm({
-      ...DEFAULT_FORM,
-    });
+    setForm({ ...EMPTY_PRODUCT });
 
     setMessage(
       "Produk berhasil disimpan."
     );
   }
 
-  function editProduct(product) {
+  function editProduct(p) {
     setForm({
-      id: product.id,
-      name: product.name,
-      collection: product.collection,
-      image: product.image || "",
-
+      id: p.id,
+      name: p.name,
+      collection: p.collection,
+      image: p.image || "",
       gallery:
-        Array.isArray(product.gallery)
-          ? product.gallery.join(",")
-          : "",
-
-      price: String(product.price),
-      stock: String(product.stock),
-      description:
-        product.description || "",
-
+        (p.gallery || []).join(","),
+      price: String(p.price),
+      stock: String(p.stock),
+      description: p.description || "",
       sizes:
-        (product.sizes || []).join(","),
-
+        (p.sizes || []).join(","),
       colors:
-        (product.colors || []).join(","),
+        (p.colors || []).join(","),
     });
 
     window.scrollTo(0, 0);
   }
 
   function deleteProduct(id) {
-    if (
-      orders.some(
-        (order) =>
-          ![
-            "Selesai",
-            "Dibatalkan",
-          ].includes(statusOf(order.status)) &&
-          order.items?.some(
-            (item) =>
-              item.id === id
-          )
-      )
-    ) {
+    const active = orders.some(
+      (o) =>
+        !["Selesai", "Dibatalkan"].includes(
+          status(o.status)
+        ) &&
+        o.items?.some(
+          (i) => i.id === id
+        )
+    );
+
+    if (active) {
       setMessage(
         "Selesaikan pesanan aktif dahulu."
       );
@@ -3520,615 +3128,85 @@ export default function App() {
 
     if (
       !window.confirm(
-        "Yakin ingin menghapus produk?"
+        "Hapus produk ini?"
       )
     ) {
       return;
     }
 
-    const product = products.find(
-      (item) =>
-        item.id === id
+    const p = products.find(
+      (v) => v.id === id
     );
 
     const deleted = new Set(
-      readArray(KEY.deleted).map(String)
+      arr(KEY.deleted).map(String)
     );
 
     deleted.add(String(id));
 
-    if (product?.image) {
-      deleted.add(
-        `local:${product.image}`
-      );
+    if (p?.image) {
+      deleted.add(`local:${p.image}`);
     }
 
-    save(
-      KEY.deleted,
-      [...deleted]
+    store(KEY.deleted, [...deleted]);
+
+    setProducts((prev) =>
+      prev.filter((v) => v.id !== id)
     );
 
-    setProducts((previous) =>
-      previous.filter(
-        (item) => item.id !== id
-      )
+    setCart((prev) =>
+      prev.filter((v) => v.id !== id)
     );
 
-    setCart((previous) =>
-      previous.filter(
-        (item) => item.id !== id
-      )
+    setWishlist((prev) =>
+      prev.filter((v) => v !== id)
     );
 
-    setWishlist((previous) =>
-      previous.filter(
-        (item) => item !== id
-      )
-    );
-
-    setForm({
-      ...DEFAULT_FORM,
-    });
-
-    setMessage(
-      "Produk berhasil dihapus."
-    );
+    setMessage("Produk dihapus.");
   }
 
-  const gridProps = {
-    wishlist,
-    onDetail: openDetail,
-    onWishlist: toggleWishlist,
-    onCart: addToCart,
-  };
-
-  /* ==========================================
-     TAMPILAN WEBSITE
-  ========================================== */
+  /* TAMPILAN */
 
   return (
     <div
       className={`lumina ${
-        page === "admin"
-          ? "admin-mode"
-          : ""
+        page === "admin" ? "admin-mode" : ""
       }`}
     >
-      {/* CSS FITUR TAMBAHAN */}
-
-      <style>{`
-        .lumina .lum-dash-table-wrap {
-          overflow-x: auto;
-        }
-
-        .lumina .lum-dash-table {
-          min-width: 1050px;
-        }
-
-        .lumina .lum-dash-table td,
-        .lumina .lum-dash-table th {
-          padding: 12px;
-          vertical-align: top;
-        }
-
-        .lumina .lum-hint {
-          display: block;
-          color: #826b56;
-          margin-top: 8px;
-        }
-
-        .lumina .lum-payment-detail {
-          margin: 18px 0;
-          padding: 18px;
-          border: 1px solid #e9dcd1;
-          border-radius: 14px;
-          background: #fcf8f5;
-        }
-
-        .lumina .lum-payment-detail button {
-          margin: 8px 0;
-        }
-
-        .lumina .lum-payment-box {
-          padding: 18px;
-          background: #fbf7f3;
-          border: 1px solid #e7d9ca;
-          border-radius: 13px;
-          margin-top: 20px;
-        }
-
-        .lumina .lum-payment-box select {
-          width: 100%;
-          margin: 10px 0;
-        }
-
-        .lumina .lum-between,
-        .lumina .lum-track-head,
-        .lumina .lum-track-meta {
-          display: flex;
-          justify-content: space-between;
-          gap: 14px;
-          flex-wrap: wrap;
-          align-items: center;
-        }
-
-        .lumina .lum-track-card {
-          margin: 16px 0;
-        }
-
-        .lumina .lum-track-head p {
-          margin: 5px 0;
-        }
-
-        .lumina .lum-track-meta {
-          margin: 14px 0;
-        }
-
-        .lumina .lum-payment-badge {
-          background: #f3e9e0;
-          padding: 8px 14px;
-          border-radius: 24px;
-          font-size: 12px;
-        }
-
-        .lumina .lum-track-steps {
-          display: grid;
-          grid-template-columns:
-            repeat(4, minmax(0, 1fr));
-          gap: 10px;
-          margin: 23px 0;
-        }
-
-        .lumina .lum-track-steps > div {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 8px;
-          text-align: center;
-          color: #a2978c;
-        }
-
-        .lumina .lum-track-steps > div > span {
-          width: 34px;
-          height: 34px;
-          border-radius: 50%;
-          background: #eee6df;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .lumina .lum-track-steps > div.complete {
-          color: #467c52;
-          font-weight: 700;
-        }
-
-        .lumina .lum-track-steps > div.complete > span {
-          background: #e0f2e5;
-        }
-
-        .lumina .lum-paid-note {
-          color: #397c46;
-        }
-
-        .lumina .lum-cancel-note {
-          color: #b33636;
-        }
-
-        .lumina .lum-dash-product-row {
-          display: flex;
-          gap: 12px;
-          align-items: center;
-          margin: 12px 0;
-        }
-
-        .lumina .lum-admin-thumb {
-          width: 65px;
-          height: 70px;
-          flex: 0 0 65px;
-        }
-
-        .lumina .lum-admin-thumb img,
-        .lumina .lum-admin-preview img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-        }
-
-        .lumina .lum-admin-preview {
-          height: 190px;
-        }
-
-        .lumina .lum-admin-product-info {
-          flex: 1;
-          min-width: 0;
-        }
-
-        .lumina .lum-extra-gallery {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-          margin: 15px 0;
-        }
-
-        .lumina .lum-report-actions {
-          display: flex;
-          gap: 12px;
-          margin-top: 20px;
-          flex-wrap: wrap;
-        }
-
-        .lumina .lum-analytics {
-          margin: 20px 0;
-        }
-
-        .lumina .lum-analytics-cards {
-          display: grid;
-          grid-template-columns:
-            repeat(4, minmax(0, 1fr));
-          gap: 14px;
-        }
-
-        .lumina .lum-analytics-cards h2 {
-          overflow-wrap: anywhere;
-        }
-
-        .lumina .lum-analytics-panels {
-          display: grid;
-          grid-template-columns: 1.5fr 1fr;
-          gap: 16px;
-          margin: 16px 0;
-        }
-
-        .lumina .lum-mini-chart {
-          display: grid;
-          grid-template-columns:
-            repeat(6, minmax(0, 1fr));
-          gap: 8px;
-          align-items: end;
-          min-height: 180px;
-        }
-
-        .lumina .lum-mini-chart > div {
-          text-align: center;
-        }
-
-        .lumina .lum-chart-track {
-          height: 155px;
-          display: flex;
-          justify-content: center;
-          align-items: flex-end;
-          background: #f7f2ed;
-          border-radius: 8px;
-          overflow: hidden;
-        }
-
-        .lumina .lum-chart-track > div {
-          width: 65%;
-          background: linear-gradient(
-            #d6b299,
-            #84644d
-          );
-          border-radius: 6px 6px 0 0;
-        }
-
-        .lumina .lum-new-shop {
-          max-width: 1250px;
-          margin: auto;
-          padding: 45px 20px;
-        }
-
-        .lumina .lum-shop-heading {
-          text-align: center;
-        }
-
-        .lumina .lum-shop-categories {
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: center;
-          gap: 9px;
-          margin: 25px 0;
-        }
-
-        .lumina .lum-shop-pill {
-          border: 1px solid #ddd1c5;
-          border-radius: 30px;
-          background: white;
-          padding: 9px 16px;
-          cursor: pointer;
-        }
-
-        .lumina .lum-shop-pill.active {
-          background: #302720;
-          color: white;
-        }
-
-        .lumina .lum-shop-toolbar {
-          display: flex;
-          gap: 12px;
-          flex-wrap: wrap;
-          margin: 20px 0;
-        }
-
-        .lumina .lum-shop-search {
-          display: flex;
-          flex: 1;
-          min-width: 220px;
-          align-items: center;
-          gap: 8px;
-          padding: 10px;
-          border: 1px solid #e4d9cf;
-          border-radius: 30px;
-        }
-
-        .lumina .lum-shop-search input {
-          border: 0;
-          flex: 1;
-          outline: 0;
-        }
-
-        .lumina .lum-shop-sort {
-          padding: 10px 16px;
-          border-radius: 30px;
-        }
-
-        .lumina .lum-shop-grid .product-grid {
-          display: grid;
-          grid-template-columns:
-            repeat(2, minmax(0, 1fr));
-          gap: 18px;
-        }
-
-        .lumina .lum-shop-grid .product-card {
-          background: white;
-          border: 1px solid #eee4dc;
-          border-radius: 14px;
-          overflow: hidden;
-        }
-
-        .lumina .lum-shop-grid .product-picture {
-          aspect-ratio: 4 / 5;
-          position: relative;
-          background: #faf8f6;
-        }
-
-        .lumina .lum-shop-grid .image-button {
-          width: 100%;
-          height: 100%;
-          border: 0;
-          background: transparent;
-        }
-
-        .lumina .lum-shop-grid .product-picture img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-          filter: none;
-        }
-
-        .lumina .lum-photo-placeholder {
-          min-height: 100px;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: #f2ebe6;
-        }
-
-        .lumina .lum-home-categories {
-          display: grid;
-          grid-template-columns:
-            repeat(auto-fit, minmax(180px, 1fr));
-          gap: 15px;
-        }
-
-        .lumina .lum-detail-grid {
-          display: grid;
-          grid-template-columns: 1.1fr .9fr;
-          gap: 35px;
-        }
-
-        .lumina .lum-detail-main {
-          height: 500px;
-          background: #faf7f4;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .lumina .lum-detail-main img {
-          max-width: 100%;
-          max-height: 100%;
-          object-fit: contain;
-        }
-
-        .lumina .lum-detail-thumbs {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-          margin-top: 12px;
-        }
-
-        .lumina .lum-detail-thumbs button {
-          width: 90px;
-          height: 95px;
-          padding: 5px;
-          border: 1px solid #ddd1c4;
-          background: white;
-        }
-
-        .lumina .lum-detail-thumbs button.active {
-          border: 2px solid #85644a;
-        }
-
-        .lumina .lum-detail-thumbs img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-        }
-
-        .lumina .lum-detail-data label {
-          display: block;
-          margin: 18px 0 9px;
-        }
-
-        .lumina .lum-detail-data .wide {
-          margin-top: 12px;
-        }
-
-        .lumina .lum-review-box {
-          margin-top: 40px;
-        }
-
-        .lumina .lum-review-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 20px;
-        }
-
-        .lumina .lum-review-grid .panel {
-          margin: 12px 0;
-        }
-
-        .lumina .lum-review-grid textarea {
-          width: 100%;
-          padding: 12px;
-        }
-
-        .lumina .lum-stars {
-          color: #b67d32;
-        }
-
-        .lumina .lum-rating-buttons button {
-          background: transparent;
-          border: 0;
-          color: #bbb;
-          font-size: 27px;
-          cursor: pointer;
-        }
-
-        .lumina .lum-rating-buttons button.active {
-          color: #db9f3d;
-        }
-
-        .lumina .lum-gallery {
-          display: grid;
-          grid-template-columns:
-            repeat(auto-fill, minmax(150px, 1fr));
-          gap: 14px;
-        }
-
-        .lumina .lum-gallery img {
-          width: 100%;
-          height: 180px;
-          object-fit: contain;
-        }
-
-        .lumina .lum-cart-photo {
-          width: 100px;
-          height: 115px;
-          flex: 0 0 100px;
-        }
-
-        .lumina .lum-cart-photo img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-        }
-
-        .lumina .lum-category-stats {
-          display: flex;
-          gap: 12px;
-          flex-wrap: wrap;
-        }
-
-        .lumina .lum-category-stats button {
-          padding: 14px;
-        }
-
-        @media (max-width: 850px) {
-          .lumina .lum-analytics-cards {
-            grid-template-columns:
-              repeat(2, minmax(0, 1fr));
-          }
-
-          .lumina .lum-analytics-panels,
-          .lumina .lum-detail-grid,
-          .lumina .lum-review-grid {
-            grid-template-columns: 1fr;
-          }
-        }
-
-        @media (max-width: 600px) {
-          .lumina .lum-shop-grid .product-grid {
-            gap: 10px;
-          }
-
-          .lumina .lum-analytics-cards {
-            grid-template-columns: 1fr;
-          }
-
-          .lumina .lum-track-steps {
-            gap: 4px;
-          }
-
-          .lumina .lum-track-steps > div small {
-            font-size: 10px;
-          }
-        }
-      `}</style>
-
-      {/* NAVBAR */}
-
       {page !== "admin" && (
         <>
           <div className="announcement">
-            ✦ LUMINA STORE — PREMIUM FASHION
-            & LIFESTYLE
+            ✦ LUMINA STORE — PREMIUM FASHION & LIFESTYLE
           </div>
 
           <header className="navbar">
             <button
               className="logo"
-              onClick={() => navigate("home")}
+              onClick={() => go("home")}
             >
               LUMINA<span>.</span>
             </button>
 
             <nav className="nav-menu">
-              <button
-                onClick={() => navigate("home")}
-              >
+              <button onClick={() => go("home")}>
                 Home
               </button>
 
-              <button
-                onClick={() =>
-                  chooseCategory("All")
-                }
-              >
+              <button onClick={() => choose("All")}>
                 Shop
               </button>
 
-              <button
-                onClick={() =>
-                  chooseCategory("Pria")
-                }
-              >
+              <button onClick={() => choose("Pria")}>
                 Men
               </button>
 
-              <button
-                onClick={() =>
-                  chooseCategory("Wanita")
-                }
-              >
+              <button onClick={() => choose("Wanita")}>
                 Women
               </button>
 
               <button
                 onClick={() =>
-                  chooseCategory("Batik Wanita")
+                  choose("Batik Wanita")
                 }
               >
                 Batik
@@ -4136,24 +3214,20 @@ export default function App() {
 
               <button
                 onClick={() =>
-                  chooseCategory("Tas Wanita")
+                  choose("Tas Wanita")
                 }
               >
                 Bags
               </button>
 
               <button
-                onClick={() =>
-                  navigate("wishlist")
-                }
+                onClick={() => go("wishlist")}
               >
                 ♡ Wishlist ({wishlist.length})
               </button>
 
               <button
-                onClick={() =>
-                  navigate("admin")
-                }
+                onClick={() => go("admin")}
               >
                 Admin Demo
               </button>
@@ -4161,9 +3235,7 @@ export default function App() {
               {customer ? (
                 <>
                   <button
-                    onClick={() =>
-                      navigate("account")
-                    }
+                    onClick={() => go("account")}
                   >
                     Halo, {customer.name}
                   </button>
@@ -4174,9 +3246,7 @@ export default function App() {
                 </>
               ) : (
                 <button
-                  onClick={() =>
-                    openAuth("home")
-                  }
+                  onClick={() => auth("home")}
                 >
                   Login / Register
                 </button>
@@ -4185,17 +3255,15 @@ export default function App() {
 
             <button
               className="cart-link"
-              onClick={() =>
-                navigate("cart")
-              }
+              onClick={() => go("cart")}
             >
-              🛍 Cart ({cartCount})
+              🛍 Cart ({count})
             </button>
           </header>
         </>
       )}
 
-      {/* HOMEPAGE */}
+      {/* HOME */}
 
       {page === "home" && (
         <>
@@ -4212,16 +3280,14 @@ export default function App() {
               </h1>
 
               <p>
-                Temukan pakaian, batik,
-                sepatu, tas, dan aksesori
-                untuk gaya terbaikmu.
+                Temukan fashion pria, wanita,
+                batik, sepatu, tas, dan aksesori
+                pilihan.
               </p>
 
               <button
                 className="btn-dark"
-                onClick={() =>
-                  chooseCategory("All")
-                }
+                onClick={() => choose("All")}
               >
                 Explore Collection →
               </button>
@@ -4232,30 +3298,30 @@ export default function App() {
             </div>
 
             <div className="hero-photo">
-              <ProductImage
+              <Photo
                 src={hero}
-                alt="LUMINA Fashion"
+                alt="LUMINA fashion collection"
               />
             </div>
           </section>
 
           <section className="perks">
             <div>
-              ✧{" "}
+              ✧
               <strong>Premium Fashion</strong>
               <span>Modern & Elegant</span>
             </div>
 
             <div>
-              ♡{" "}
+              ♡
               <strong>
                 {PHOTOS.length} Foto Koleksi
               </strong>
-              <span>Katalog Foto Lokal</span>
+              <span>Katalog gambar lokal</span>
             </div>
 
             <div>
-              ✦{" "}
+              ✦
               <strong>Seven Collections</strong>
               <span>Fashion For Everyone</span>
             </div>
@@ -4271,57 +3337,26 @@ export default function App() {
             </h2>
 
             <div className="lum-home-categories">
-              {CATEGORIES.map((category) => {
+              {CATEGORIES.map((c) => {
                 const cover = products.find(
-                  (product) =>
-                    product.collection ===
-                      category.name &&
-                    product.image
+                  (p) =>
+                    p.collection === c.name &&
+                    p.image
                 );
 
                 return (
                   <button
-                    key={category.name}
+                    key={c.name}
                     onClick={() =>
-                      chooseCategory(
-                        category.name
-                      )
+                      choose(c.name)
                     }
-                    style={{
-                      position: "relative",
-                      height: 280,
-                      border: 0,
-                      borderRadius: 12,
-                      overflow: "hidden",
-                      background: "#eee1d6",
-                      cursor: "pointer",
-                    }}
                   >
-                    <ProductImage
+                    <Photo
                       src={cover?.image}
-                      alt={category.label}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "contain",
-                      }}
+                      alt={c.label}
                     />
 
-                    <span
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        display: "flex",
-                        alignItems: "end",
-                        padding: 18,
-                        color: "white",
-                        fontWeight: 700,
-                        background:
-                          "linear-gradient(transparent,rgba(0,0,0,.65))",
-                      }}
-                    >
-                      {category.label}
-                    </span>
+                    <span>{c.label}</span>
                   </button>
                 );
               })}
@@ -4337,19 +3372,28 @@ export default function App() {
               Featured Collection
             </h2>
 
+            <p className="section-description">
+              Pilihan fashion untuk menyempurnakan
+              gaya sehari-hari.
+            </p>
+
             <ProductGrid
-              products={featured}
-              {...gridProps}
+              products={products
+                .filter((p) => p.image)
+                .slice(0, 8)}
+              favorites={wishlist}
+              reviews={reviews}
+              onDetail={openProduct}
+              onFavorite={toggleFavorite}
+              onCart={addToCart}
             />
 
             <div className="center action-space">
               <button
                 className="btn-dark"
-                onClick={() =>
-                  chooseCategory("All")
-                }
+                onClick={() => choose("All")}
               >
-                View All Products →
+                Lihat Semua Produk →
               </button>
             </div>
           </section>
@@ -4361,14 +3405,15 @@ export default function App() {
       {page === "shop" && (
         <main className="lum-new-shop">
           <div className="lum-shop-heading">
-            <small>
+            <p className="eyebrow">
               DISCOVER YOUR STYLE
-            </small>
+            </p>
 
             <h1>Shop Our Collection</h1>
 
             <p>
-              Temukan koleksi LUMINA STORE.
+              Temukan produk terbaik dari
+              LUMINA STORE.
             </p>
           </div>
 
@@ -4378,24 +3423,24 @@ export default function App() {
                 name: "All",
                 label: "Semua",
               },
-              ...CATEGORIES.map((category) => ({
-                name: category.name,
-                label: category.label,
+              ...CATEGORIES.map((c) => ({
+                name: c.name,
+                label: c.label,
               })),
-            ].map((item) => (
+            ].map((c) => (
               <button
-                key={item.name}
-                className={
-                  category === item.name
-                    ? "lum-shop-pill active"
-                    : "lum-shop-pill"
-                }
+                key={c.name}
+                className={`lum-shop-pill ${
+                  category === c.name
+                    ? "active"
+                    : ""
+                }`}
                 onClick={() => {
-                  setCategory(item.name);
+                  setCategory(c.name);
                   setSearch("");
                 }}
               >
-                {item.label}
+                {c.label}
               </button>
             ))}
           </div>
@@ -4405,19 +3450,17 @@ export default function App() {
               <span>⌕</span>
 
               <input
-                placeholder="Cari produk..."
                 type="search"
                 value={search}
-                onChange={(event) =>
-                  setSearch(event.target.value)
+                placeholder="Cari produk..."
+                onChange={(e) =>
+                  setSearch(e.target.value)
                 }
               />
 
               {search && (
                 <button
-                  onClick={() =>
-                    setSearch("")
-                  }
+                  onClick={() => setSearch("")}
                 >
                   ×
                 </button>
@@ -4427,8 +3470,8 @@ export default function App() {
             <select
               className="lum-shop-sort"
               value={sort}
-              onChange={(event) =>
-                setSort(event.target.value)
+              onChange={(e) =>
+                setSort(e.target.value)
               }
             >
               <option value="default">
@@ -4449,36 +3492,69 @@ export default function App() {
             </select>
           </div>
 
-          <p>{shown.length} produk ditemukan</p>
+          <div className="lum-shop-count">
+            <span>
+              {visible.length} produk ditemukan
+            </span>
 
-          <div className="lum-shop-grid">
-            <ProductGrid
-              products={shown}
-              {...gridProps}
-            />
+            <span>
+              Menampilkan{" "}
+              {Math.min(
+                shownCount,
+                visible.length
+              )}
+            </span>
           </div>
+
+          <ProductGrid
+            products={visible.slice(
+              0,
+              shownCount
+            )}
+            favorites={wishlist}
+            reviews={reviews}
+            onDetail={openProduct}
+            onFavorite={toggleFavorite}
+            onCart={addToCart}
+          />
+
+          {shownCount < visible.length && (
+            <div className="center action-space">
+              <button
+                className="btn-light"
+                onClick={() =>
+                  setShownCount(
+                    (n) => n + 12
+                  )
+                }
+              >
+                Tampilkan Lebih Banyak (
+                {visible.length - shownCount} tersisa) ↓
+              </button>
+            </div>
+          )}
         </main>
       )}
 
-      {/* DETAIL PRODUK */}
+      {/* DETAIL */}
 
       {page === "detail" && selected && (
-        <PremiumDetail
+        <ProductDetail
           key={selected.id}
           product={selected}
           customer={customer}
           size={size}
           color={color}
-          setSize={setSize}
-          setColor={setColor}
+          onSize={setSize}
+          onColor={setColor}
           onCart={addToCart}
-          onWishlist={toggleWishlist}
-          isWishlisted={wishlist.includes(
+          onFavorite={toggleFavorite}
+          favorite={wishlist.includes(
             selected.id
           )}
-          onBack={() =>
-            navigate("shop")
-          }
+          reviews={reviews}
+          onReview={reviewProduct}
+          onBack={() => go("shop")}
         />
       )}
 
@@ -4492,10 +3568,13 @@ export default function App() {
 
           <ProductGrid
             products={products.filter(
-              (product) =>
-                wishlist.includes(product.id)
+              (p) => wishlist.includes(p.id)
             )}
-            {...gridProps}
+            favorites={wishlist}
+            reviews={reviews}
+            onDetail={openProduct}
+            onFavorite={toggleFavorite}
+            onCart={addToCart}
           />
         </main>
       )}
@@ -4514,53 +3593,45 @@ export default function App() {
                 <p>Keranjang masih kosong.</p>
               )}
 
-              {validCart.map((item) => (
+              {validCart.map((i) => (
                 <div
                   className="cart-row"
-                  key={item.key}
+                  key={i.key}
                 >
                   <div className="lum-cart-photo">
-                    <ProductImage
-                      src={item.image}
-                      alt={item.name}
+                    <Photo
+                      src={i.image}
+                      alt={i.name}
                     />
                   </div>
 
                   <div className="grow">
-                    <h3>{item.name}</h3>
+                    <h3>
+                      {prettyName(i.name)}
+                    </h3>
 
                     <p>
-                      {item.size}
-                      {" / "}
-                      {item.color}
+                      {i.size} / {i.color}
                     </p>
 
                     <strong>
-                      {money(item.price)}
+                      {rp(i.price)}
                     </strong>
 
                     <div className="quantity">
                       <button
                         onClick={() =>
-                          changeQty(
-                            item.key,
-                            -1
-                          )
+                          changeQty(i.key, -1)
                         }
                       >
                         −
                       </button>
 
-                      <span>
-                        {item.quantity}
-                      </span>
+                      <span>{i.quantity}</span>
 
                       <button
                         onClick={() =>
-                          changeQty(
-                            item.key,
-                            1
-                          )
+                          changeQty(i.key, 1)
                         }
                       >
                         +
@@ -4568,15 +3639,15 @@ export default function App() {
 
                       <button
                         onClick={() =>
-                          setCart((previous) =>
-                            previous.filter(
-                              (entry) =>
-                                (entry.key ||
+                          setCart((prev) =>
+                            prev.filter(
+                              (v) =>
+                                (v.key ||
                                   JSON.stringify([
-                                    entry.id,
-                                    entry.size,
-                                    entry.color,
-                                  ])) !== item.key
+                                    v.id,
+                                    v.size,
+                                    v.color,
+                                  ])) !== i.key
                             )
                           )
                         }
@@ -4592,19 +3663,23 @@ export default function App() {
             <div className="panel summary">
               <h2>Ringkasan Belanja</h2>
 
-              <p>Jumlah: {cartCount}</p>
+              <div className="lum-between">
+                <span>Jumlah Produk</span>
+                <b>{count}</b>
+              </div>
 
-              <p>
-                Subtotal: {money(subtotal)}
-              </p>
+              <div className="lum-between">
+                <span>Subtotal</span>
+                <b>{rp(subtotal)}</b>
+              </div>
 
               <button
                 className="btn-dark wide"
                 disabled={!validCart.length}
                 onClick={() =>
                   customer
-                    ? navigate("checkout")
-                    : openAuth("checkout")
+                    ? go("checkout")
+                    : auth("checkout")
                 }
               >
                 Checkout →
@@ -4618,11 +3693,24 @@ export default function App() {
 
       {page === "auth" && (
         <AuthPage
-          onSuccess={loggedIn}
-          onBack={() =>
-            navigate("home")
-          }
+          onSuccess={login}
+          onBack={() => go("home")}
         />
+      )}
+
+      {/* CHECKOUT TANPA LOGIN */}
+
+      {page === "checkout" && !customer && (
+        <main className="container section center">
+          <h2>Login untuk Checkout</h2>
+
+          <button
+            className="btn-dark"
+            onClick={() => auth("checkout")}
+          >
+            Login
+          </button>
+        </main>
       )}
 
       {/* CHECKOUT */}
@@ -4636,71 +3724,139 @@ export default function App() {
           <div className="two-column">
             <form
               className="panel form-stack"
-              onSubmit={checkoutOrder}
+              onSubmit={placeOrder}
             >
               <h2>Informasi Pembeli</h2>
 
-              <label>Nama Lengkap</label>
+              <label>
+                Nama Lengkap
+                <input
+                  required
+                  value={checkout.name}
+                  onChange={(e) =>
+                    setCheckout((p) => ({
+                      ...p,
+                      name: e.target.value,
+                    }))
+                  }
+                />
+              </label>
 
-              <input
-                required
-                value={checkout.name}
-                onChange={(event) =>
-                  setCheckout((previous) => ({
-                    ...previous,
-                    name: event.target.value,
-                  }))
-                }
-              />
+              <label>
+                Nomor Telepon
+                <input
+                  required
+                  value={checkout.phone}
+                  onChange={(e) =>
+                    setCheckout((p) => ({
+                      ...p,
+                      phone: e.target.value,
+                    }))
+                  }
+                />
+              </label>
 
-              <label>Nomor Telepon</label>
+              <label>
+                Alamat Pengiriman
+                <textarea
+                  rows={4}
+                  required
+                  value={checkout.address}
+                  onChange={(e) =>
+                    setCheckout((p) => ({
+                      ...p,
+                      address: e.target.value,
+                    }))
+                  }
+                />
+              </label>
 
-              <input
-                required
-                value={checkout.phone}
-                onChange={(event) =>
-                  setCheckout((previous) => ({
-                    ...previous,
-                    phone: event.target.value,
-                  }))
-                }
-              />
+              <label>
+                Pengiriman
+                <select
+                  value={checkout.shipping}
+                  onChange={(e) =>
+                    setCheckout((p) => ({
+                      ...p,
+                      shipping: e.target.value,
+                    }))
+                  }
+                >
+                  <option value="regular">
+                    Regular Rp12.000
+                  </option>
 
-              <label>Alamat Pengiriman</label>
+                  <option value="express">
+                    Express Rp25.000
+                  </option>
+                </select>
+              </label>
 
-              <textarea
-                rows={4}
-                required
-                value={checkout.address}
-                onChange={(event) =>
-                  setCheckout((previous) => ({
-                    ...previous,
-                    address:
-                      event.target.value,
-                  }))
-                }
-              />
+              <div className="lum-payment-box">
+                <h3>Voucher & Diskon</h3>
 
-              <label>Pengiriman</label>
+                <p className="muted">
+                  LUMINA10: 10% min. Rp100.000
+                  {" · "}
+                  FASHION20: 20% min. Rp300.000
+                  {" · "}
+                  WELCOME15: Rp15.000 min.
+                  Rp150.000.
+                </p>
 
-              <select
-                value={checkout.shipping}
-                onChange={(event) =>
-                  setCheckout((previous) => ({
-                    ...previous,
-                    shipping:
-                      event.target.value,
-                  }))
-                }
-              >
-                <option value="regular">
-                  Regular Rp12.000
-                </option>
+                <div className="lum-voucher-controls">
+                  <input
+                    value={voucherInput}
+                    maxLength={24}
+                    placeholder="Kode voucher"
+                    onChange={(e) => {
+                      setVoucherInput(
+                        e.target.value.toUpperCase()
+                      );
 
-                <option value="express">
-                  Express Rp25.000
-                </option>
-              </select>
+                      setAppliedVoucher("");
+                      setVoucherMessage("");
+                    }}
+                  />
+
+                  <button
+                    type="button"
+                    className="btn-dark"
+                    disabled={!voucherInput.trim()}
+                    onClick={applyVoucher}
+                  >
+                    Gunakan
+                  </button>
+                </div>
+
+                {applied?.ok && (
+                  <button
+                    type="button"
+                    className="btn-light"
+                    onClick={clearVoucher}
+                  >
+                    Hapus Voucher
+                  </button>
+                )}
+
+                {(voucherMessage ||
+                  (applied &&
+                    !applied.ok)) && (
+                  <p
+                    className={
+                      applied?.ok
+                        ? "lum-voucher-success"
+                        : "lum-voucher-error"
+                    }
+                    role="status"
+                  >
+                    {applied &&
+                    !applied.ok
+                      ? applied.message
+                      : voucherMessage}
+                  </p>
+                )}
+              </div>
 
               <div className="lum-payment-box">
                 <h3>
@@ -4709,34 +3865,32 @@ export default function App() {
 
                 <select
                   value={checkout.payment}
-                  onChange={(event) =>
-                    setCheckout((previous) => ({
-                      ...previous,
-                      payment:
-                        event.target.value,
+                  onChange={(e) =>
+                    setCheckout((p) => ({
+                      ...p,
+                      payment: e.target.value,
                     }))
                   }
                 >
-                  {PAYMENT_METHODS.map(
-                    (method) => (
-                      <option
-                        value={method.value}
-                        key={method.value}
-                      >
-                        {method.label}
-                      </option>
-                    )
-                  )}
+                  {METHODS.map((m) => (
+                    <option
+                      value={m.value}
+                      key={m.value}
+                    >
+                      {m.label}
+                    </option>
+                  ))}
                 </select>
 
                 <p className="muted">
-                  {checkout.payment === "cod"
-                    ? "COD: pembayaran saat paket diterima."
-                    : "Transfer/QRIS: setelah checkout, Admin akan melakukan konfirmasi simulasi. Tidak ada transaksi uang sungguhan."}
+                  Tidak ada perpindahan uang
+                  sungguhan. Konfirmasi dilakukan
+                  di Admin Demo.
                 </p>
               </div>
 
               <button
+                type="submit"
                 className="btn-dark wide"
                 disabled={!validCart.length}
               >
@@ -4744,120 +3898,134 @@ export default function App() {
               </button>
             </form>
 
-            <div className="panel summary">
+            <aside className="panel summary">
               <h2>Ringkasan Pesanan</h2>
 
-              <p>
-                Subtotal: {money(subtotal)}
-              </p>
+              <div className="lum-between">
+                <span>Subtotal</span>
+                <b>{rp(subtotal)}</b>
+              </div>
 
-              <p>
-                Ongkir: {money(delivery)}
-              </p>
+              <div className="lum-between">
+                <span>Voucher</span>
+                <b>
+                  {applied?.ok
+                    ? applied.code
+                    : "Tidak digunakan"}
+                </b>
+              </div>
 
-              <p>
-                Pembayaran:{" "}
-                {paymentName(
-                  checkout.payment
-                )}
-              </p>
+              <div className="lum-between">
+                <span>Diskon</span>
+                <b className="lum-voucher-success">
+                  −{rp(discount)}
+                </b>
+              </div>
 
-              <h3>
-                Total:{" "}
-                {money(
-                  subtotal + delivery
-                )}
-              </h3>
-            </div>
+              <div className="lum-between">
+                <span>Ongkir</span>
+                <b>{rp(shipping)}</b>
+              </div>
+
+              <div className="lum-between">
+                <span>Pembayaran</span>
+                <b>
+                  {paymentLabel(
+                    checkout.payment
+                  )}
+                </b>
+              </div>
+
+              <hr />
+
+              <div className="lum-between lum-grand-total">
+                <b>Total Pembayaran</b>
+
+                <strong>
+                  {rp(total)}
+                </strong>
+              </div>
+            </aside>
           </div>
         </main>
       )}
 
-      {page === "checkout" && !customer && (
-        <main className="container section center">
-          <h2>
-            Login sebelum checkout
-          </h2>
-
-          <button
-            className="btn-dark"
-            onClick={() =>
-              openAuth("checkout")
-            }
-          >
-            Login
-          </button>
-        </main>
-      )}
-
-      {/* DASHBOARD PELANGGAN + TRACKING */}
+      {/* DASHBOARD PELANGGAN */}
 
       {page === "account" && customer && (
         <>
           <CustomerTracking
-            orders={myOrders}
+            orders={mine}
           />
 
           <CustomerDashboard
             customer={customer}
-            orders={myOrders}
-            onBack={() =>
-              chooseCategory("All")
-            }
+            orders={mine}
+            onBack={() => choose("All")}
             onLogout={logout}
           />
         </>
       )}
 
-      {/* PESANAN BERHASIL */}
+      {/* SUKSES */}
 
       {page === "success" && (
         <main className="container section center">
           <div className="panel success-panel">
             <h1>✓ Pesanan Berhasil!</h1>
 
-            {orders[0] && (
+            {currentOrder && (
               <>
                 <p>
-                  No. Pesanan:{" "}
-                  {orders[0].id}
+                  Nomor Pesanan:{" "}
+                  <b>{currentOrder.id}</b>
                 </p>
 
                 <p>
                   Metode:{" "}
-                  {paymentName(
-                    orders[0].paymentMethod
+                  {paymentLabel(
+                    currentOrder.paymentMethod
                   )}
                 </p>
 
                 <p>
-                  Status pembayaran:{" "}
-                  {paymentStatus(
-                    orders[0]
-                  )}
+                  Status Bayar:{" "}
+                  {payStatus(currentOrder)}
                 </p>
+
+                <p>
+                  Voucher:{" "}
+                  {currentOrder.voucherCode ||
+                    "Tidak digunakan"}
+                </p>
+
+                <p>
+                  Diskon: −
+                  {rp(currentOrder.discount || 0)}
+                </p>
+
+                <h2>
+                  Total:{" "}
+                  {rp(currentOrder.total)}
+                </h2>
               </>
             )}
 
             <p>
-              Pesanan simulasi dapat dilacak
-              di dashboard pelanggan.
+              Pesanan simulasi bisa dilihat
+              pada Dashboard Pelanggan.
             </p>
 
             <button
               className="btn-dark"
-              onClick={() =>
-                navigate("account")
-              }
+              onClick={() => go("account")}
             >
               Lihat Pesanan Saya →
             </button>
 
             <button
               className="btn-light"
-              onClick={() =>
-                chooseCategory("All")
-              }
+              onClick={() => choose("All")}
             >
               Lanjut Belanja
             </button>
@@ -4865,7 +4033,7 @@ export default function App() {
         </main>
       )}
 
-      {/* DASHBOARD ADMIN */}
+      {/* ADMIN */}
 
       {page === "admin" && (
         <AdminDashboard
@@ -4877,10 +4045,8 @@ export default function App() {
           onEdit={editProduct}
           onDelete={deleteProduct}
           onStatus={changeStatus}
-          onPayment={confirmPayment}
-          onBack={() =>
-            navigate("home")
-          }
+          onPay={confirmPayment}
+          onBack={() => go("home")}
         />
       )}
 
@@ -4890,10 +4056,7 @@ export default function App() {
         <footer className="footer">
           <div>
             <h2>LUMINA.</h2>
-
-            <p>
-              Premium Fashion & Lifestyle
-            </p>
+            <p>Premium Fashion & Lifestyle</p>
           </div>
 
           <p>
@@ -4901,13 +4064,10 @@ export default function App() {
           </p>
 
           <p>
-            © {new Date().getFullYear()}
-            {" "}LUMINA STORE
+            © {new Date().getFullYear()} LUMINA STORE
           </p>
         </footer>
       )}
-
-      {/* NOTIFIKASI */}
 
       {message && (
         <div
@@ -4917,9 +4077,8 @@ export default function App() {
           <span>{message}</span>
 
           <button
-            onClick={() =>
-              setMessage("")
-            }
+            type="button"
+            onClick={() => setMessage("")}
           >
             ×
           </button>
