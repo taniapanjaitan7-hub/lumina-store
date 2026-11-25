@@ -1013,7 +1013,7 @@ export default function App() {
       <div><h2>LUMINA.</h2><p>Premium Fashion & Lifestyle</p></div>
       <p>Men • Women • Batik • Shoes • Bags</p>
       <p>© {new Date().getFullYear()} LUMINA STORE</p>
-    </footer>}
+    </footer>
     {message && <div className="toast" role="status"><span>{message}</span>
       <button type="button" onClick={()=>setMessage("")}>×</button></div>}
   </div>;
