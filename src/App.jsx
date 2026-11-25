@@ -4111,3 +4111,107 @@ export default function App() {
     </div>
   );
 }
+
+
+/* =========================================
+   TAHAP 6 - LUMINA MOBILE RESPONSIVE
+========================================= */
+
+@media (max-width: 768px) {
+
+  .lumina:not(.admin-mode) .navbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+
+  .lumina .nav-menu {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 14px;
+    width: 100%;
+    padding: 8px 0;
+    scrollbar-width: thin;
+  }
+
+  .lumina .nav-menu button {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .lumina .hero {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .lumina .hero-copy h1 {
+    font-size: clamp(30px, 7vw, 45px);
+    line-height: 1.15;
+  }
+
+  .lumina .product-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .lumina .product-card {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .lumina .product-card h3 {
+    overflow-wrap: anywhere;
+  }
+
+  .lumina .lum-premium-filter-panel {
+    padding: 18px;
+    margin: 18px 0;
+  }
+
+  .lumina .lum-premium-filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .lumina .lum-shop-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .lumina .lum-shop-search,
+  .lumina .lum-shop-sort {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 480px) {
+
+  .lumina .product-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lumina .lum-premium-filter-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lumina .lum-reset-filter {
+    width: 100%;
+  }
+
+  .lumina .product-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .lumina .product-actions button {
+    flex: 1;
+    min-width: 110px;
+  }
+}
