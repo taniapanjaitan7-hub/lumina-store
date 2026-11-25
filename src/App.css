@@ -1713,3 +1713,105 @@ textarea:focus-visible {
     animation: none !important;
   }
 }
+
+
+/* LUMINA — PERBAIKAN FOTO DETAIL PRODUK */
+
+.lumina .lum-detail-main {
+  width: 100%;
+  height: 580px;
+  max-height: none;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #f7f1eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lumina .lum-detail-main img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+@media (max-width: 620px) {
+  .lumina .lum-detail-main {
+    height: 400px;
+  }
+}
+
+
+/* ==========================================
+   LUMINA STORE
+   PREMIUM PRODUCT DETAIL IMAGE FIX
+========================================== */
+
+.lumina .lum-detail-main {
+  width: 100%;
+  height: 620px;
+  max-height: none;
+  min-height: 0;
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  background: #f8f4f0;
+  border: 1px solid #eadfd5;
+  border-radius: 18px;
+}
+
+.lumina .lum-detail-main img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center center;
+}
+
+.lumina .lum-detail-thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.lumina .lum-detail-thumbs button {
+  width: 85px;
+  height: 95px;
+  padding: 5px;
+  border: 1px solid #e5d9ce;
+  border-radius: 10px;
+  background: white;
+  overflow: hidden;
+}
+
+.lumina .lum-detail-thumbs button.active {
+  border: 2px solid #a57d61;
+}
+
+.lumina .lum-detail-thumbs img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+@media (max-width: 768px) {
+  .lumina .lum-detail-main {
+    height: 460px;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .lumina .lum-detail-main {
+    height: 380px;
+  }
+}
