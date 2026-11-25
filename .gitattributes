@@ -1,4 +1,6 @@
+
+
 *.js linguist-language=JavaScript
 *.jsx linguist-language=JavaScript
-*.css linguist-detectable=false
-*.html linguist-detectable=false
+*.css linguist-language=CSS linguist-detectable
+*.html linguist-language=HTML linguist-detectable

@@ -2390,3 +2390,149 @@ textarea:focus-visible {
     transition: none;
   }
 }
+
+/* ==========================================
+   LUMINA STORE — TAHAP 5
+   FILTER PRODUK PREMIUM
+========================================== */
+
+.lumina .lum-premium-filter-panel {
+  margin: 24px 0 28px;
+  padding: 26px;
+  background: linear-gradient(135deg, #ffffff, #fbf5ef);
+  border: 1px solid #e9dcd1;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(60, 42, 28, 0.06);
+}
+
+.lumina .lum-premium-filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 23px;
+}
+
+.lumina .lum-filter-eyebrow {
+  color: #a57d61;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.lumina .lum-premium-filter-header h3 {
+  margin: 7px 0;
+  color: #30251f;
+  font-size: 21px;
+}
+
+.lumina .lum-premium-filter-header p {
+  margin: 0;
+  color: #8b7a6e;
+  font-size: 12px;
+}
+
+.lumina .lum-premium-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(150px, .9fr);
+  gap: 14px;
+  align-items: end;
+}
+
+.lumina .lum-premium-filter-grid > label {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  color: #58483d;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.lumina .lum-premium-filter-grid select {
+  width: 100%;
+  min-height: 47px;
+  padding: 10px 13px;
+  background: #ffffff;
+  border: 1px solid #e5d7cc;
+  border-radius: 9px;
+  color: #30251f;
+  cursor: pointer;
+}
+
+.lumina .lum-premium-filter-grid select:focus {
+  outline: none;
+  border-color: #a57d61;
+  box-shadow: 0 0 0 3px rgba(165, 125, 97, 0.12);
+}
+
+.lumina .lum-premium-filter-grid .lum-filter-stock {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  min-height: 47px;
+  padding: 10px;
+  background: #f4e8dd;
+  border: 1px solid #e6d6c8;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.lumina .lum-filter-stock input {
+  width: 17px;
+  height: 17px;
+  accent-color: #8e6b55;
+  cursor: pointer;
+}
+
+.lumina .lum-reset-filter {
+  padding: 11px 17px;
+  background: #fff;
+  border: 1px solid #d9c3b1;
+  border-radius: 9px;
+  color: #845f45;
+  font-size: 12px;
+  font-weight: 700;
+  transition: .2s ease;
+}
+
+.lumina .lum-reset-filter:hover {
+  background: #30251f;
+  border-color: #30251f;
+  color: #ffffff;
+}
+
+.lumina .lum-filter-result {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #eee3da;
+  text-align: right;
+  color: #8e6b55;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+@media (max-width: 950px) {
+  .lumina .lum-premium-filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .lumina .lum-premium-filter-panel {
+    padding: 17px;
+    border-radius: 14px;
+  }
+
+  .lumina .lum-premium-filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lumina .lum-reset-filter {
+    width: 100%;
+  }
+
+  .lumina .lum-premium-filter-header h3 {
+    font-size: 18px;
+  }
+}

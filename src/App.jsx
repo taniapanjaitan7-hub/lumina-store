@@ -8,17 +8,61 @@ import { downloadTransactionsPDF } from "./utils/reportPdf.js";
 import productImages from "./product-images.json";
 import "./App.css";
 
-// LUMINA STORE — Product Card Premium
-// Data localStorage dan fitur transaksi lama dipertahankan.
+/* =========================================================
+   LUMINA STORE — REACT E-COMMERCE
+   TAHAP 5: FILTER PRODUK PREMIUM
+   ========================================================= */
 
 const CATEGORIES = [
-  { folder: "baju pria", name: "Pria", label: "Baju Pria", price: 179000, sizes: ["S", "M", "L", "XL", "XXL"] },
-  { folder: "baju wanita", name: "Wanita", label: "Baju Wanita", price: 199000, sizes: ["S", "M", "L", "XL", "XXL"] },
-  { folder: "batik wanita", name: "Batik Wanita", label: "Batik", price: 235000, sizes: ["S", "M", "L", "XL", "XXL"] },
-  { folder: "sepatu pria", name: "Sepatu Pria", label: "Sepatu Pria", price: 295000, sizes: ["39", "40", "41", "42", "43", "44"] },
-  { folder: "sepatu wanita", name: "Sepatu Wanita", label: "Sepatu Wanita", price: 245000, sizes: ["35", "36", "37", "38", "39", "40"] },
-  { folder: "tas wanita", name: "Tas Wanita", label: "Tas", price: 249000, sizes: ["All Size"] },
-  { folder: "aksesoris wanita", name: "Accessories", label: "Aksesori", price: 129000, sizes: ["All Size"] },
+  {
+    folder: "baju pria",
+    name: "Pria",
+    label: "Baju Pria",
+    price: 179000,
+    sizes: ["S", "M", "L", "XL", "XXL"],
+  },
+  {
+    folder: "baju wanita",
+    name: "Wanita",
+    label: "Baju Wanita",
+    price: 199000,
+    sizes: ["S", "M", "L", "XL", "XXL"],
+  },
+  {
+    folder: "batik wanita",
+    name: "Batik Wanita",
+    label: "Batik",
+    price: 235000,
+    sizes: ["S", "M", "L", "XL", "XXL"],
+  },
+  {
+    folder: "sepatu pria",
+    name: "Sepatu Pria",
+    label: "Sepatu Pria",
+    price: 295000,
+    sizes: ["39", "40", "41", "42", "43", "44"],
+  },
+  {
+    folder: "sepatu wanita",
+    name: "Sepatu Wanita",
+    label: "Sepatu Wanita",
+    price: 245000,
+    sizes: ["35", "36", "37", "38", "39", "40"],
+  },
+  {
+    folder: "tas wanita",
+    name: "Tas Wanita",
+    label: "Tas",
+    price: 249000,
+    sizes: ["All Size"],
+  },
+  {
+    folder: "aksesoris wanita",
+    name: "Accessories",
+    label: "Aksesori",
+    price: 129000,
+    sizes: ["All Size"],
+  },
 ];
 
 const STATUSES = [
@@ -73,22 +117,22 @@ const EMPTY_CHECKOUT = {
   payment: "cod",
 };
 
-/* =====================================
-   HELPER
-===================================== */
+/* =========================================================
+   PENYIMPANAN DAN HELPER
+   ========================================================= */
 
 function read(key, fallback) {
   try {
-    const value = localStorage.getItem(key);
-    return value === null ? fallback : JSON.parse(value);
+    const saved = localStorage.getItem(key);
+    return saved === null ? fallback : JSON.parse(saved);
   } catch {
     return fallback;
   }
 }
 
 function arr(key) {
-  const value = read(key, []);
-  return Array.isArray(value) ? value : [];
+  const data = read(key, []);
+  return Array.isArray(data) ? data : [];
 }
 
 function store(key, value) {
@@ -96,7 +140,7 @@ function store(key, value) {
     localStorage.setItem(key, JSON.stringify(value));
     return true;
   } catch (error) {
-    console.error("Penyimpanan gagal", error);
+    console.error("Gagal menyimpan data:", error);
     return false;
   }
 }
@@ -108,7 +152,7 @@ function text(value) {
 function values(value) {
   return String(value || "")
     .split(",")
-    .map((v) => v.trim())
+    .map((item) => item.trim())
     .filter(Boolean);
 }
 
@@ -122,12 +166,13 @@ function rp(value) {
 
 function date(value) {
   const d = new Date(value || "");
-  return Number.isNaN(d.getTime())
-    ? "-"
-    : d.toLocaleString("id-ID", {
-        dateStyle: "medium",
-        timeStyle: "short",
-      });
+
+  if (Number.isNaN(d.getTime())) return "-";
+
+  return d.toLocaleString("id-ID", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
 }
 
 function prettyName(value) {
@@ -137,13 +182,13 @@ function prettyName(value) {
   );
 }
 
-function status(value) {
+function orderStatus(value) {
   return STATUSES.includes(value) ? value : "Pesanan Baru";
 }
 
 function paymentLabel(value) {
   return (
-    METHODS.find((m) => m.value === value)?.label ||
+    METHODS.find((method) => method.value === value)?.label ||
     "Belum tercatat"
   );
 }
@@ -160,15 +205,13 @@ function payStatus(order) {
 }
 
 function canPay(order) {
-  return (
+  return Boolean(
     order &&
-    ["cod", "transfer", "qris"].includes(
-      order.paymentMethod
-    ) &&
-    status(order.status) !== "Dibatalkan" &&
-    payStatus(order) !== "Lunas" &&
-    (order.paymentMethod !== "cod" ||
-      status(order.status) === "Selesai")
+      ["cod", "transfer", "qris"].includes(order.paymentMethod) &&
+      orderStatus(order.status) !== "Dibatalkan" &&
+      payStatus(order) !== "Lunas" &&
+      (order.paymentMethod !== "cod" ||
+        orderStatus(order.status) === "Selesai")
   );
 }
 
@@ -183,8 +226,8 @@ function canMove(from, to) {
 
 function voucherValue(code, subtotal) {
   const item = VOUCHERS.find(
-    (v) =>
-      v.code === String(code || "").trim().toUpperCase()
+    (voucher) =>
+      voucher.code === String(code || "").trim().toUpperCase()
   );
 
   if (!item) {
@@ -199,9 +242,7 @@ function voucherValue(code, subtotal) {
     return {
       ok: false,
       amount: 0,
-      message:
-        `Minimal belanja ${rp(item.min)} ` +
-        `untuk voucher ${item.code}.`,
+      message: `Minimal belanja ${rp(item.min)} untuk ${item.code}.`,
     };
   }
 
@@ -214,32 +255,30 @@ function voucherValue(code, subtotal) {
         ? Math.round((subtotal * item.percent) / 100)
         : item.amount
     ),
-    message: `Voucher ${item.code} berhasil dipakai.`,
+    message: `Voucher ${item.code} berhasil digunakan.`,
   };
 }
 
-/* =====================================
-   GAMBAR PRODUK
-===================================== */
+/* =========================================================
+   DATA GAMBAR PRODUK LOKAL
+   ========================================================= */
 
 function folder(value) {
-  const f = text(value);
+  const name = text(value);
 
   return (
     {
       pria: "baju pria",
       wanita: "baju wanita",
       aksesoris: "aksesoris wanita",
-    }[f] || f
+    }[name] || name
   );
 }
 
 function imagePath(value) {
   if (!value) return "";
 
-  const raw = String(value)
-    .trim()
-    .replace(/\\/g, "/");
+  const raw = String(value).trim().replace(/\\/g, "/");
 
   if (/^(https?:|data:|blob:)/i.test(raw)) {
     return raw;
@@ -258,9 +297,7 @@ function imagePath(value) {
       parts[1] = folder(parts[1]);
     }
   } else if (
-    CATEGORIES.some(
-      (c) => c.folder === folder(parts[0])
-    )
+    CATEGORIES.some((category) => category.folder === folder(parts[0]))
   ) {
     parts[0] = folder(parts[0]);
     parts.unshift("images");
@@ -281,134 +318,138 @@ function imageUrl(value) {
   const encoded = path
     .replace(/^\/+/, "")
     .split("/")
-    .map((s) => {
+    .map((segment) => {
       try {
-        return encodeURIComponent(decodeURIComponent(s));
+        return encodeURIComponent(decodeURIComponent(segment));
       } catch {
-        return encodeURIComponent(s);
+        return encodeURIComponent(segment);
       }
     })
     .join("/");
 
-  return base + "/" + encoded;
+  return `${base}/${encoded}`;
 }
 
 const PHOTOS = [
   ...new Map(
     (Array.isArray(productImages) ? productImages : [])
-      .filter((p) => p?.url)
-      .map((p) => {
-        const url = imagePath(p.url);
+      .filter((photo) => photo?.url)
+      .map((photo) => {
+        const url = imagePath(photo.url);
         const parts = url.replace(/^\/+/, "").split("/");
-        const pos = parts.indexOf("images");
+        const index = parts.indexOf("images");
 
-        let dirname = pos >= 0 ? parts[pos + 1] : "";
+        let dirname = index >= 0 ? parts[index + 1] : "";
 
         try {
           dirname = decodeURIComponent(dirname);
         } catch {
-          // Nama folder tetap digunakan.
+          // Gunakan nama folder asli.
         }
 
         return {
-          ...p,
+          ...photo,
           url,
-          folder: folder(p.folder || dirname),
-          name: p.name || parts.at(-1),
+          folder: folder(photo.folder || dirname),
+          name: photo.name || parts.at(-1),
         };
       })
-      .filter((p) =>
-        CATEGORIES.some((c) => c.folder === p.folder)
+      .filter((photo) =>
+        CATEGORIES.some((category) => category.folder === photo.folder)
       )
-      .map((p) => [p.url, p])
+      .map((photo) => [photo.url, photo])
   ).values(),
 ];
 
-const DEFAULT_PRODUCTS = PHOTOS.map((p) => {
-  const c = CATEGORIES.find(
-    (v) => v.folder === p.folder
+const DEFAULT_PRODUCTS = PHOTOS.map((photo) => {
+  const category = CATEGORIES.find(
+    (item) => item.folder === photo.folder
   );
 
   return {
-    id: `local:${p.url}`,
-    name: `${c.label} — ${p.name}`,
-    collection: c.name,
-    image: p.url,
+    id: `local:${photo.url}`,
+    name: `${category.label} — ${photo.name}`,
+    collection: category.name,
+    image: photo.url,
     gallery: [],
-    price: c.price,
+    price: category.price,
     stock: 20,
-    sizes: c.sizes,
+    sizes: category.sizes,
     colors: ["Sesuai foto"],
-    description: `Koleksi ${c.label} dari LUMINA STORE.`,
+    description: `Koleksi ${category.label} dari LUMINA STORE.`,
   };
 });
 
 function loadProducts() {
-  const old =
+  const previous =
     localStorage.getItem(KEY.products) !== null
       ? arr(KEY.products)
       : arr(KEY.oldProducts);
 
-  const deleted = new Set(
-    arr(KEY.deleted).map(String)
-  );
+  const deleted = new Set(arr(KEY.deleted).map(String));
 
-  const saved = old
+  const saved = previous
     .filter(
-      (p) =>
-        p &&
-        p.id != null &&
-        p.name &&
-        !deleted.has(String(p.id))
+      (product) =>
+        product &&
+        product.id != null &&
+        product.name &&
+        !deleted.has(String(product.id))
     )
-    .map((p) => {
-      const photo = imagePath(p.image);
+    .map((product) => {
+      const photo = imagePath(product.image);
 
-      const c =
+      const category =
         CATEGORIES.find(
-          (x) => x.name === p.collection
+          (item) => item.name === product.collection
         ) ||
-        CATEGORIES.find((x) =>
+        CATEGORIES.find((item) =>
           PHOTOS.some(
-            (a) =>
-              a.url === photo &&
-              a.folder === x.folder
+            (photoItem) =>
+              photoItem.url === photo &&
+              photoItem.folder === item.folder
           )
         ) ||
         CATEGORIES[0];
 
       return {
-        ...p,
+        ...product,
         image: photo,
-        collection: c.name,
-        price: Number(p.price) || 0,
-        stock: Math.max(0, Number(p.stock) || 0),
-        sizes: Array.isArray(p.sizes) ? p.sizes : c.sizes,
-        colors: Array.isArray(p.colors)
-          ? p.colors
+        collection: category.name,
+        price: Number(product.price) || 0,
+        stock: Math.max(0, Number(product.stock) || 0),
+        sizes: Array.isArray(product.sizes)
+          ? product.sizes
+          : category.sizes,
+        colors: Array.isArray(product.colors)
+          ? product.colors
           : ["Sesuai foto"],
-        gallery: Array.isArray(p.gallery)
-          ? p.gallery.map(imagePath)
+        gallery: Array.isArray(product.gallery)
+          ? product.gallery.map(imagePath)
           : [],
       };
     });
 
-  const seen = new Set(saved.map((p) => p.image));
+  const seen = new Set(saved.map((product) => product.image));
 
   const fresh = DEFAULT_PRODUCTS.filter(
-    (p) =>
-      !seen.has(p.image) &&
-      !deleted.has(String(p.id))
+    (product) =>
+      !seen.has(product.image) &&
+      !deleted.has(String(product.id))
   );
 
   return [...saved, ...fresh];
 }
 
+/* =========================================================
+   FOTO PRODUK
+   ========================================================= */
+
 function Photo({ src, alt, className = "", style }) {
-  const [bad, setBad] = useState("");
+  const [broken, setBroken] = useState("");
   const url = imageUrl(src);
 
-  if (!url || bad === url) {
+  if (!url || broken === url) {
     return (
       <div
         className={`lum-photo-placeholder ${className}`}
@@ -421,19 +462,19 @@ function Photo({ src, alt, className = "", style }) {
 
   return (
     <img
-      className={className}
       src={url}
-      alt={alt || "Produk LUMINA"}
+      alt={alt || "Produk LUMINA STORE"}
+      className={className}
       style={style}
       loading="lazy"
-      onError={() => setBad(url)}
+      onError={() => setBroken(url)}
     />
   );
 }
 
-/* =====================================
-   PRODUCT CARD PREMIUM
-===================================== */
+/* =========================================================
+   KARTU PRODUK PREMIUM
+   ========================================================= */
 
 function ProductCard({
   product,
@@ -443,18 +484,15 @@ function ProductCard({
   onFavorite,
   onCart,
 }) {
-  const stock = Math.max(
-    0,
-    Number(product.stock) || 0
-  );
+  const stock = Math.max(0, Number(product.stock) || 0);
 
   const ratings = reviewList
-    .map((v) => Number(v.rating))
-    .filter((v) => v >= 1 && v <= 5);
+    .map((review) => Number(review.rating))
+    .filter((rating) => rating >= 1 && rating <= 5);
 
-  const avg = ratings.length
+  const average = ratings.length
     ? (
-        ratings.reduce((a, b) => a + b, 0) /
+        ratings.reduce((sum, rating) => sum + rating, 0) /
         ratings.length
       ).toFixed(1)
     : null;
@@ -466,7 +504,6 @@ function ProductCard({
           type="button"
           className="image-button"
           onClick={() => onDetail(product)}
-          aria-label={`Lihat detail ${prettyName(product.name)}`}
         >
           <Photo
             src={product.image}
@@ -476,11 +513,7 @@ function ProductCard({
 
         <span
           className={`stock-label ${
-            stock === 0
-              ? "is-empty"
-              : stock <= 5
-                ? "is-low"
-                : ""
+            stock === 0 ? "is-empty" : stock <= 5 ? "is-low" : ""
           }`}
         >
           {stock === 0
@@ -492,20 +525,11 @@ function ProductCard({
 
         <button
           type="button"
-          className={`heart ${
-            favorite ? "is-saved" : ""
-          }`}
+          className={`heart ${favorite ? "is-saved" : ""}`}
           aria-label={
-            favorite
-              ? "Hapus dari wishlist"
-              : "Tambahkan ke wishlist"
+            favorite ? "Hapus dari wishlist" : "Tambahkan ke wishlist"
           }
           aria-pressed={favorite}
-          title={
-            favorite
-              ? "Hapus wishlist"
-              : "Simpan wishlist"
-          }
           onClick={() => onFavorite(product.id)}
         >
           {favorite ? "♥" : "♡"}
@@ -516,18 +540,16 @@ function ProductCard({
           className="lum-image-quickview"
           onClick={() => onDetail(product)}
         >
-          Lihat Detail
-          <span aria-hidden="true">↗</span>
+          Lihat Detail <span>↗</span>
         </button>
       </div>
 
       <div className="product-body">
         <div className="lum-product-topline">
           <small>{product.collection}</small>
-
           <span>
-            {avg
-              ? `★ ${avg} (${ratings.length})`
+            {average
+              ? `★ ${average} (${ratings.length})`
               : "New arrival"}
           </span>
         </div>
@@ -536,9 +558,7 @@ function ProductCard({
           {prettyName(product.name)}
         </h3>
 
-        <p className="price">
-          {rp(product.price)}
-        </p>
+        <p className="price">{rp(product.price)}</p>
 
         <p className="muted lum-availability">
           {stock > 5
@@ -583,21 +603,21 @@ function ProductGrid({
     return (
       <div className="panel lum-empty">
         <h3>Produk tidak ditemukan</h3>
-        <p>Coba kategori atau kata kunci lainnya.</p>
+        <p>Coba ubah pilihan filter atau kata pencarian.</p>
       </div>
     );
   }
 
   return (
     <div className="product-grid">
-      {products.map((p) => (
+      {products.map((product) => (
         <ProductCard
-          key={p.id}
-          product={p}
-          favorite={favorites.includes(p.id)}
+          key={product.id}
+          product={product}
+          favorite={favorites.includes(product.id)}
           reviewList={
-            Array.isArray(reviews[String(p.id)])
-              ? reviews[String(p.id)]
+            Array.isArray(reviews[String(product.id)])
+              ? reviews[String(product.id)]
               : []
           }
           onDetail={onDetail}
@@ -609,9 +629,9 @@ function ProductGrid({
   );
 }
 
-/* =====================================
-   DETAIL PRODUK
-===================================== */
+/* =========================================================
+   DETAIL DAN ULASAN PRODUK
+   ========================================================= */
 
 function ProductDetail({
   product,
@@ -631,9 +651,7 @@ function ProductDetail({
     ...new Set(
       [
         product.image,
-        ...(Array.isArray(product.gallery)
-          ? product.gallery
-          : []),
+        ...(Array.isArray(product.gallery) ? product.gallery : []),
       ].filter(Boolean)
     ),
   ];
@@ -648,15 +666,11 @@ function ProductDetail({
     : [];
 
   const userId = customer
-    ? String(
-        customer.id ??
-        customer.email ??
-        ""
-      )
+    ? String(customer.id ?? customer.email ?? "")
     : "";
 
   const mine = list.find(
-    (r) => String(r.userId) === userId
+    (review) => String(review.userId) === userId
   );
 
   useEffect(() => {
@@ -671,15 +685,14 @@ function ProductDetail({
   const average = list.length
     ? (
         list.reduce(
-          (s, r) =>
-            s + Number(r.rating || 0),
+          (sum, review) => sum + Number(review.rating || 0),
           0
         ) / list.length
       ).toFixed(1)
     : null;
 
-  function submit(e) {
-    e.preventDefault();
+  function submitReview(event) {
+    event.preventDefault();
 
     if (!userId) {
       setNotice("Login untuk memberikan ulasan.");
@@ -701,25 +714,18 @@ function ProductDetail({
     };
 
     const updated = mine
-      ? list.map((v) =>
-          v.id === mine.id ? record : v
+      ? list.map((review) =>
+          review.id === mine.id ? record : review
         )
       : [record, ...list];
 
     onReview(product.id, updated);
-
-    setNotice(
-      "Ulasan tersimpan di browser ini."
-    );
+    setNotice("Ulasan berhasil disimpan di browser.");
   }
 
   return (
     <main className="container section lum-new-detail">
-      <button
-        type="button"
-        className="back"
-        onClick={onBack}
-      >
+      <button type="button" className="back" onClick={onBack}>
         ← Kembali ke Shop
       </button>
 
@@ -733,36 +739,27 @@ function ProductDetail({
           </div>
 
           <div className="lum-detail-thumbs">
-            {images.map((url, i) => (
+            {images.map((url, index) => (
               <button
                 key={url}
                 type="button"
-                className={
-                  active === url ? "active" : ""
-                }
+                className={active === url ? "active" : ""}
                 onClick={() => setActive(url)}
               >
                 <Photo
                   src={url}
-                  alt={`Foto ${i + 1}`}
+                  alt={`Foto ${index + 1}`}
                 />
               </button>
             ))}
           </div>
 
-          <p className="muted">
-            {images.length} foto produk
-          </p>
+          <p className="muted">{images.length} foto produk</p>
         </div>
 
         <div className="lum-detail-data">
-          <p className="eyebrow">
-            {product.collection}
-          </p>
-
-          <h1>
-            {prettyName(product.name)}
-          </h1>
+          <p className="eyebrow">{product.collection}</p>
+          <h1>{prettyName(product.name)}</h1>
 
           <p className="lum-stars">
             {average
@@ -770,9 +767,7 @@ function ProductDetail({
               : "☆ Belum ada ulasan"}
           </p>
 
-          <h2 className="price">
-            {rp(product.price)}
-          </h2>
+          <h2 className="price">{rp(product.price)}</h2>
 
           <p>
             {product.description ||
@@ -786,55 +781,45 @@ function ProductDetail({
           <label>Ukuran</label>
 
           <div className="option-row">
-            {(product.sizes || ["All Size"]).map(
-              (v) => (
-                <button
-                  type="button"
-                  key={v}
-                  className={
-                    size === v ? "chosen" : ""
-                  }
-                  onClick={() => onSize(v)}
-                >
-                  {v}
-                </button>
-              )
-            )}
+            {(product.sizes || ["All Size"]).map((item) => (
+              <button
+                type="button"
+                key={item}
+                className={size === item ? "chosen" : ""}
+                onClick={() => onSize(item)}
+              >
+                {item}
+              </button>
+            ))}
           </div>
 
           <label>Warna</label>
 
           <div className="option-row">
-            {(product.colors || [
-              "Sesuai foto",
-            ]).map((v) => (
+            {(product.colors || ["Sesuai foto"]).map((item) => (
               <button
                 type="button"
-                key={v}
-                className={
-                  color === v ? "chosen" : ""
-                }
-                onClick={() => onColor(v)}
+                key={item}
+                className={color === item ? "chosen" : ""}
+                onClick={() => onColor(item)}
               >
-                {v}
+                {item}
               </button>
             ))}
           </div>
 
           <button
-            className="btn-dark wide"
             type="button"
+            className="btn-dark wide"
             disabled={Number(product.stock) <= 0}
-            onClick={() =>
-              onCart(product, size, color)
-            }
+            onClick={() => onCart(product, size, color)}
           >
             + Tambahkan ke Keranjang
           </button>
 
           <button
-            className="btn-light wide"
             type="button"
+            className="btn-light wide"
             onClick={() => onFavorite(product.id)}
           >
             {favorite
@@ -850,55 +835,41 @@ function ProductDetail({
         <div className="lum-review-grid">
           <div>
             {list.length ? (
-              list.map((r) => (
-                <article
-                  key={r.id}
-                  className="panel"
-                >
-                  <strong>{r.name}</strong>
+              list.map((review) => (
+                <article className="panel" key={review.id}>
+                  <strong>{review.name}</strong>
 
                   <p className="lum-stars">
                     {"★".repeat(
                       Math.min(
                         5,
-                        Math.max(
-                          0,
-                          Number(r.rating) || 0
-                        )
+                        Math.max(0, Number(review.rating) || 0)
                       )
                     )}
                   </p>
 
-                  <p>{r.comment}</p>
-                  <small>{date(r.at)}</small>
+                  <p>{review.comment}</p>
+                  <small>{date(review.at)}</small>
                 </article>
               ))
             ) : (
-              <p className="muted">
-                Belum ada ulasan.
-              </p>
+              <p className="muted">Belum ada ulasan.</p>
             )}
           </div>
 
           <form
             className="panel form-stack"
-            onSubmit={submit}
+            onSubmit={submitReview}
           >
-            <h3>
-              {mine
-                ? "Edit Ulasan"
-                : "Tulis Ulasan"}
-            </h3>
+            <h3>{mine ? "Edit Ulasan" : "Tulis Ulasan"}</h3>
 
             <div className="lum-rating-buttons">
-              {[1, 2, 3, 4, 5].map((n) => (
+              {[1, 2, 3, 4, 5].map((item) => (
                 <button
                   type="button"
-                  key={n}
-                  className={
-                    n <= rating ? "active" : ""
-                  }
-                  onClick={() => setRating(n)}
+                  key={item}
+                  className={item <= rating ? "active" : ""}
+                  onClick={() => setRating(item)}
                 >
                   ★
                 </button>
@@ -909,8 +880,8 @@ function ProductDetail({
               rows={4}
               maxLength={500}
               value={comment}
-              onChange={(e) =>
-                setComment(e.target.value)
+              onChange={(event) =>
+                setComment(event.target.value)
               }
               placeholder="Bagikan pengalamanmu..."
             />
@@ -919,9 +890,7 @@ function ProductDetail({
               Simpan Ulasan
             </button>
 
-            {notice && (
-              <p role="status">{notice}</p>
-            )}
+            {notice && <p role="status">{notice}</p>}
           </form>
         </div>
       </section>
@@ -929,9 +898,9 @@ function ProductDetail({
   );
 }
 
-/* =====================================
-   CUSTOMER TRACKING
-===================================== */
+/* =========================================================
+   TRACKING PESANAN PELANGGAN
+   ========================================================= */
 
 function CustomerTracking({ orders }) {
   const stages = STATUSES.slice(0, 4);
@@ -943,27 +912,21 @@ function CustomerTracking({ orders }) {
       </h2>
 
       {!orders.length && (
-        <p className="panel">
-          Belum ada pesanan.
-        </p>
+        <p className="panel">Belum ada pesanan.</p>
       )}
 
-      {orders.map((o) => {
-        const current = status(o.status);
+      {orders.map((order) => {
+        const current = orderStatus(order.status);
         const index = stages.indexOf(current);
-        const paid = payStatus(o) === "Lunas";
+        const paid = payStatus(order) === "Lunas";
 
         return (
-          <article
-            className="panel lum-track-card"
-            key={o.id}
-          >
+          <article className="panel lum-track-card" key={order.id}>
             <div className="lum-between">
               <div>
-                <strong>{o.id}</strong>
-
+                <strong>{order.id}</strong>
                 <p className="muted">
-                  {date(o.date)} · {rp(o.total)}
+                  {date(order.date)} · {rp(order.total)}
                 </p>
               </div>
 
@@ -973,19 +936,17 @@ function CustomerTracking({ orders }) {
             </div>
 
             <p>
-              Metode:{" "}
-              <b>{paymentLabel(o.paymentMethod)}</b>
+              Metode: <b>{paymentLabel(order.paymentMethod)}</b>
             </p>
 
             <p>
-              Status bayar:{" "}
-              <b>{payStatus(o)}</b>
+              Status bayar: <b>{payStatus(order)}</b>
             </p>
 
-            {o.voucherCode && (
+            {order.voucherCode && (
               <p className="muted">
-                Voucher {o.voucherCode} · Hemat{" "}
-                {rp(o.discount)}
+                Voucher {order.voucherCode} · Hemat{" "}
+                {rp(order.discount)}
               </p>
             )}
 
@@ -995,18 +956,17 @@ function CustomerTracking({ orders }) {
               </p>
             ) : (
               <div className="lum-track-steps">
-                {stages.map((s, i) => (
+                {stages.map((stage, position) => (
                   <div
-                    key={s}
+                    key={stage}
                     className={
-                      i <= index ? "complete" : ""
+                      position <= index ? "complete" : ""
                     }
                   >
                     <span>
-                      {i < index ? "✓" : i + 1}
+                      {position < index ? "✓" : position + 1}
                     </span>
-
-                    <small>{s}</small>
+                    <small>{stage}</small>
                   </div>
                 ))}
               </div>
@@ -1015,13 +975,12 @@ function CustomerTracking({ orders }) {
             {paid ? (
               <p className="lum-paid-note">
                 ✓ Pembayaran dikonfirmasi Admin{" "}
-                {o.paidAt &&
-                  `pada ${date(o.paidAt)}`}
+                {order.paidAt && `pada ${date(order.paidAt)}`}
               </p>
             ) : (
               current !== "Dibatalkan" && (
                 <p className="muted">
-                  {o.paymentMethod === "cod"
+                  {order.paymentMethod === "cod"
                     ? "COD dibayar saat paket diterima."
                     : "Menunggu konfirmasi pembayaran simulasi Admin."}
                 </p>
@@ -1034,94 +993,84 @@ function CustomerTracking({ orders }) {
   );
 }
 
-/* =====================================
-   ADMIN ANALYTICS
-===================================== */
+/* =========================================================
+   ANALISIS PENJUALAN ADMIN
+   ========================================================= */
 
 function AdminAnalytics({ orders, products }) {
   const done = orders.filter(
-    (o) => status(o.status) === "Selesai"
+    (order) => orderStatus(order.status) === "Selesai"
   );
 
   const revenue = done.reduce(
-    (n, o) => n + Number(o.total || 0),
+    (sum, order) => sum + Number(order.total || 0),
     0
   );
 
-  const qty = done
-    .flatMap((o) => o.items || [])
+  const quantity = done
+    .flatMap((order) => order.items || [])
     .reduce(
-      (n, i) => n + Number(i.quantity || 0),
+      (sum, item) => sum + Number(item.quantity || 0),
       0
     );
 
   const now = new Date();
 
-  const months = Array.from(
-    { length: 6 },
-    (_, i) => {
-      const d = new Date(
-        now.getFullYear(),
-        now.getMonth() - 5 + i,
-        1
-      );
+  const months = Array.from({ length: 6 }, (_, index) => {
+    const current = new Date(
+      now.getFullYear(),
+      now.getMonth() - 5 + index,
+      1
+    );
 
-      return {
-        key:
-          `${d.getFullYear()}-${String(
-            d.getMonth() + 1
-          ).padStart(2, "0")}`,
-        label: d.toLocaleDateString("id-ID", {
-          month: "short",
-          year: "2-digit",
-        }),
-        total: 0,
-      };
-    }
-  );
+    return {
+      key:
+        `${current.getFullYear()}-` +
+        String(current.getMonth() + 1).padStart(2, "0"),
+      label: current.toLocaleDateString("id-ID", {
+        month: "short",
+        year: "2-digit",
+      }),
+      total: 0,
+    };
+  });
 
   const sold = new Map();
 
-  done.forEach((o) => {
-    const entry = [...(o.history || [])]
+  done.forEach((order) => {
+    const finished = [...(order.history || [])]
       .reverse()
-      .find((h) => h.status === "Selesai");
+      .find((item) => item.status === "Selesai");
 
-    const d = new Date(
-      entry?.at ||
-      o.updatedAt ||
-      o.date ||
-      ""
+    const completedDate = new Date(
+      finished?.at || order.updatedAt || order.date
     );
 
     const key =
-      `${d.getFullYear()}-${String(
-        d.getMonth() + 1
-      ).padStart(2, "0")}`;
+      `${completedDate.getFullYear()}-` +
+      String(completedDate.getMonth() + 1).padStart(2, "0");
 
-    const month = months.find(
-      (m) => m.key === key
-    );
+    const month = months.find((item) => item.key === key);
 
     if (month) {
-      month.total += Number(o.total || 0);
+      month.total += Number(order.total || 0);
     }
 
-    (o.items || []).forEach((i) => {
-      const k = String(i.id ?? i.name);
-      const current = sold.get(k) || {
-        name: i.name,
+    (order.items || []).forEach((item) => {
+      const itemKey = String(item.id ?? item.name);
+      const current = sold.get(itemKey) || {
+        name: item.name,
         qty: 0,
       };
 
-      current.qty += Number(i.quantity || 0);
-      sold.set(k, current);
+      current.qty += Number(item.quantity || 0);
+      sold.set(itemKey, current);
     });
   });
 
-  const max = Math.max(
+  const maximum = Math.max(
     1,
-    ...months.map((m) => m.total)
+    ...months.map((month) => month.total)
   );
 
   const best = [...sold.values()]
@@ -1140,18 +1089,15 @@ function AdminAnalytics({ orders, products }) {
         {[
           ["Pendapatan Selesai", rp(revenue)],
           ["Pesanan Selesai", done.length],
-          ["Unit Terjual", qty],
+          ["Unit Terjual", quantity],
           [
             "Stok ≤ 5",
             products.filter(
-              (p) => Number(p.stock) <= 5
+              (product) => Number(product.stock) <= 5
             ).length,
           ],
         ].map(([label, value]) => (
-          <article
-            className="lum-dash-card"
-            key={label}
-          >
+          <article className="lum-dash-card" key={label}>
             <small>{label}</small>
             <h2>{value}</h2>
           </article>
@@ -1163,19 +1109,19 @@ function AdminAnalytics({ orders, products }) {
           <h3>Pendapatan 6 Bulan</h3>
 
           <div className="lum-mini-chart">
-            {months.map((m) => (
+            {months.map((month) => (
               <div
-                key={m.key}
-                title={`${m.label}: ${rp(m.total)}`}
+                key={month.key}
+                title={`${month.label}: ${rp(month.total)}`}
               >
                 <div className="lum-chart-track">
                   <div
                     style={{
                       height: `${
-                        m.total
+                        month.total
                           ? Math.max(
                               3,
-                              (m.total / max) * 100
+                              (month.total / maximum) * 100
                             )
                           : 0
                       }%`,
@@ -1183,7 +1129,7 @@ function AdminAnalytics({ orders, products }) {
                   />
                 </div>
 
-                <small>{m.label}</small>
+                <small>{month.label}</small>
               </div>
             ))}
           </div>
@@ -1192,16 +1138,14 @@ function AdminAnalytics({ orders, products }) {
         <article className="lum-dash-card">
           <h3>Status Pesanan</h3>
 
-          {STATUSES.map((s) => (
-            <p
-              className="lum-between"
-              key={s}
-            >
-              <span>{s}</span>
+          {STATUSES.map((statusItem) => (
+            <p className="lum-between" key={statusItem}>
+              <span>{statusItem}</span>
               <b>
                 {
                   orders.filter(
-                    (o) => status(o.status) === s
+                    (order) =>
+                      orderStatus(order.status) === statusItem
                   ).length
                 }
               </b>
@@ -1214,15 +1158,12 @@ function AdminAnalytics({ orders, products }) {
         <h3>5 Produk Terlaris</h3>
 
         {best.length ? (
-          best.map((p, i) => (
-            <p
-              className="lum-between"
-              key={i}
-            >
+          best.map((product, index) => (
+            <p className="lum-between" key={index}>
               <span>
-                {i + 1}. {prettyName(p.name)}
+                {index + 1}. {prettyName(product.name)}
               </span>
-              <b>{p.qty} unit</b>
+              <b>{product.qty} unit</b>
             </p>
           ))
         ) : (
@@ -1233,9 +1174,9 @@ function AdminAnalytics({ orders, products }) {
   );
 }
 
-/* =====================================
-   ORDER TABLE
-===================================== */
+/* =========================================================
+   TABEL PESANAN
+   ========================================================= */
 
 function OrderTable({
   orders,
@@ -1264,65 +1205,58 @@ function OrderTable({
         </thead>
 
         <tbody>
-          {orders.map((o) => {
-            const s = status(o.status);
-            const paid =
-              payStatus(o) === "Lunas";
+          {orders.map((order) => {
+            const status = orderStatus(order.status);
+            const paid = payStatus(order) === "Lunas";
 
             return (
-              <tr key={o.id}>
-                <td>{o.id}</td>
-                <td>{date(o.date)}</td>
-                <td>{o.customer}</td>
+              <tr key={order.id}>
+                <td>{order.id}</td>
+                <td>{date(order.date)}</td>
+                <td>{order.customer}</td>
 
                 <td>
-                  {(o.items || [])
+                  {(order.items || [])
                     .map(
-                      (i) =>
-                        `${prettyName(i.name)} (${i.quantity})`
+                      (item) =>
+                        `${prettyName(item.name)} (${item.quantity})`
                     )
                     .join(", ")}
                 </td>
 
                 <td>
-                  {o.subtotal != null
-                    ? rp(o.subtotal)
+                  {order.subtotal != null
+                    ? rp(order.subtotal)
+                    : "-"}
+                </td>
+
+                <td>{order.voucherCode || "-"}</td>
+
+                <td>
+                  {order.discount
+                    ? `−${rp(order.discount)}`
                     : "-"}
                 </td>
 
                 <td>
-                  {o.voucherCode || "-"}
+                  <b>{rp(order.total)}</b>
                 </td>
 
                 <td>
-                  {o.discount
-                    ? `−${rp(o.discount)}`
-                    : "-"}
+                  {paymentLabel(order.paymentMethod)}
                 </td>
 
-                <td>
-                  <b>{rp(o.total)}</b>
-                </td>
-
-                <td>
-                  {paymentLabel(o.paymentMethod)}
-                </td>
-
-                <td>{payStatus(o)}</td>
+                <td>{payStatus(order)}</td>
 
                 <td>
                   {edit ? (
                     <select
-                      value={s}
-                      disabled={[
-                        "Selesai",
-                        "Dibatalkan",
-                      ].includes(s)}
-                      onChange={(e) =>
-                        onStatus(
-                          o.id,
-                          e.target.value
-                        )
+                      value={status}
+                      disabled={["Selesai", "Dibatalkan"].includes(
+                        status
+                      )}
+                      onChange={(event) =>
+                        onStatus(order.id, event.target.value)
                       }
                     >
                       {STATUSES.map((next) => (
@@ -1330,11 +1264,11 @@ function OrderTable({
                           key={next}
                           value={next}
                           disabled={
-                            next !== s &&
-                            (!canMove(s, next) ||
+                            next !== status &&
+                            (!canMove(status, next) ||
                               (next !== "Dibatalkan" &&
                                 ["transfer", "qris"].includes(
-                                  o.paymentMethod
+                                  order.paymentMethod
                                 ) &&
                                 !paid))
                           }
@@ -1344,7 +1278,7 @@ function OrderTable({
                       ))}
                     </select>
                   ) : (
-                    s
+                    status
                   )}
                 </td>
 
@@ -1353,12 +1287,12 @@ function OrderTable({
                     <button
                       type="button"
                       className="btn-dark"
-                      disabled={!canPay(o)}
-                      onClick={() => onPay(o.id)}
+                      disabled={!canPay(order)}
+                      onClick={() => onPay(order.id)}
                     >
                       {paid
                         ? "✓ Lunas"
-                        : o.paymentMethod === "cod"
+                        : order.paymentMethod === "cod"
                           ? "Konfirmasi COD"
                           : "Tandai Lunas"}
                     </button>
@@ -1381,9 +1315,9 @@ function OrderTable({
   );
 }
 
-/* =====================================
-   DASHBOARD ADMIN
-===================================== */
+/* =========================================================
+   DASHBOARD ADMIN LUMINA STORE
+   ========================================================= */
 
 function AdminDashboard({
   products,
@@ -1399,54 +1333,54 @@ function AdminDashboard({
 }) {
   const [tab, setTab] = useState("overview");
   const [search, setSearch] = useState("");
-  const [folderFilter, setFolderFilter] =
-    useState("Semua");
+  const [folderFilter, setFolderFilter] = useState("Semua");
   const [chosenId, setChosenId] = useState("");
 
-  const filteredProducts = products.filter((p) =>
-    text(`${p.name} ${p.collection}`).includes(
+  const filteredProducts = products.filter((product) =>
+    text(`${product.name} ${product.collection}`).includes(
       text(search)
     )
   );
 
-  const filteredOrders = orders.filter((o) =>
+  const filteredOrders = orders.filter((order) =>
     text(
-      `${o.id} ${o.customer} ${o.status} ${o.voucherCode || ""}`
+      `${order.id} ${order.customer} ${order.status} ${
+        order.voucherCode || ""
+      }`
     ).includes(text(search))
   );
 
   const filteredPhotos = PHOTOS.filter(
-    (p) =>
+    (photo) =>
       (folderFilter === "Semua" ||
-        p.folder === folderFilter) &&
-      text(`${p.name} ${p.folder}`).includes(
-        text(search)
-      )
+        photo.folder === folderFilter) &&
+      text(`${photo.name} ${photo.folder}`).includes(text(search))
   );
 
   const chosen =
     filteredOrders.find(
-      (o) => String(o.id) === chosenId
+      (order) => String(order.id) === chosenId
     ) || filteredOrders[0];
 
   const done = orders.filter(
-    (o) => status(o.status) === "Selesai"
+    (order) => orderStatus(order.status) === "Selesai"
   );
 
   const revenue = done.reduce(
-    (n, o) => n + Number(o.total || 0),
+    (sum, order) => sum + Number(order.total || 0),
     0
   );
 
-  const currentCat = CATEGORIES.find(
-    (c) => c.name === form.collection
+  const currentCategory = CATEGORIES.find(
+    (item) => item.name === form.collection
   );
 
-  const field = (key, value) =>
-    setForm((prev) => ({
-      ...prev,
+  function field(key, value) {
+    setForm((previous) => ({
+      ...previous,
       [key]: value,
     }));
+  }
 
   function exportCSV() {
     const rows = [
@@ -1463,18 +1397,18 @@ function AdminDashboard({
         "Status Bayar",
         "Status Pesanan",
       ],
-      ...filteredOrders.map((o) => [
-        o.id,
-        o.date,
-        o.customer,
-        o.subtotal ?? "",
-        o.shippingFee ?? "",
-        o.voucherCode || "",
-        o.discount || 0,
-        o.total,
-        paymentLabel(o.paymentMethod),
-        payStatus(o),
-        status(o.status),
+      ...filteredOrders.map((order) => [
+        order.id,
+        order.date,
+        order.customer,
+        order.subtotal ?? "",
+        order.shippingFee ?? "",
+        order.voucherCode || "",
+        order.discount || 0,
+        order.total,
+        paymentLabel(order.paymentMethod),
+        payStatus(order),
+        orderStatus(order.status),
       ]),
     ];
 
@@ -1482,16 +1416,13 @@ function AdminDashboard({
       .map((row) =>
         row
           .map((value) => {
-            let s = String(value ?? "");
+            let current = String(value ?? "");
 
-            if (/^[=+\-@\t\r]/.test(s)) {
-              s = "'" + s;
+            if (/^[=+\-@\t\r]/.test(current)) {
+              current = "'" + current;
             }
 
-            return `"${s.replaceAll(
-              '"',
-              '""'
-            )}"`;
+            return `"${current.replaceAll('"', '""')}"`;
           })
           .join(",")
       )
@@ -1504,15 +1435,11 @@ function AdminDashboard({
     );
 
     const link = document.createElement("a");
-
     link.href = url;
     link.download = "laporan-lumina.csv";
     link.click();
 
-    setTimeout(
-      () => URL.revokeObjectURL(url),
-      1000
-    );
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   return (
@@ -1531,18 +1458,16 @@ function AdminDashboard({
             ["orders", "Orders"],
             ["reports", "Sales Report"],
             ["gallery", "Photo Gallery"],
-          ].map(([v, l]) => (
+          ].map(([value, label]) => (
             <button
-              key={v}
-              className={
-                tab === v ? "active" : ""
-              }
+              key={value}
+              className={tab === value ? "active" : ""}
               onClick={() => {
-                setTab(v);
+                setTab(value);
                 setSearch("");
               }}
             >
-              {l}
+              {label}
             </button>
           ))}
         </nav>
@@ -1563,21 +1488,21 @@ function AdminDashboard({
             </small>
 
             <h1>
-              {{
-                overview: "Dashboard Overview",
-                products: "Product Management",
-                orders: "Order Management",
-                reports: "Sales Report",
-                gallery: "Photo Gallery",
-              }[tab]}
+              {
+                {
+                  overview: "Dashboard Overview",
+                  products: "Product Management",
+                  orders: "Order Management",
+                  reports: "Sales Report",
+                  gallery: "Photo Gallery",
+                }[tab]
+              }
             </h1>
           </div>
 
           <input
             value={search}
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
+            onChange={(event) => setSearch(event.target.value)}
             placeholder="Cari produk atau pesanan..."
           />
         </header>
@@ -1593,21 +1518,19 @@ function AdminDashboard({
               <h2>Inventory Monitoring</h2>
 
               {products.some(
-                (p) => Number(p.stock) <= 5
+                (product) => Number(product.stock) <= 5
               ) ? (
                 products
                   .filter(
-                    (p) => Number(p.stock) <= 5
+                    (product) => Number(product.stock) <= 5
                   )
-                  .map((p) => (
+                  .map((product) => (
                     <p
                       className="lum-between"
-                      key={p.id}
+                      key={product.id}
                     >
-                      <span>
-                        {prettyName(p.name)}
-                      </span>
-                      <b>Stok {p.stock}</b>
+                      <span>{prettyName(product.name)}</span>
+                      <b>Stok {product.stock}</b>
                     </p>
                   ))
               ) : (
@@ -1619,20 +1542,20 @@ function AdminDashboard({
               <h2>Collection Overview</h2>
 
               <div className="lum-category-stats">
-                {CATEGORIES.map((c) => (
+                {CATEGORIES.map((category) => (
                   <button
                     className="btn-light"
-                    key={c.name}
+                    key={category.name}
                     onClick={() => {
-                      setFolderFilter(c.folder);
+                      setFolderFilter(category.folder);
                       setTab("gallery");
                     }}
                   >
-                    {c.label} (
+                    {category.label} (
                     {
                       products.filter(
-                        (p) =>
-                          p.collection === c.name
+                        (product) =>
+                          product.collection === category.name
                       ).length
                     }
                     )
@@ -1643,10 +1566,7 @@ function AdminDashboard({
 
             <section className="lum-dash-card">
               <h2>Recent Orders</h2>
-
-              <OrderTable
-                orders={orders.slice(0, 5)}
-              />
+              <OrderTable orders={orders.slice(0, 5)} />
             </section>
           </>
         )}
@@ -1668,8 +1588,8 @@ function AdminDashboard({
                 <input
                   required
                   value={form.name}
-                  onChange={(e) =>
-                    field("name", e.target.value)
+                  onChange={(event) =>
+                    field("name", event.target.value)
                   }
                 />
               </label>
@@ -1678,29 +1598,29 @@ function AdminDashboard({
                 Kategori
                 <select
                   value={form.collection}
-                  onChange={(e) => {
-                    const cat = CATEGORIES.find(
-                      (c) =>
-                        c.name === e.target.value
+                  onChange={(event) => {
+                    const category = CATEGORIES.find(
+                      (item) =>
+                        item.name === event.target.value
                     );
 
-                    if (cat) {
-                      setForm((p) => ({
-                        ...p,
-                        collection: cat.name,
+                    if (category) {
+                      setForm((previous) => ({
+                        ...previous,
+                        collection: category.name,
                         image: "",
                         gallery: "",
-                        sizes: cat.sizes.join(","),
+                        sizes: category.sizes.join(","),
                       }));
                     }
                   }}
                 >
-                  {CATEGORIES.map((c) => (
+                  {CATEGORIES.map((category) => (
                     <option
-                      key={c.name}
-                      value={c.name}
+                      key={category.name}
+                      value={category.name}
                     >
-                      {c.label}
+                      {category.label}
                     </option>
                   ))}
                 </select>
@@ -1713,8 +1633,8 @@ function AdminDashboard({
                   min="1"
                   required
                   value={form.price}
-                  onChange={(e) =>
-                    field("price", e.target.value)
+                  onChange={(event) =>
+                    field("price", event.target.value)
                   }
                 />
               </label>
@@ -1727,8 +1647,8 @@ function AdminDashboard({
                   step="1"
                   required
                   value={form.stock}
-                  onChange={(e) =>
-                    field("stock", e.target.value)
+                  onChange={(event) =>
+                    field("stock", event.target.value)
                   }
                 />
               </label>
@@ -1737,56 +1657,50 @@ function AdminDashboard({
                 Foto Utama
                 <select
                   value={form.image}
-                  onChange={(e) =>
-                    field("image", e.target.value)
+                  onChange={(event) =>
+                    field("image", event.target.value)
                   }
                 >
-                  <option value="">
-                    Pilih gambar
-                  </option>
+                  <option value="">Pilih gambar</option>
 
                   {PHOTOS.filter(
-                    (p) =>
-                      p.folder ===
-                      currentCat?.folder
-                  ).map((p) => (
+                    (photo) =>
+                      photo.folder === currentCategory?.folder
+                  ).map((photo) => (
                     <option
-                      key={p.url}
-                      value={p.url}
+                      key={photo.url}
+                      value={photo.url}
                     >
-                      {p.name}
+                      {photo.name}
                     </option>
                   ))}
                 </select>
               </label>
 
               <div className="lum-admin-preview">
-                <Photo
-                  src={form.image}
-                  alt="Preview"
-                />
+                <Photo src={form.image} alt="Preview" />
               </div>
 
               <label>
                 Foto Tambahan
                 <select
                   value=""
-                  onChange={(e) => {
-                    if (e.target.value) {
-                      setForm((p) => ({
-                        ...p,
-                        gallery: [
-                          ...new Set([
-                            ...values(p.gallery),
-                            e.target.value,
-                          ]),
-                        ]
-                          .filter(
-                            (x) => x !== p.image
-                          )
-                          .join(","),
-                      }));
-                    }
+                  onChange={(event) => {
+                    if (!event.target.value) return;
+
+                    setForm((previous) => ({
+                      ...previous,
+                      gallery: [
+                        ...new Set([
+                          ...values(previous.gallery),
+                          event.target.value,
+                        ]),
+                      ]
+                        .filter(
+                          (url) => url !== previous.image
+                        )
+                        .join(","),
+                    }));
                   }}
                 >
                   <option value="">
@@ -1794,66 +1708,56 @@ function AdminDashboard({
                   </option>
 
                   {PHOTOS.filter(
-                    (p) =>
-                      p.folder ===
-                        currentCat?.folder &&
-                      p.url !== form.image &&
-                      !values(form.gallery).includes(
-                        p.url
-                      )
-                  ).map((p) => (
+                    (photo) =>
+                      photo.folder === currentCategory?.folder &&
+                      photo.url !== form.image &&
+                      !values(form.gallery).includes(photo.url)
+                  ).map((photo) => (
                     <option
-                      key={p.url}
-                      value={p.url}
+                      key={photo.url}
+                      value={photo.url}
                     >
-                      {p.name}
+                      {photo.name}
                     </option>
                   ))}
                 </select>
               </label>
 
               <div className="lum-extra-gallery">
-                {values(form.gallery).map(
-                  (url) => (
-                    <div key={url}>
-                      <div className="lum-admin-thumb">
-                        <Photo
-                          src={url}
-                          alt="Foto tambahan"
-                        />
-                      </div>
-
-                      <button
-                        type="button"
-                        className="btn-light"
-                        onClick={() =>
-                          field(
-                            "gallery",
-                            values(form.gallery)
-                              .filter(
-                                (x) => x !== url
-                              )
-                              .join(",")
-                          )
-                        }
-                      >
-                        Hapus
-                      </button>
+                {values(form.gallery).map((url) => (
+                  <div key={url}>
+                    <div className="lum-admin-thumb">
+                      <Photo
+                        src={url}
+                        alt="Foto tambahan"
+                      />
                     </div>
-                  )
-                )}
+
+                    <button
+                      type="button"
+                      className="btn-light"
+                      onClick={() =>
+                        field(
+                          "gallery",
+                          values(form.gallery)
+                            .filter((item) => item !== url)
+                            .join(",")
+                        )
+                      }
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                ))}
               </div>
 
               <label>
                 Deskripsi
                 <textarea
-                  rows="3"
+                  rows={3}
                   value={form.description}
-                  onChange={(e) =>
-                    field(
-                      "description",
-                      e.target.value
-                    )
+                  onChange={(event) =>
+                    field("description", event.target.value)
                   }
                 />
               </label>
@@ -1862,8 +1766,8 @@ function AdminDashboard({
                 Ukuran (pisahkan dengan koma)
                 <input
                   value={form.sizes}
-                  onChange={(e) =>
-                    field("sizes", e.target.value)
+                  onChange={(event) =>
+                    field("sizes", event.target.value)
                   }
                 />
               </label>
@@ -1872,8 +1776,8 @@ function AdminDashboard({
                 Warna (pisahkan dengan koma)
                 <input
                   value={form.colors}
-                  onChange={(e) =>
-                    field("colors", e.target.value)
+                  onChange={(event) =>
+                    field("colors", event.target.value)
                   }
                 />
               </label>
@@ -1890,9 +1794,7 @@ function AdminDashboard({
                   type="button"
                   className="btn-light"
                   onClick={() =>
-                    setForm({
-                      ...EMPTY_PRODUCT,
-                    })
+                    setForm({ ...EMPTY_PRODUCT })
                   }
                 >
                   Batal Edit
@@ -1901,45 +1803,41 @@ function AdminDashboard({
             </form>
 
             <section className="lum-dash-card">
-              <h2>
-                Daftar Produk ({products.length})
-              </h2>
+              <h2>Daftar Produk ({products.length})</h2>
 
-              {filteredProducts.map((p) => (
+              {filteredProducts.map((product) => (
                 <div
                   className="lum-dash-product-row"
-                  key={p.id}
+                  key={product.id}
                 >
                   <div className="lum-admin-thumb">
                     <Photo
-                      src={p.image}
-                      alt={p.name}
+                      src={product.image}
+                      alt={product.name}
                     />
                   </div>
 
                   <div className="lum-admin-product-info">
                     <strong>
-                      {prettyName(p.name)}
+                      {prettyName(product.name)}
                     </strong>
 
                     <p>
-                      {rp(p.price)} · Stok{" "}
-                      {p.stock}
+                      {rp(product.price)} · Stok{" "}
+                      {product.stock}
                     </p>
                   </div>
 
                   <button
                     className="btn-light"
-                    onClick={() => onEdit(p)}
+                    onClick={() => onEdit(product)}
                   >
                     Edit
                   </button>
 
                   <button
                     className="btn-light"
-                    onClick={() =>
-                      onDelete(p.id)
-                    }
+                    onClick={() => onDelete(product.id)}
                   >
                     Hapus
                   </button>
@@ -1951,14 +1849,12 @@ function AdminDashboard({
 
         {tab === "orders" && (
           <section className="lum-dash-card">
-            <h2>
-              Manajemen Pesanan & Pembayaran
-            </h2>
+            <h2>Manajemen Pesanan & Pembayaran</h2>
 
             <p className="muted">
               Transfer/QRIS wajib dikonfirmasi
-              sebelum diproses; COD dikonfirmasi
-              setelah Selesai. Semua pembayaran
+              sebelum diproses. COD dikonfirmasi
+              setelah pesanan selesai. Semua pembayaran
               hanya simulasi.
             </p>
 
@@ -1968,18 +1864,16 @@ function AdminDashboard({
                   Pilih Pesanan
                   <select
                     value={String(chosen.id)}
-                    onChange={(e) =>
-                      setChosenId(
-                        e.target.value
-                      )
+                    onChange={(event) =>
+                      setChosenId(event.target.value)
                     }
                   >
-                    {filteredOrders.map((o) => (
+                    {filteredOrders.map((order) => (
                       <option
-                        key={o.id}
-                        value={String(o.id)}
+                        key={order.id}
+                        value={String(order.id)}
                       >
-                        {o.id} — {o.customer}
+                        {order.id} — {order.customer}
                       </option>
                     ))}
                   </select>
@@ -1988,9 +1882,7 @@ function AdminDashboard({
                 <div className="lum-payment-detail">
                   <p>
                     <b>Metode:</b>{" "}
-                    {paymentLabel(
-                      chosen.paymentMethod
-                    )}
+                    {paymentLabel(chosen.paymentMethod)}
                   </p>
 
                   <p>
@@ -2000,49 +1892,39 @@ function AdminDashboard({
 
                   <p>
                     <b>Voucher:</b>{" "}
-                    {chosen.voucherCode || "-"}
-                    {" · "}
+                    {chosen.voucherCode || "-"} ·{" "}
                     <b>Diskon:</b>{" "}
                     {rp(chosen.discount || 0)}
                   </p>
 
                   <p>
-                    <b>Total:</b>{" "}
-                    {rp(chosen.total)}
+                    <b>Total:</b> {rp(chosen.total)}
                   </p>
 
                   {chosen.paidAt && (
                     <p>
-                      Dikonfirmasi:{" "}
-                      {date(chosen.paidAt)}
+                      Dikonfirmasi: {date(chosen.paidAt)}
                     </p>
                   )}
 
                   <button
                     className="btn-dark"
                     disabled={!canPay(chosen)}
-                    onClick={() =>
-                      onPay(chosen.id)
-                    }
+                    onClick={() => onPay(chosen.id)}
                   >
                     {payStatus(chosen) === "Lunas"
                       ? "✓ Lunas"
-                      : chosen.paymentMethod ===
-                          "cod"
+                      : chosen.paymentMethod === "cod"
                         ? "Konfirmasi COD"
                         : "Tandai Lunas"}
                   </button>
                 </div>
 
                 <OrderStatusFlow
-                  status={status(
-                    chosen.status
-                  )}
+                  status={orderStatus(chosen.status)}
                 />
 
-                <OrderHistory
-                  order={chosen}
-                />
+                <OrderHistory order={chosen} />
               </>
             )}
 
@@ -2062,25 +1944,19 @@ function AdminDashboard({
             <h2>Sales Report</h2>
 
             <p>
-              Total Pesanan: {orders.length}
-              {" · "}
-              Selesai: {done.length}
-              {" · "}
+              Total Pesanan: {orders.length} ·
+              Selesai: {done.length} ·
               Pendapatan Selesai: {rp(revenue)}
             </p>
 
-            <OrderTable
-              orders={filteredOrders}
-            />
+            <OrderTable orders={filteredOrders} />
 
             <div className="lum-report-actions">
               <button
                 className="btn-dark"
                 disabled={!filteredOrders.length}
                 onClick={() =>
-                  downloadTransactionsPDF(
-                    filteredOrders
-                  )
+                  downloadTransactionsPDF(filteredOrders)
                 }
               >
                 Download PDF
@@ -2096,9 +1972,8 @@ function AdminDashboard({
             </div>
 
             <small className="muted">
-              Kolom voucher pada PDF mengikuti
-              format di utils/reportPdf.js;
-              CSV sudah memuat voucher.
+              PDF mengikuti format dari utils/reportPdf.js.
+              CSV sudah mencantumkan voucher.
             </small>
           </section>
         )}
@@ -2109,40 +1984,34 @@ function AdminDashboard({
 
             <select
               value={folderFilter}
-              onChange={(e) =>
-                setFolderFilter(
-                  e.target.value
-                )
+              onChange={(event) =>
+                setFolderFilter(event.target.value)
               }
             >
-              <option value="Semua">
-                Semua
-              </option>
+              <option value="Semua">Semua</option>
 
-              {CATEGORIES.map((c) => (
+              {CATEGORIES.map((category) => (
                 <option
-                  key={c.folder}
-                  value={c.folder}
+                  key={category.folder}
+                  value={category.folder}
                 >
-                  {c.label}
+                  {category.label}
                 </option>
               ))}
             </select>
 
-            <p>
-              {filteredPhotos.length} foto tersedia
-            </p>
+            <p>{filteredPhotos.length} foto tersedia</p>
 
             <div className="lum-gallery">
-              {filteredPhotos.map((p) => (
-                <article key={p.url}>
+              {filteredPhotos.map((photo) => (
+                <article key={photo.url}>
                   <Photo
-                    src={p.url}
-                    alt={p.name}
+                    src={photo.url}
+                    alt={photo.name}
                   />
 
                   <small>
-                    {p.folder} / {p.name}
+                    {photo.folder} / {photo.name}
                   </small>
                 </article>
               ))}
@@ -2153,14 +2022,16 @@ function AdminDashboard({
 
       <aside className="lum-dash-right">
         <h3>Store Summary</h3>
+
         <p>Total Produk: {products.length}</p>
         <p>Foto Lokal: {PHOTOS.length}</p>
         <p>Total Pesanan: {orders.length}</p>
+
         <p>
           Stok Menipis:{" "}
           {
             products.filter(
-              (p) => Number(p.stock) <= 5
+              (product) => Number(product.stock) <= 5
             ).length
           }
         </p>
@@ -2169,84 +2040,62 @@ function AdminDashboard({
   );
 }
 
-/* =====================================
-   MAIN APP
-===================================== */
+/* =========================================================
+   APP UTAMA
+   ========================================================= */
 
 export default function App() {
   const [products, setProducts] = useState(loadProducts);
-
-  const [orders, setOrders] = useState(
-    () => arr(KEY.orders)
-  );
-
+  const [orders, setOrders] = useState(() => arr(KEY.orders));
   const [customer, setCustomer] = useState(
     () => read(KEY.session, null)
   );
-
-  const [cart, setCart] = useState(
-    () => arr(KEY.cart)
-  );
-
+  const [cart, setCart] = useState(() => arr(KEY.cart));
   const [wishlist, setWishlist] = useState(
     () => arr(KEY.wishlist)
   );
-
   const [reviews, setReviews] = useState(
     () => read(KEY.reviews, {})
   );
 
   const [page, setPage] = useState(
-    () =>
-      location.hash === "#admin"
-        ? "admin"
-        : "home"
+    () => window.location.hash === "#admin"
+      ? "admin"
+      : "home"
   );
 
-  const [returnPage, setReturnPage] =
-    useState("home");
-
-  const [category, setCategory] =
-    useState("All");
-
+  const [returnPage, setReturnPage] = useState("home");
+  const [category, setCategory] = useState("All");
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("default");
 
-  const [shownCount, setShownCount] =
-    useState(12);
+  /* FILTER PRODUK PREMIUM */
+  const [filterPrice, setFilterPrice] = useState("all");
+  const [filterSize, setFilterSize] = useState("all");
+  const [filterColor, setFilterColor] = useState("all");
+  const [onlyReady, setOnlyReady] = useState(false);
 
-  const [selectedId, setSelectedId] =
-    useState(null);
-
+  const [shownCount, setShownCount] = useState(12);
+  const [selectedId, setSelectedId] = useState(null);
   const [size, setSize] = useState("");
   const [color, setColor] = useState("");
 
-  const [form, setForm] = useState({
-    ...EMPTY_PRODUCT,
-  });
-
+  const [form, setForm] = useState({ ...EMPTY_PRODUCT });
   const [checkout, setCheckout] = useState({
     ...EMPTY_CHECKOUT,
   });
 
-  const [voucherInput, setVoucherInput] =
-    useState("");
-
-  const [appliedVoucher, setAppliedVoucher] =
-    useState("");
-
-  const [voucherMessage, setVoucherMessage] =
-    useState("");
-
-  const [message, setMessage] =
-    useState("");
-
-  const [lastId, setLastId] =
-    useState("");
+  const [voucherInput, setVoucherInput] = useState("");
+  const [appliedVoucher, setAppliedVoucher] = useState("");
+  const [voucherMessage, setVoucherMessage] = useState("");
+  const [message, setMessage] = useState("");
+  const [lastId, setLastId] = useState("");
 
   const checkoutLock = useRef(false);
   const statusLock = useRef(new Set());
   const paymentLock = useRef(new Set());
+
+  /* SIMPAN DATA KE BROWSER */
 
   useEffect(() => {
     store(KEY.products, products);
@@ -2281,69 +2130,148 @@ export default function App() {
   useEffect(() => {
     if (!message) return;
 
-    const timer = setTimeout(
-      () => setMessage(""),
-      3500
-    );
-
+    const timer = setTimeout(() => setMessage(""), 3500);
     return () => clearTimeout(timer);
   }, [message]);
 
+  /* =======================================================
+     TAHAP 5 — FILTER PRODUK PREMIUM AKTIF
+     ======================================================= */
+
+  const categoryProducts = useMemo(() => {
+    return products.filter(
+      (product) =>
+        category === "All" ||
+        product.collection === category
+    );
+  }, [products, category]);
+
+  const availableSizes = useMemo(() => {
+    const options = categoryProducts.flatMap((product) =>
+      Array.isArray(product.sizes) ? product.sizes : []
+    );
+
+    return [...new Set(options)].sort((a, b) =>
+      String(a).localeCompare(String(b), "id", {
+        numeric: true,
+      })
+    );
+  }, [categoryProducts]);
+
+  const availableColors = useMemo(() => {
+    const options = categoryProducts.flatMap((product) =>
+      Array.isArray(product.colors) ? product.colors : []
+    );
+
+    return [...new Set(options)].sort((a, b) =>
+      String(a).localeCompare(String(b), "id")
+    );
+  }, [categoryProducts]);
+
   useEffect(() => {
     setShownCount(12);
-  }, [category, search, sort]);
+  }, [
+    category,
+    search,
+    sort,
+    filterPrice,
+    filterSize,
+    filterColor,
+    onlyReady,
+  ]);
 
-  const visible = useMemo(
-    () =>
-      products
-        .filter(
-          (p) =>
-            (category === "All" ||
-              p.collection === category) &&
-            text(
-              `${p.name} ${p.collection} ${p.description}`
-            ).includes(text(search))
-        )
-        .sort((a, b) => {
-          if (sort === "low") {
-            return (
-              Number(a.price) -
-              Number(b.price)
-            );
-          }
+  const visible = useMemo(() => {
+    return categoryProducts
+      .filter((product) => {
+        const price = Number(product.price) || 0;
 
-          if (sort === "high") {
-            return (
-              Number(b.price) -
-              Number(a.price)
-            );
-          }
+        const matchSearch = text(
+          `${product.name} ${product.collection} ${
+            product.description || ""
+          }`
+        ).includes(text(search));
 
-          if (sort === "name") {
-            return a.name.localeCompare(
-              b.name
-            );
-          }
+        const matchPrice =
+          filterPrice === "all" ||
+          (filterPrice === "low" && price < 200000) ||
+          (filterPrice === "mid" &&
+            price >= 200000 &&
+            price <= 300000) ||
+          (filterPrice === "high" && price > 300000);
 
-          return 0;
-        }),
-    [products, category, search, sort]
-  );
+        const matchSize =
+          filterSize === "all" ||
+          (Array.isArray(product.sizes) &&
+            product.sizes.includes(filterSize));
+
+        const matchColor =
+          filterColor === "all" ||
+          (Array.isArray(product.colors) &&
+            product.colors.includes(filterColor));
+
+        const matchStock =
+          !onlyReady || Number(product.stock) > 0;
+
+        return (
+          matchSearch &&
+          matchPrice &&
+          matchSize &&
+          matchColor &&
+          matchStock
+        );
+      })
+      .sort((a, b) => {
+        if (sort === "low") {
+          return Number(a.price) - Number(b.price);
+        }
+
+        if (sort === "high") {
+          return Number(b.price) - Number(a.price);
+        }
+
+        if (sort === "name") {
+          return a.name.localeCompare(b.name);
+        }
+
+        return 0;
+      });
+  }, [
+    categoryProducts,
+    search,
+    sort,
+    filterPrice,
+    filterSize,
+    filterColor,
+    onlyReady,
+  ]);
+
+  function resetShopFilters() {
+    setCategory("All");
+    setSearch("");
+    setSort("default");
+    setFilterPrice("all");
+    setFilterSize("all");
+    setFilterColor("all");
+    setOnlyReady(false);
+    setShownCount(12);
+  }
+
+  /* DATA PRODUK DAN KERANJANG */
 
   const selected = products.find(
-    (p) => p.id === selectedId
+    (product) => product.id === selectedId
   );
 
   const validCart = cart
     .map((item) => {
-      const p = products.find(
-        (x) => x.id === item.id
+      const product = products.find(
+        (candidate) => candidate.id === item.id
       );
 
-      if (!p) return null;
+      if (!product) return null;
 
       return {
-        ...p,
+        ...product,
         key:
           item.key ||
           JSON.stringify([
@@ -2355,67 +2283,53 @@ export default function App() {
         color: item.color,
         quantity: Math.max(
           1,
-          Math.floor(
-            Number(item.quantity) || 1
-          )
+          Math.floor(Number(item.quantity) || 1)
         ),
       };
     })
     .filter(Boolean);
 
   const count = validCart.reduce(
-    (n, i) => n + i.quantity,
+    (sum, item) => sum + item.quantity,
     0
   );
 
   const subtotal = validCart.reduce(
-    (n, i) =>
-      n + Number(i.price) * i.quantity,
+    (sum, item) =>
+      sum + Number(item.price) * item.quantity,
     0
   );
 
   const shipping =
-    checkout.shipping === "express"
-      ? 25000
-      : 12000;
+    checkout.shipping === "express" ? 25000 : 12000;
 
   const applied = appliedVoucher
     ? voucherValue(appliedVoucher, subtotal)
     : null;
 
-  const discount = applied?.ok
-    ? applied.amount
-    : 0;
-
-  const total =
-    subtotal - discount + shipping;
+  const discount = applied?.ok ? applied.amount : 0;
+  const total = subtotal - discount + shipping;
 
   const mine = customer
     ? orders.filter(
-        (o) =>
-          String(o.customerId) ===
+        (order) =>
+          String(order.customerId) ===
           String(customer.id)
       )
     : [];
 
   const hero =
     PHOTOS.find(
-      (p) => p.folder === "baju wanita"
+      (photo) => photo.folder === "baju wanita"
     )?.url ||
     PHOTOS[0]?.url ||
-    products.find((p) => p.image)?.image;
+    products.find((product) => product.image)?.image;
 
   const currentOrder =
-    orders.find((o) => o.id === lastId) ||
+    orders.find((order) => order.id === lastId) ||
     orders[0];
 
-  const gridProps = {
-    favorites: wishlist,
-    reviews,
-    onDetail: openProduct,
-    onFavorite: toggleFavorite,
-    onCart: addToCart,
-  };
+  /* NAVIGASI */
 
   function go(next) {
     if (["home", "shop", "cart"].includes(next)) {
@@ -2438,15 +2352,15 @@ export default function App() {
   function choose(next) {
     setCategory(next);
     setSearch("");
+    setFilterSize("all");
+    setFilterColor("all");
     go("shop");
   }
 
-  function openProduct(p) {
-    setSelectedId(p.id);
-    setSize(p.sizes?.[0] || "All Size");
-    setColor(
-      p.colors?.[0] || "Sesuai foto"
-    );
+  function openProduct(product) {
+    setSelectedId(product.id);
+    setSize(product.sizes?.[0] || "All Size");
+    setColor(product.colors?.[0] || "Sesuai foto");
     go("detail");
   }
 
@@ -2458,16 +2372,13 @@ export default function App() {
   function login(user) {
     setCustomer(user);
 
-    setCheckout((p) => ({
-      ...p,
-      name: p.name || user.name,
+    setCheckout((previous) => ({
+      ...previous,
+      name: previous.name || user.name,
     }));
 
     go(returnPage);
-
-    setMessage(
-      `Selamat datang, ${user.name}!`
-    );
+    setMessage(`Selamat datang, ${user.name}!`);
   }
 
   function logout() {
@@ -2477,169 +2388,143 @@ export default function App() {
   }
 
   function toggleFavorite(id) {
-    setWishlist((prev) =>
-      prev.includes(id)
-        ? prev.filter((v) => v !== id)
-        : [...prev, id]
+    setWishlist((previous) =>
+      previous.includes(id)
+        ? previous.filter((item) => item !== id)
+        : [...previous, id]
     );
   }
 
   function reviewProduct(id, list) {
-    setReviews((prev) => ({
-      ...prev,
+    setReviews((previous) => ({
+      ...previous,
       [String(id)]: list,
     }));
   }
 
   /* KERANJANG */
 
-  function addToCart(
-    product,
-    chosenSize,
-    chosenColor
-  ) {
-    const p = products.find(
-      (v) => v.id === product.id
+  function addToCart(product, chosenSize, chosenColor) {
+    const current = products.find(
+      (item) => item.id === product.id
     );
 
-    if (!p) return;
+    if (!current) return;
 
     const used = cart
-      .filter((v) => v.id === p.id)
+      .filter((item) => item.id === current.id)
       .reduce(
-        (n, v) =>
-          n + Number(v.quantity),
+        (sum, item) => sum + Number(item.quantity),
         0
       );
 
-    if (used >= Number(p.stock)) {
-      setMessage(
-        "Stok tidak mencukupi."
-      );
+    if (used >= Number(current.stock)) {
+      setMessage("Stok tidak mencukupi.");
       return;
     }
 
-    const s =
-      chosenSize ||
-      p.sizes?.[0] ||
-      "All Size";
+    const selectedSize =
+      chosenSize || current.sizes?.[0] || "All Size";
 
-    const c =
-      chosenColor ||
-      p.colors?.[0] ||
-      "Sesuai foto";
+    const selectedColor =
+      chosenColor || current.colors?.[0] || "Sesuai foto";
 
     const key = JSON.stringify([
-      p.id,
-      s,
-      c,
+      current.id,
+      selectedSize,
+      selectedColor,
     ]);
 
-    setCart((prev) => {
-      const old = prev.find(
-        (v) =>
-          (v.key ||
+    setCart((previous) => {
+      const found = previous.find(
+        (item) =>
+          (item.key ||
             JSON.stringify([
-              v.id,
-              v.size,
-              v.color,
+              item.id,
+              item.size,
+              item.color,
             ])) === key
       );
 
-      return old
-        ? prev.map((v) =>
-            (v.key ||
+      return found
+        ? previous.map((item) =>
+            (item.key ||
               JSON.stringify([
-                v.id,
-                v.size,
-                v.color,
+                item.id,
+                item.size,
+                item.color,
               ])) === key
               ? {
-                  ...v,
+                  ...item,
                   key,
-                  quantity:
-                    Number(v.quantity) + 1,
+                  quantity: Number(item.quantity) + 1,
                 }
-              : v
+              : item
           )
         : [
-            ...prev,
+            ...previous,
             {
-              id: p.id,
+              id: current.id,
               key,
-              size: s,
-              color: c,
+              size: selectedSize,
+              color: selectedColor,
               quantity: 1,
             },
           ];
     });
 
-    setMessage(
-      "Produk masuk ke keranjang."
-    );
+    setMessage("Produk masuk ke keranjang.");
   }
 
   function changeQty(key, step) {
     const item = validCart.find(
-      (v) => v.key === key
+      (product) => product.key === key
     );
 
     if (!item) return;
 
     const used = cart
-      .filter((v) => v.id === item.id)
+      .filter((product) => product.id === item.id)
       .reduce(
-        (n, v) =>
-          n + Number(v.quantity),
+        (sum, product) =>
+          sum + Number(product.quantity),
         0
       );
 
-    if (
-      step > 0 &&
-      used >= Number(item.stock)
-    ) {
-      setMessage(
-        "Stok tidak mencukupi."
-      );
+    if (step > 0 && used >= Number(item.stock)) {
+      setMessage("Stok tidak mencukupi.");
       return;
     }
 
-    setCart((prev) =>
-      prev
-        .map((v) => {
-          const k =
-            v.key ||
+    setCart((previous) =>
+      previous
+        .map((product) => {
+          const currentKey =
+            product.key ||
             JSON.stringify([
-              v.id,
-              v.size,
-              v.color,
+              product.id,
+              product.size,
+              product.color,
             ]);
 
-          return k === key
+          return currentKey === key
             ? {
-                ...v,
+                ...product,
                 key,
-                quantity:
-                  Number(v.quantity) + step,
+                quantity: Number(product.quantity) + step,
               }
-            : v;
+            : product;
         })
-        .filter((v) => v.quantity > 0)
+        .filter((product) => product.quantity > 0)
     );
   }
 
   /* VOUCHER */
 
   function applyVoucher() {
-    const result = voucherValue(
-      voucherInput,
-      subtotal
-    );
+    const result = voucherValue(voucherInput, subtotal);
 
-    setAppliedVoucher(
-      result.ok ? result.code : ""
-    );
-
+    setAppliedVoucher(result.ok ? result.code : "");
     setVoucherMessage(result.message);
   }
 
@@ -2649,10 +2534,10 @@ export default function App() {
     setVoucherMessage("");
   }
 
-  /* CHECKOUT */
+  /* CHECKOUT PESANAN */
 
-  function placeOrder(e) {
-    e.preventDefault();
+  function placeOrder(event) {
+    event.preventDefault();
 
     if (checkoutLock.current) return;
 
@@ -2669,9 +2554,7 @@ export default function App() {
     if (
       !checkout.name.trim() ||
       !checkout.address.trim() ||
-      !/^[0-9+()\s-]{8,20}$/.test(
-        checkout.phone.trim()
-      )
+      !/^[0-9+()\s-]{8,20}$/.test(checkout.phone.trim())
     ) {
       setMessage(
         "Periksa nama, nomor telepon, dan alamat."
@@ -2679,25 +2562,23 @@ export default function App() {
       return;
     }
 
-    const qty = new Map();
+    const quantityMap = new Map();
 
-    validCart.forEach((i) =>
-      qty.set(
-        i.id,
-        (qty.get(i.id) || 0) +
-          i.quantity
-      )
-    );
+    validCart.forEach((item) => {
+      quantityMap.set(
+        item.id,
+        (quantityMap.get(item.id) || 0) +
+          item.quantity
+      );
+    });
 
-    for (const [id, n] of qty) {
-      const p = products.find(
-        (v) => v.id === id
+    for (const [id, quantity] of quantityMap) {
+      const product = products.find(
+        (item) => item.id === id
       );
 
-      if (!p || Number(p.stock) < n) {
-        setMessage(
-          "Stok tidak mencukupi."
-        );
+      if (!product || Number(product.stock) < quantity) {
+        setMessage("Stok tidak mencukupi.");
         return;
       }
     }
@@ -2708,21 +2589,16 @@ export default function App() {
     const id = `LM-${Date.now()}`;
 
     const method = METHODS.some(
-      (m) => m.value === checkout.payment
+      (item) => item.value === checkout.payment
     )
       ? checkout.payment
       : "cod";
 
     const promo = appliedVoucher
-      ? voucherValue(
-          appliedVoucher,
-          subtotal
-        )
+      ? voucherValue(appliedVoucher, subtotal)
       : null;
 
-    const cut = promo?.ok
-      ? promo.amount
-      : 0;
+    const cut = promo?.ok ? promo.amount : 0;
 
     const order = {
       id,
@@ -2741,14 +2617,9 @@ export default function App() {
           : "Menunggu Pembayaran",
       paidAt: null,
       paymentHistory: [],
-      items: validCart.map((i) => ({
-        ...i,
-      })),
+      items: validCart.map((item) => ({ ...item })),
       subtotal,
-      voucherCode:
-        promo?.ok
-          ? promo.code
-          : null,
+      voucherCode: promo?.ok ? promo.code : null,
       discount: cut,
       total: subtotal - cut + shipping,
       status: "Pesanan Baru",
@@ -2761,27 +2632,20 @@ export default function App() {
           at: now,
           by: "Sistem",
           note:
-            `Checkout ${paymentLabel(method)}; ` +
-            `Voucher: ${
-              promo?.ok
-                ? promo.code
-                : "Tidak ada"
-            }.`,
+            `Checkout ${paymentLabel(method)}; Voucher: ` +
+            (promo?.ok ? promo.code : "Tidak ada"),
         },
       ],
     };
 
-    setOrders((prev) => [
-      order,
-      ...prev,
-    ]);
+    setOrders((previous) => [order, ...previous]);
 
-    setProducts((prev) =>
-      prev.map((p) => ({
-        ...p,
+    setProducts((previous) =>
+      previous.map((product) => ({
+        ...product,
         stock:
-          Number(p.stock) -
-          (qty.get(p.id) || 0),
+          Number(product.stock) -
+          (quantityMap.get(product.id) || 0),
       }))
     );
 
@@ -2792,29 +2656,21 @@ export default function App() {
     setLastId(id);
     go("success");
 
-    setMessage(
-      "Pesanan berhasil dibuat."
-    );
+    setMessage("Pesanan berhasil dibuat.");
   }
 
-  /* PEMBAYARAN ADMIN */
+  /* ADMIN — KONFIRMASI PEMBAYARAN */
 
   function confirmPayment(id) {
-    const order = orders.find(
-      (o) => o.id === id
-    );
+    const order = orders.find((item) => item.id === id);
 
-    if (
-      !canPay(order) ||
-      paymentLock.current.has(id)
-    ) {
+    if (!canPay(order) || paymentLock.current.has(id)) {
       return;
     }
 
     if (
       !window.confirm(
-        `Tandai pembayaran pesanan ${id} ` +
-        `sebagai LUNAS? (Simulasi)`
+        `Tandai pembayaran pesanan ${id} sebagai LUNAS? (Simulasi)`
       )
     ) {
       return;
@@ -2824,70 +2680,53 @@ export default function App() {
 
     const now = new Date().toISOString();
 
-    setOrders((prev) =>
-      prev.map((o) =>
-        o.id === id
+    setOrders((previous) =>
+      previous.map((item) =>
+        item.id === id
           ? {
-              ...o,
+              ...item,
               paymentStatus: "Lunas",
               paidAt: now,
               paymentConfirmedBy: "Admin Demo",
               paymentHistory: [
-                ...(Array.isArray(
-                  o.paymentHistory
-                )
-                  ? o.paymentHistory
+                ...(Array.isArray(item.paymentHistory)
+                  ? item.paymentHistory
                   : []),
                 {
-                  id:
-                    `${id}-paid-${Date.now()}`,
+                  id: `${id}-paid-${Date.now()}`,
                   at: now,
                   status: "Lunas",
                   by: "Admin Demo",
-                  note:
-                    "Pembayaran simulasi dikonfirmasi.",
+                  note: "Pembayaran simulasi dikonfirmasi.",
                 },
               ],
             }
-          : o
+          : item
       )
     );
 
-    setMessage(
-      "Pembayaran ditandai Lunas."
-    );
+    setMessage("Pembayaran ditandai Lunas.");
   }
 
-  /* STATUS PESANAN */
+  /* ADMIN — STATUS PESANAN */
 
   function changeStatus(id, next) {
-    const order = orders.find(
-      (o) => o.id === id
-    );
+    const order = orders.find((item) => item.id === id);
 
-    if (
-      !order ||
-      statusLock.current.has(id)
-    ) {
+    if (!order || statusLock.current.has(id)) {
       return;
     }
 
-    const current = status(
-      order.status
-    );
+    const current = orderStatus(order.status);
 
     if (!canMove(current, next)) {
-      setMessage(
-        "Status harus berubah berurutan."
-      );
+      setMessage("Status harus berubah berurutan.");
       return;
     }
 
     if (
       next !== "Dibatalkan" &&
-      ["transfer", "qris"].includes(
-        order.paymentMethod
-      ) &&
+      ["transfer", "qris"].includes(order.paymentMethod) &&
       payStatus(order) !== "Lunas"
     ) {
       setMessage(
@@ -2896,13 +2735,10 @@ export default function App() {
       return;
     }
 
-    // Pengaman agar pesanan tidak terbatalkan
-    // karena salah klik dropdown.
     if (
       next === "Dibatalkan" &&
       !window.confirm(
-        `Yakin ingin MEMBATALKAN pesanan ${id}? ` +
-        "Status ini tidak bisa dikembalikan."
+        `Yakin membatalkan pesanan ${id}? Tindakan ini tidak bisa dibatalkan.`
       )
     ) {
       return;
@@ -2912,49 +2748,43 @@ export default function App() {
 
     const now = new Date().toISOString();
 
-    if (
-      next === "Dibatalkan" &&
-      !order.stockRestored
-    ) {
-      const qty = new Map();
+    if (next === "Dibatalkan" && !order.stockRestored) {
+      const quantityMap = new Map();
 
-      (order.items || []).forEach((i) =>
-        qty.set(
-          i.id,
-          (qty.get(i.id) || 0) +
-            Number(i.quantity || 0)
-        )
-      );
+      (order.items || []).forEach((item) => {
+        quantityMap.set(
+          item.id,
+          (quantityMap.get(item.id) || 0) +
+            Number(item.quantity || 0)
+        );
+      });
 
-      setProducts((prev) =>
-        prev.map((p) => ({
-          ...p,
+      setProducts((previous) =>
+        previous.map((product) => ({
+          ...product,
           stock:
-            Number(p.stock) +
-            (qty.get(p.id) || 0),
+            Number(product.stock) +
+            (quantityMap.get(product.id) || 0),
         }))
       );
     }
 
-    setOrders((prev) =>
-      prev.map((o) =>
-        o.id === id
+    setOrders((previous) =>
+      previous.map((item) =>
+        item.id === id
           ? {
-              ...o,
+              ...item,
               status: next,
               updatedAt: now,
               stockRestored:
-                !!o.stockRestored ||
+                !!item.stockRestored ||
                 next === "Dibatalkan",
               history: [
-                ...(Array.isArray(
-                  o.history
-                )
-                  ? o.history
+                ...(Array.isArray(item.history)
+                  ? item.history
                   : []),
                 {
-                  id:
-                    `${id}-${Date.now()}-${next}`,
+                  id: `${id}-${Date.now()}-${next}`,
                   from: current,
                   status: next,
                   at: now,
@@ -2966,22 +2796,20 @@ export default function App() {
                 },
               ],
             }
-          : o
+          : item
       )
     );
 
-    setMessage(
-      `Status pesanan: ${next}`
-    );
+    setMessage(`Status pesanan: ${next}`);
   }
 
-  /* CRUD PRODUK */
+  /* ADMIN — CRUD PRODUK */
 
-  function saveProduct(e) {
-    e.preventDefault();
+  function saveProduct(event) {
+    event.preventDefault();
 
-    const c = CATEGORIES.find(
-      (x) => x.name === form.collection
+    const category = CATEGORIES.find(
+      (item) => item.name === form.collection
     );
 
     const price = Number(form.price);
@@ -2989,38 +2817,34 @@ export default function App() {
 
     if (
       !form.name.trim() ||
-      !c ||
+      !category ||
       !Number.isFinite(price) ||
       price <= 0 ||
       !Number.isInteger(stock) ||
       stock < 0
     ) {
-      setMessage(
-        "Periksa nama, harga, dan stok."
-      );
+      setMessage("Periksa nama, harga, dan stok.");
       return;
     }
 
     if (
       form.image &&
       !PHOTOS.some(
-        (p) =>
-          p.url === form.image &&
-          p.folder === c.folder
+        (photo) =>
+          photo.url === form.image &&
+          photo.folder === category.folder
       )
     ) {
-      setMessage(
-        "Foto tidak sesuai kategori."
-      );
+      setMessage("Foto tidak sesuai kategori.");
       return;
     }
 
     if (
       form.image &&
       products.some(
-        (p) =>
-          p.id !== form.id &&
-          p.image === form.image
+        (product) =>
+          product.id !== form.id &&
+          product.image === form.image
       )
     ) {
       setMessage(
@@ -3032,13 +2856,8 @@ export default function App() {
     const sizes = values(form.sizes);
     const colors = values(form.colors);
 
-    if (
-      !sizes.length ||
-      !colors.length
-    ) {
-      setMessage(
-        "Ukuran dan warna wajib diisi."
-      );
+    if (!sizes.length || !colors.length) {
+      setMessage("Ukuran dan warna wajib diisi.");
       return;
     }
 
@@ -3048,20 +2867,18 @@ export default function App() {
           (url) =>
             url !== form.image &&
             PHOTOS.some(
-              (p) =>
-                p.url === url &&
-                p.folder === c.folder
+              (photo) =>
+                photo.url === url &&
+                photo.folder === category.folder
             )
         )
       ),
     ];
 
     const product = {
-      id:
-        form.id ??
-        `custom:${Date.now()}`,
+      id: form.id ?? `custom:${Date.now()}`,
       name: form.name.trim(),
-      collection: c.name,
+      collection: category.name,
       image: form.image,
       gallery,
       price,
@@ -3071,38 +2888,30 @@ export default function App() {
       colors,
     };
 
-    setProducts((prev) =>
+    setProducts((previous) =>
       form.id === null
-        ? [...prev, product]
-        : prev.map((p) =>
-            p.id === form.id
-              ? product
-              : p
+        ? [...previous, product]
+        : previous.map((item) =>
+            item.id === form.id ? product : item
           )
     );
 
     setForm({ ...EMPTY_PRODUCT });
-
-    setMessage(
-      "Produk berhasil disimpan."
-    );
+    setMessage("Produk berhasil disimpan.");
   }
 
-  function editProduct(p) {
+  function editProduct(product) {
     setForm({
-      id: p.id,
-      name: p.name,
-      collection: p.collection,
-      image: p.image || "",
-      gallery:
-        (p.gallery || []).join(","),
-      price: String(p.price),
-      stock: String(p.stock),
-      description: p.description || "",
-      sizes:
-        (p.sizes || []).join(","),
-      colors:
-        (p.colors || []).join(","),
+      id: product.id,
+      name: product.name,
+      collection: product.collection,
+      image: product.image || "",
+      gallery: (product.gallery || []).join(","),
+      price: String(product.price),
+      stock: String(product.stock),
+      description: product.description || "",
+      sizes: (product.sizes || []).join(","),
+      colors: (product.colors || []).join(","),
     });
 
     window.scrollTo(0, 0);
@@ -3110,33 +2919,23 @@ export default function App() {
 
   function deleteProduct(id) {
     const active = orders.some(
-      (o) =>
+      (order) =>
         !["Selesai", "Dibatalkan"].includes(
-          status(o.status)
+          orderStatus(order.status)
         ) &&
-        o.items?.some(
-          (i) => i.id === id
-        )
+        order.items?.some((item) => item.id === id)
     );
 
     if (active) {
-      setMessage(
-        "Selesaikan pesanan aktif dahulu."
-      );
+      setMessage("Selesaikan pesanan aktif dahulu.");
       return;
     }
 
-    if (
-      !window.confirm(
-        "Hapus produk ini?"
-      )
-    ) {
+    if (!window.confirm("Hapus produk ini?")) {
       return;
     }
 
-    const p = products.find(
-      (v) => v.id === id
-    );
+    const product = products.find((item) => item.id === id);
 
     const deleted = new Set(
       arr(KEY.deleted).map(String)
@@ -3144,28 +2943,30 @@ export default function App() {
 
     deleted.add(String(id));
 
-    if (p?.image) {
-      deleted.add(`local:${p.image}`);
+    if (product?.image) {
+      deleted.add(`local:${product.image}`);
     }
 
     store(KEY.deleted, [...deleted]);
 
-    setProducts((prev) =>
-      prev.filter((v) => v.id !== id)
+    setProducts((previous) =>
+      previous.filter((item) => item.id !== id)
     );
 
-    setCart((prev) =>
-      prev.filter((v) => v.id !== id)
+    setCart((previous) =>
+      previous.filter((item) => item.id !== id)
     );
 
-    setWishlist((prev) =>
-      prev.filter((v) => v !== id)
+    setWishlist((previous) =>
+      previous.filter((item) => item !== id)
     );
 
     setMessage("Produk dihapus.");
   }
 
-  /* TAMPILAN */
+  /* =======================================================
+     TAMPILAN LUMINA STORE
+     ======================================================= */
 
   return (
     <div
@@ -3173,6 +2974,151 @@ export default function App() {
         page === "admin" ? "admin-mode" : ""
       }`}
     >
+      {/* DESAIN FILTER PREMIUM — CSS DALAM APP.JSX */}
+
+      <style>{`
+        .lumina .lum-premium-filter-panel {
+          margin: 24px 0 28px;
+          padding: 26px;
+          background: linear-gradient(135deg, #fff, #fbf5ef);
+          border: 1px solid #e9dcd1;
+          border-radius: 18px;
+          box-shadow: 0 10px 30px rgba(60,42,28,.06);
+        }
+
+        .lumina .lum-premium-filter-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 16px;
+          margin-bottom: 23px;
+        }
+
+        .lumina .lum-filter-eyebrow {
+          color: #a57d61;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 2px;
+        }
+
+        .lumina .lum-premium-filter-header h3 {
+          margin: 7px 0;
+          color: #30251f;
+          font-size: 21px;
+        }
+
+        .lumina .lum-premium-filter-header p {
+          margin: 0;
+          color: #8b7a6e;
+          font-size: 12px;
+        }
+
+        .lumina .lum-premium-filter-grid {
+          display: grid;
+          grid-template-columns:
+            repeat(3, minmax(0, 1fr)) minmax(150px, .9fr);
+          gap: 14px;
+          align-items: end;
+        }
+
+        .lumina .lum-premium-filter-grid > label {
+          display: flex;
+          flex-direction: column;
+          gap: 9px;
+          color: #58483d;
+          font-size: 12px;
+          font-weight: 700;
+        }
+
+        .lumina .lum-premium-filter-grid select {
+          width: 100%;
+          min-height: 47px;
+          padding: 10px 13px;
+          background: #fff;
+          border: 1px solid #e5d7cc;
+          border-radius: 9px;
+          color: #30251f;
+          cursor: pointer;
+        }
+
+        .lumina .lum-premium-filter-grid select:focus {
+          outline: none;
+          border-color: #a57d61;
+          box-shadow: 0 0 0 3px rgba(165,125,97,.12);
+        }
+
+        .lumina .lum-premium-filter-grid .lum-filter-stock {
+          flex-direction: row;
+          align-items: center;
+          justify-content: center;
+          min-height: 47px;
+          padding: 10px;
+          background: #f4e8dd;
+          border: 1px solid #e6d6c8;
+          border-radius: 9px;
+          cursor: pointer;
+        }
+
+        .lumina .lum-filter-stock input {
+          width: 17px;
+          height: 17px;
+          accent-color: #8e6b55;
+          cursor: pointer;
+        }
+
+        .lumina .lum-reset-filter {
+          padding: 11px 17px;
+          background: #fff;
+          border: 1px solid #d9c3b1;
+          border-radius: 9px;
+          color: #845f45;
+          font-size: 12px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: .2s ease;
+        }
+
+        .lumina .lum-reset-filter:hover {
+          background: #30251f;
+          border-color: #30251f;
+          color: #fff;
+        }
+
+        .lumina .lum-filter-result {
+          margin-top: 18px;
+          padding-top: 14px;
+          border-top: 1px solid #eee3da;
+          text-align: right;
+          color: #8e6b55;
+          font-size: 12px;
+          font-weight: 700;
+        }
+
+        @media (max-width: 950px) {
+          .lumina .lum-premium-filter-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+        }
+
+        @media (max-width: 600px) {
+          .lumina .lum-premium-filter-panel {
+            padding: 17px;
+            border-radius: 14px;
+          }
+
+          .lumina .lum-premium-filter-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .lumina .lum-reset-filter {
+            width: 100%;
+          }
+        }
+      `}</style>
+
+      {/* HEADER */}
+
       {page !== "admin" && (
         <>
           <div className="announcement">
@@ -3205,30 +3151,22 @@ export default function App() {
               </button>
 
               <button
-                onClick={() =>
-                  choose("Batik Wanita")
-                }
+                onClick={() => choose("Batik Wanita")}
               >
                 Batik
               </button>
 
               <button
-                onClick={() =>
-                  choose("Tas Wanita")
-                }
+                onClick={() => choose("Tas Wanita")}
               >
                 Bags
               </button>
 
-              <button
-                onClick={() => go("wishlist")}
-              >
+              <button onClick={() => go("wishlist")}>
                 ♡ Wishlist ({wishlist.length})
               </button>
 
-              <button
-                onClick={() => go("admin")}
-              >
+              <button onClick={() => go("admin")}>
                 Admin Demo
               </button>
 
@@ -3281,8 +3219,7 @@ export default function App() {
 
               <p>
                 Temukan fashion pria, wanita,
-                batik, sepatu, tas, dan aksesori
-                pilihan.
+                batik, sepatu, tas, dan aksesori pilihan.
               </p>
 
               <button
@@ -3337,26 +3274,23 @@ export default function App() {
             </h2>
 
             <div className="lum-home-categories">
-              {CATEGORIES.map((c) => {
+              {CATEGORIES.map((item) => {
                 const cover = products.find(
-                  (p) =>
-                    p.collection === c.name &&
-                    p.image
+                  (product) =>
+                    product.collection === item.name &&
+                    product.image
                 );
 
                 return (
                   <button
-                    key={c.name}
-                    onClick={() =>
-                      choose(c.name)
-                    }
+                    key={item.name}
+                    onClick={() => choose(item.name)}
                   >
                     <Photo
                       src={cover?.image}
-                      alt={c.label}
+                      alt={item.label}
                     />
-
-                    <span>{c.label}</span>
+                    <span>{item.label}</span>
                   </button>
                 );
               })}
@@ -3379,7 +3313,7 @@ export default function App() {
 
             <ProductGrid
               products={products
-                .filter((p) => p.image)
+                .filter((product) => product.image)
                 .slice(0, 8)}
               favorites={wishlist}
               reviews={reviews}
@@ -3400,7 +3334,7 @@ export default function App() {
         </>
       )}
 
-      {/* SHOP */}
+      {/* SHOP — FILTER PRODUK PREMIUM */}
 
       {page === "shop" && (
         <main className="lum-new-shop">
@@ -3412,35 +3346,31 @@ export default function App() {
             <h1>Shop Our Collection</h1>
 
             <p>
-              Temukan produk terbaik dari
-              LUMINA STORE.
+              Temukan produk terbaik dari LUMINA STORE.
             </p>
           </div>
 
           <div className="lum-shop-categories">
             {[
-              {
-                name: "All",
-                label: "Semua",
-              },
-              ...CATEGORIES.map((c) => ({
-                name: c.name,
-                label: c.label,
+              { name: "All", label: "Semua" },
+              ...CATEGORIES.map((item) => ({
+                name: item.name,
+                label: item.label,
               })),
-            ].map((c) => (
+            ].map((item) => (
               <button
-                key={c.name}
+                key={item.name}
                 className={`lum-shop-pill ${
-                  category === c.name
-                    ? "active"
-                    : ""
+                  category === item.name ? "active" : ""
                 }`}
                 onClick={() => {
-                  setCategory(c.name);
+                  setCategory(item.name);
                   setSearch("");
+                  setFilterSize("all");
+                  setFilterColor("all");
                 }}
               >
-                {c.label}
+                {item.label}
               </button>
             ))}
           </div>
@@ -3453,14 +3383,15 @@ export default function App() {
                 type="search"
                 value={search}
                 placeholder="Cari produk..."
-                onChange={(e) =>
-                  setSearch(e.target.value)
+                onChange={(event) =>
+                  setSearch(event.target.value)
                 }
               />
 
               {search && (
                 <button
                   onClick={() => setSearch("")}
+                  type="button"
                 >
                   ×
                 </button>
@@ -3470,27 +3401,153 @@ export default function App() {
             <select
               className="lum-shop-sort"
               value={sort}
-              onChange={(e) =>
-                setSort(e.target.value)
+              onChange={(event) =>
+                setSort(event.target.value)
               }
             >
               <option value="default">
                 Urutan Default
               </option>
-
               <option value="low">
                 Harga Termurah
               </option>
-
               <option value="high">
                 Harga Termahal
               </option>
-
               <option value="name">
                 Nama A–Z
               </option>
             </select>
           </div>
+
+          {/* FILTER PREMIUM BARU */}
+
+          <section
+            className="lum-premium-filter-panel"
+            aria-label="Filter Produk Premium"
+          >
+            <div className="lum-premium-filter-header">
+              <div>
+                <span className="lum-filter-eyebrow">
+                  LUMINA SMART FILTER
+                </span>
+
+                <h3>Filter Produk Premium</h3>
+
+                <p>
+                  Temukan fashion sesuai harga,
+                  ukuran, warna, dan stok.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="lum-reset-filter"
+                onClick={resetShopFilters}
+              >
+                ↻ Reset Filter
+              </button>
+            </div>
+
+            <div className="lum-premium-filter-grid">
+              <label htmlFor="lum-price-filter">
+                Rentang Harga
+
+                <select
+                  id="lum-price-filter"
+                  value={filterPrice}
+                  onChange={(event) =>
+                    setFilterPrice(event.target.value)
+                  }
+                >
+                  <option value="all">
+                    Semua Harga
+                  </option>
+
+                  <option value="low">
+                    Di bawah Rp200.000
+                  </option>
+
+                  <option value="mid">
+                    Rp200.000 – Rp300.000
+                  </option>
+
+                  <option value="high">
+                    Di atas Rp300.000
+                  </option>
+                </select>
+              </label>
+
+              <label htmlFor="lum-size-filter">
+                Ukuran
+
+                <select
+                  id="lum-size-filter"
+                  value={filterSize}
+                  onChange={(event) =>
+                    setFilterSize(event.target.value)
+                  }
+                >
+                  <option value="all">
+                    Semua Ukuran
+                  </option>
+
+                  {availableSizes.map((item) => (
+                    <option
+                      key={item}
+                      value={item}
+                    >
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label htmlFor="lum-color-filter">
+                Warna
+
+                <select
+                  id="lum-color-filter"
+                  value={filterColor}
+                  onChange={(event) =>
+                    setFilterColor(event.target.value)
+                  }
+                >
+                  <option value="all">
+                    Semua Warna
+                  </option>
+
+                  {availableColors.map((item) => (
+                    <option
+                      key={item}
+                      value={item}
+                    >
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="lum-filter-stock">
+                <input
+                  type="checkbox"
+                  checked={onlyReady}
+                  onChange={(event) =>
+                    setOnlyReady(event.target.checked)
+                  }
+                />
+
+                <span>Hanya stok tersedia</span>
+              </label>
+            </div>
+
+            <div
+              className="lum-filter-result"
+              role="status"
+            >
+              ✓ {visible.length} produk sesuai filter
+            </div>
+          </section>
 
           <div className="lum-shop-count">
             <span>
@@ -3499,18 +3556,12 @@ export default function App() {
 
             <span>
               Menampilkan{" "}
-              {Math.min(
-                shownCount,
-                visible.length
-              )}
+              {Math.min(shownCount, visible.length)}
             </span>
           </div>
 
           <ProductGrid
-            products={visible.slice(
-              0,
-              shownCount
-            )}
+            products={visible.slice(0, shownCount)}
             favorites={wishlist}
             reviews={reviews}
             onDetail={openProduct}
@@ -3523,9 +3574,7 @@ export default function App() {
               <button
                 className="btn-light"
                 onClick={() =>
-                  setShownCount(
-                    (n) => n + 12
-                  )
+                  setShownCount((previous) => previous + 12)
                 }
               >
                 Tampilkan Lebih Banyak (
@@ -3536,7 +3585,7 @@ export default function App() {
         </main>
       )}
 
-      {/* DETAIL */}
+      {/* DETAIL PRODUK */}
 
       {page === "detail" && selected && (
         <ProductDetail
@@ -3549,9 +3598,7 @@ export default function App() {
           onColor={setColor}
           onCart={addToCart}
           onFavorite={toggleFavorite}
-          favorite={wishlist.includes(
-            selected.id
-          )}
+          favorite={wishlist.includes(selected.id)}
           reviews={reviews}
           onReview={reviewProduct}
           onBack={() => go("shop")}
@@ -3568,7 +3615,7 @@ export default function App() {
 
           <ProductGrid
             products={products.filter(
-              (p) => wishlist.includes(p.id)
+              (product) => wishlist.includes(product.id)
             )}
             favorites={wishlist}
             reviews={reviews}
@@ -3579,7 +3626,7 @@ export default function App() {
         </main>
       )}
 
-      {/* CART */}
+      {/* KERANJANG */}
 
       {page === "cart" && (
         <main className="container section">
@@ -3593,45 +3640,41 @@ export default function App() {
                 <p>Keranjang masih kosong.</p>
               )}
 
-              {validCart.map((i) => (
+              {validCart.map((item) => (
                 <div
                   className="cart-row"
-                  key={i.key}
+                  key={item.key}
                 >
                   <div className="lum-cart-photo">
                     <Photo
-                      src={i.image}
-                      alt={i.name}
+                      src={item.image}
+                      alt={item.name}
                     />
                   </div>
 
                   <div className="grow">
-                    <h3>
-                      {prettyName(i.name)}
-                    </h3>
+                    <h3>{prettyName(item.name)}</h3>
 
                     <p>
-                      {i.size} / {i.color}
+                      {item.size} / {item.color}
                     </p>
 
-                    <strong>
-                      {rp(i.price)}
-                    </strong>
+                    <strong>{rp(item.price)}</strong>
 
                     <div className="quantity">
                       <button
                         onClick={() =>
-                          changeQty(i.key, -1)
+                          changeQty(item.key, -1)
                         }
                       >
                         −
                       </button>
 
-                      <span>{i.quantity}</span>
+                      <span>{item.quantity}</span>
 
                       <button
                         onClick={() =>
-                          changeQty(i.key, 1)
+                          changeQty(item.key, 1)
                         }
                       >
                         +
@@ -3639,15 +3682,15 @@ export default function App() {
 
                       <button
                         onClick={() =>
-                          setCart((prev) =>
-                            prev.filter(
-                              (v) =>
-                                (v.key ||
+                          setCart((previous) =>
+                            previous.filter(
+                              (cartItem) =>
+                                (cartItem.key ||
                                   JSON.stringify([
-                                    v.id,
-                                    v.size,
-                                    v.color,
-                                  ])) !== i.key
+                                    cartItem.id,
+                                    cartItem.size,
+                                    cartItem.color,
+                                  ])) !== item.key
                             )
                           )
                         }
@@ -3689,7 +3732,7 @@ export default function App() {
         </main>
       )}
 
-      {/* LOGIN */}
+      {/* LOGIN / REGISTER */}
 
       {page === "auth" && (
         <AuthPage
@@ -3697,8 +3740,6 @@ export default function App() {
           onBack={() => go("home")}
         />
       )}
-
-      {/* CHECKOUT TANPA LOGIN */}
 
       {page === "checkout" && !customer && (
         <main className="container section center">
@@ -3733,10 +3774,10 @@ export default function App() {
                 <input
                   required
                   value={checkout.name}
-                  onChange={(e) =>
-                    setCheckout((p) => ({
-                      ...p,
-                      name: e.target.value,
+                  onChange={(event) =>
+                    setCheckout((previous) => ({
+                      ...previous,
+                      name: event.target.value,
                     }))
                   }
                 />
@@ -3747,10 +3788,10 @@ export default function App() {
                 <input
                   required
                   value={checkout.phone}
-                  onChange={(e) =>
-                    setCheckout((p) => ({
-                      ...p,
-                      phone: e.target.value,
+                  onChange={(event) =>
+                    setCheckout((previous) => ({
+                      ...previous,
+                      phone: event.target.value,
                     }))
                   }
                 />
@@ -3762,10 +3803,10 @@ export default function App() {
                   rows={4}
                   required
                   value={checkout.address}
-                  onChange={(e) =>
-                    setCheckout((p) => ({
-                      ...p,
-                      address: e.target.value,
+                  onChange={(event) =>
+                    setCheckout((previous) => ({
+                      ...previous,
+                      address: event.target.value,
                     }))
                   }
                 />
@@ -3775,10 +3816,10 @@ export default function App() {
                 Pengiriman
                 <select
                   value={checkout.shipping}
-                  onChange={(e) =>
-                    setCheckout((p) => ({
-                      ...p,
-                      shipping: e.target.value,
+                  onChange={(event) =>
+                    setCheckout((previous) => ({
+                      ...previous,
+                      shipping: event.target.value,
                     }))
                   }
                 >
@@ -3796,12 +3837,9 @@ export default function App() {
                 <h3>Voucher & Diskon</h3>
 
                 <p className="muted">
-                  LUMINA10: 10% min. Rp100.000
-                  {" · "}
-                  FASHION20: 20% min. Rp300.000
-                  {" · "}
-                  WELCOME15: Rp15.000 min.
-                  Rp150.000.
+                  LUMINA10: 10% min. Rp100.000 ·
+                  FASHION20: 20% min. Rp300.000 ·
+                  WELCOME15: Rp15.000 min. Rp150.000.
                 </p>
 
                 <div className="lum-voucher-controls">
@@ -3809,9 +3847,9 @@ export default function App() {
                     value={voucherInput}
                     maxLength={24}
                     placeholder="Kode voucher"
-                    onChange={(e) => {
+                    onChange={(event) => {
                       setVoucherInput(
-                        e.target.value.toUpperCase()
+                        event.target.value.toUpperCase()
                       );
 
                       setAppliedVoucher("");
@@ -3840,8 +3878,7 @@ export default function App() {
                 )}
 
                 {(voucherMessage ||
-                  (applied &&
-                    !applied.ok)) && (
+                  (applied && !applied.ok)) && (
                   <p
                     className={
                       applied?.ok
@@ -3850,8 +3887,7 @@ export default function App() {
                     }
                     role="status"
                   >
-                    {applied &&
-                    !applied.ok
+                    {applied && !applied.ok
                       ? applied.message
                       : voucherMessage}
                   </p>
@@ -3865,27 +3901,26 @@ export default function App() {
 
                 <select
                   value={checkout.payment}
-                  onChange={(e) =>
-                    setCheckout((p) => ({
-                      ...p,
-                      payment: e.target.value,
+                  onChange={(event) =>
+                    setCheckout((previous) => ({
+                      ...previous,
+                      payment: event.target.value,
                     }))
                   }
                 >
-                  {METHODS.map((m) => (
+                  {METHODS.map((method) => (
                     <option
-                      value={m.value}
-                      key={m.value}
+                      key={method.value}
+                      value={method.value}
                     >
-                      {m.label}
+                      {method.label}
                     </option>
                   ))}
                 </select>
 
                 <p className="muted">
-                  Tidak ada perpindahan uang
-                  sungguhan. Konfirmasi dilakukan
-                  di Admin Demo.
+                  Tidak ada perpindahan uang sungguhan.
+                  Konfirmasi dilakukan di Admin Demo.
                 </p>
               </div>
 
@@ -3930,9 +3965,7 @@ export default function App() {
               <div className="lum-between">
                 <span>Pembayaran</span>
                 <b>
-                  {paymentLabel(
-                    checkout.payment
-                  )}
+                  {paymentLabel(checkout.payment)}
                 </b>
               </div>
 
@@ -3940,10 +3973,7 @@ export default function App() {
 
               <div className="lum-between lum-grand-total">
                 <b>Total Pembayaran</b>
-
-                <strong>
-                  {rp(total)}
-                </strong>
+                <strong>{rp(total)}</strong>
               </div>
             </aside>
           </div>
@@ -3954,9 +3984,7 @@ export default function App() {
 
       {page === "account" && customer && (
         <>
-          <CustomerTracking
-            orders={mine}
-          />
+          <CustomerTracking orders={mine} />
 
           <CustomerDashboard
             customer={customer}
@@ -3967,7 +3995,7 @@ export default function App() {
         </>
       )}
 
-      {/* SUKSES */}
+      {/* PESANAN BERHASIL */}
 
       {page === "success" && (
         <main className="container section center">
@@ -3983,9 +4011,7 @@ export default function App() {
 
                 <p>
                   Metode:{" "}
-                  {paymentLabel(
-                    currentOrder.paymentMethod
-                  )}
+                  {paymentLabel(currentOrder.paymentMethod)}
                 </p>
 
                 <p>
@@ -4005,15 +4031,14 @@ export default function App() {
                 </p>
 
                 <h2>
-                  Total:{" "}
-                  {rp(currentOrder.total)}
+                  Total: {rp(currentOrder.total)}
                 </h2>
               </>
             )}
 
             <p>
-              Pesanan simulasi bisa dilihat
-              pada Dashboard Pelanggan.
+              Pesanan simulasi dapat dilihat pada
+              Dashboard Pelanggan.
             </p>
 
             <button
@@ -4033,7 +4058,7 @@ export default function App() {
         </main>
       )}
 
-      {/* ADMIN */}
+      {/* DASHBOARD ADMIN */}
 
       {page === "admin" && (
         <AdminDashboard
@@ -4069,11 +4094,10 @@ export default function App() {
         </footer>
       )}
 
+      {/* NOTIFIKASI */}
+
       {message && (
-        <div
-          className="toast"
-          role="status"
-        >
+        <div className="toast" role="status">
           <span>{message}</span>
 
           <button
